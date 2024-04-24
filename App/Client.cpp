@@ -183,7 +183,7 @@ ReplicaID getFirstLeader()
 	ReplicaID firstLeader = 0;
 #elif defined(BASIC_DAMYSUS)
 	ReplicaID firstLeader = 0;
-#elif defined(BASIC_PTBFT)
+#elif defined(BASIC_HOTSUS)
 	ReplicaID firstLeader = numGeneralReplicas;
 #endif
 	return firstLeader;
@@ -331,7 +331,7 @@ int main(int argc, char const *argv[])
 	long unsigned int sizeMessage = std::max({sizeof(MsgNewviewHotstuff), sizeof(MsgLdrprepareHotstuff), sizeof(MsgPrepareHotstuff), sizeof(MsgPrecommitHotstuff), sizeof(MsgCommitHotstuff)});
 #elif defined(BASIC_DAMYSUS)
 	long unsigned int sizeMessage = std::max({sizeof(MsgNewviewDamysus), sizeof(MsgLdrprepareDamysus), sizeof(MsgPrepareDamysus), sizeof(MsgPrecommitDamysus)});
-#elif defined(BASIC_PTBFT)
+#elif defined(BASIC_HOTSUS)
 	long unsigned int sizeMessage = std::max({sizeof(MsgNewviewPtbft), sizeof(MsgLdrpreparePtbft), sizeof(MsgPreparePtbft), sizeof(MsgPrecommitPtbft), sizeof(MsgExnewviewPtbft), sizeof(MsgExldrpreparePtbft), sizeof(MsgExpreparePtbft), sizeof(MsgExprecommitPtbft), sizeof(MsgExcommitPtbft)});
 #endif
 	long unsigned int size = std::max({sizeBasic, sizeMessage});

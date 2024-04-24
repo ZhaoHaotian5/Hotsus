@@ -22,7 +22,7 @@
 #include "Hotstuff.h"
 #elif defined(BASIC_DAMYSUS)
 #include "Damysus.h"
-#elif defined(BASIC_PTBFT)
+#elif defined(BASIC_HOTSUS)
 #include "Ptbft.h"
 #endif
 
@@ -138,7 +138,7 @@ int main(int argc, char const *argv[])
 	long unsigned int sizeMessage = std::max({sizeof(MsgNewviewHotstuff), sizeof(MsgLdrprepareHotstuff), sizeof(MsgPrepareHotstuff), sizeof(MsgPrecommitHotstuff), sizeof(MsgCommitHotstuff)});
 #elif defined(BASIC_DAMYSUS)
 	long unsigned int sizeMessage = std::max({sizeof(MsgNewviewDamysus), sizeof(MsgLdrprepareDamysus), sizeof(MsgPrepareDamysus), sizeof(MsgPrecommitDamysus)});
-#elif defined(BASIC_PTBFT)
+#elif defined(BASIC_HOTSUS)
 	long unsigned int sizeMessage = std::max({sizeof(MsgNewviewPtbft), sizeof(MsgLdrpreparePtbft), sizeof(MsgPreparePtbft), sizeof(MsgPrecommitPtbft), sizeof(MsgExnewviewPtbft), sizeof(MsgExldrpreparePtbft), sizeof(MsgExpreparePtbft), sizeof(MsgExprecommitPtbft), sizeof(MsgExcommitPtbft)});
 #endif
 	long unsigned int size = std::max({sizeBasic, sizeMessage});
@@ -161,7 +161,7 @@ int main(int argc, char const *argv[])
 	Hotstuff hotstuff(keysFunctions, replicaId, numGeneralReplicas, numTrustedReplicas, numReplicas, numViews, numFaults, leaderChangeTime, nodes, privateKey, peerNetConfig, clientNetConfig);
 #elif defined(BASIC_DAMYSUS)
 	Damysus damysus(keysFunctions, replicaId, numGeneralReplicas, numTrustedReplicas, numReplicas, numViews, numFaults, leaderChangeTime, nodes, privateKey, peerNetConfig, clientNetConfig);
-#elif defined(BASIC_PTBFT)
+#elif defined(BASIC_HOTSUS)
 	Ptbft ptbft(keysFunctions, replicaId, numGeneralReplicas, numTrustedReplicas, numReplicas, numViews, numFaults, leaderChangeTime, nodes, privateKey, peerNetConfig, clientNetConfig);
 #endif
 

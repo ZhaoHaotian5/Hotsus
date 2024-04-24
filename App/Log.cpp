@@ -1655,7 +1655,7 @@ std::string Log::toPrint()
 		std::set<MsgPrecommitDamysus> msgs = itView->second;
 		text += "MsgPrecommitDamysus: View = " + std::to_string(view) + "; The number of MsgPrecommitDamysus is: " + std::to_string(msgs.size()) + "\n";
 	}
-#elif defined(BASIC_PTBFT)
+#elif defined(BASIC_HOTSUS)
 	// MsgNewviewPtbft
 	for (std::map<View, std::set<MsgNewviewPtbft>>::iterator itView = this->newviewsPtbft.begin(); itView != this->newviewsPtbft.end(); itView++)
 	{
