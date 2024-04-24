@@ -72,8 +72,6 @@ ParametersFile = "App/parameters.h"  # Parameters directory
 ConfigFile = "config"  # Config directory
 PointsFile = StatisticsFile + "/points-" + TimestampStr
 AbortedFile = StatisticsFile + "/aborted-" + TimestampStr
-PlotFile = StatisticsFile + "/plot-" + TimestampStr + ".png"
-ClientsFile = StatisticsFile + "/clients-" + TimestampStr
 MainFile = "Hotsus"
 
 # Names of execute files
@@ -143,14 +141,10 @@ def makeParameters(protocolName, numReplicas, numMaxSignatures, numTransactions,
 
 def clearStatisticsPath():
     # Remove all temporary files in statistics path
-    file0 = glob.glob(StatisticsFile + "/vals*")
-    file1 = glob.glob(StatisticsFile + "/throughput-view*")
-    file2 = glob.glob(StatisticsFile + "/latency-view*")
-    file3 = glob.glob(StatisticsFile + "/handle*")
-    file4 = glob.glob(StatisticsFile + "/crypto*")
-    file5 = glob.glob(StatisticsFile + "/done*")
-    file6 = glob.glob(StatisticsFile + "/client-throughput-latency*")
-    allFile = file0 + file1 + file2 + file3 + file4 + file5 + file6
+    file0 = glob.glob(StatisticsFile + "/values*")
+    file1 = glob.glob(StatisticsFile + "/done*")
+    file2 = glob.glob(StatisticsFile + "/clientvalues*")
+    allFile = file0 + file1 + file2
     for file in allFile:
         os.remove(file)
 
@@ -526,7 +520,7 @@ def computeStatistics(protocolName, numFaults, experimentIndex, numExperiments):
 
     allFile = glob.glob(StatisticsFile + "/*")
     for file in allFile:
-        if file.startswith(StatisticsFile + "/vals"):
+        if file.startswith(StatisticsFile + "/values"):
             f = open(file, "r")
             text = f.read()
             [throughput, latency, handle] = text.split(" ")
@@ -603,7 +597,7 @@ def runLocalExperiment(protocolName, constFactor, numViews, numFaults, numClient
         numTrustedReplicas = int(hotsusFactor * numFaults)
         numGeneralReplicas = numAllReplicas - numTrustedReplicas
         numMaxSignatures = numAllReplicas - numFaults
-        if numTrustedReplicas < 3:
+        if numTrustedReplicas < 5:
             print("----The number of trusted replicas is too small")
             exit(0)
 

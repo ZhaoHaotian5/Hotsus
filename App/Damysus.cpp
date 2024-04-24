@@ -1531,7 +1531,7 @@ Damysus::Damysus(KeysFunctions keysFunctions, ReplicaID replicaId, unsigned int 
 	std::time_t time = std::chrono::system_clock::to_time_t(timeNow);
 	struct tm y2k = {0};
 	double seconds = difftime(time, mktime(&y2k));
-	statisticsValues = "results/vals-" + std::to_string(this->replicaId) + "-" + std::to_string(seconds);
+	statisticsValues = "results/values-" + std::to_string(this->replicaId) + "-" + std::to_string(seconds);
 	statisticsDone = "results/done-" + std::to_string(this->replicaId) + "-" + std::to_string(seconds);
 	statistics.setReplicaId(this->replicaId);
 

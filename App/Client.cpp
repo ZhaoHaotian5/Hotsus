@@ -310,7 +310,7 @@ int main(int argc, char const *argv[])
 	struct tm y2k = {0};
 	double seconds = difftime(time, mktime(&y2k));
 	std::string stamp = std::to_string(experimentIndex) + "-" + std::to_string(clientId) + "-" + std::to_string(seconds);
-	statisticsClient = "results/client-throughput-latency-" + stamp;
+	statisticsClient = "results/clientvalues-" + stamp;
 
 	// Public keys
 	for (unsigned int i = 0; i < numReplicas; i++)
