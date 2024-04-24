@@ -6,4 +6,4 @@ git clone https://github.com/ZhaoHaotian5/Hotsus
 
 cd Hotsus
 
-docker build -t ptbft .
+docker build -t hotsus .

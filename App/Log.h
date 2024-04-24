@@ -27,16 +27,16 @@ private:
 	std::map<View, std::set<MsgPrepareDamysus>> preparesDamysus;
 	std::map<View, std::set<MsgPrecommitDamysus>> precommitsDamysus;
 
-	// Basic Ptbft
-	std::map<View, std::set<MsgNewviewPtbft>> newviewsPtbft;
-	std::map<View, std::set<MsgLdrpreparePtbft>> ldrpreparesPtbft;
-	std::map<View, std::set<MsgPreparePtbft>> preparesPtbft;
-	std::map<View, std::set<MsgPrecommitPtbft>> precommitsPtbft;
-	std::map<View, std::set<MsgExnewviewPtbft>> exnewviewsPtbft;
-	std::map<View, std::set<MsgExldrpreparePtbft>> exldrpreparesPtbft;
-	std::map<View, std::set<MsgExpreparePtbft>> expreparesPtbft;
-	std::map<View, std::set<MsgExprecommitPtbft>> exprecommitsPtbft;
-	std::map<View, std::set<MsgExcommitPtbft>> excommitsPtbft;
+	// Basic Hotsus
+	std::map<View, std::set<MsgNewviewHotsus>> newviewsHotsus;
+	std::map<View, std::set<MsgLdrprepareHotsus>> ldrpreparesHotsus;
+	std::map<View, std::set<MsgPrepareHotsus>> preparesHotsus;
+	std::map<View, std::set<MsgPrecommitHotsus>> precommitsHotsus;
+	std::map<View, std::set<MsgExnewviewHotsus>> exnewviewsHotsus;
+	std::map<View, std::set<MsgExldrprepareHotsus>> exldrpreparesHotsus;
+	std::map<View, std::set<MsgExprepareHotsus>> expreparesHotsus;
+	std::map<View, std::set<MsgExprecommitHotsus>> exprecommitsHotsus;
+	std::map<View, std::set<MsgExcommitHotsus>> excommitsHotsus;
 
 public:
 	Log();
@@ -81,38 +81,38 @@ public:
 	Justification firstMsgPrepareDamysus(View view);
 	Justification firstMsgPrecommitDamysus(View view);
 
-	// Basic Ptbft
+	// Basic Hotsus
 	// Return the number of signatures
-	unsigned int storeMsgNewviewPtbft(MsgNewviewPtbft msgNewview);
-	unsigned int storeMsgLdrpreparePtbft(MsgLdrpreparePtbft msgLdrprepare);
-	unsigned int storeMsgPreparePtbft(MsgPreparePtbft msgPrepare);
-	unsigned int storeMsgPrecommitPtbft(MsgPrecommitPtbft msgPrecommit);
-	unsigned int storeMsgExnewviewPtbft(MsgExnewviewPtbft msgExnewview);
-	unsigned int storeMsgExldrpreparePtbft(MsgExldrpreparePtbft msgExldrprepare);
-	unsigned int storeMsgExpreparePtbft(MsgExpreparePtbft msgExprepare);
-	unsigned int storeMsgExprecommitPtbft(MsgExprecommitPtbft msgExprecommit);
-	unsigned int storeMsgExcommitPtbft(MsgExcommitPtbft msgExcommit);
+	unsigned int storeMsgNewviewHotsus(MsgNewviewHotsus msgNewview);
+	unsigned int storeMsgLdrprepareHotsus(MsgLdrprepareHotsus msgLdrprepare);
+	unsigned int storeMsgPrepareHotsus(MsgPrepareHotsus msgPrepare);
+	unsigned int storeMsgPrecommitHotsus(MsgPrecommitHotsus msgPrecommit);
+	unsigned int storeMsgExnewviewHotsus(MsgExnewviewHotsus msgExnewview);
+	unsigned int storeMsgExldrprepareHotsus(MsgExldrprepareHotsus msgExldrprepare);
+	unsigned int storeMsgExprepareHotsus(MsgExprepareHotsus msgExprepare);
+	unsigned int storeMsgExprecommitHotsus(MsgExprecommitHotsus msgExprecommit);
+	unsigned int storeMsgExcommitHotsus(MsgExcommitHotsus msgExcommit);
 
 	// Collect [n] signatures of the messages
-	std::set<MsgNewviewPtbft> getMsgNewviewPtbft(View view, unsigned int n);
-	Signs getMsgPreparePtbft(View view, unsigned int n);
-	Signs getMsgPrecommitPtbft(View view, unsigned int n);
-	Signs getMsgExnewviewPtbft(View view, unsigned int n);
-	Signs getMsgExpreparePtbft(View view, unsigned int n);
-	Signs getMsgExprecommitPtbft(View view, unsigned int n);
-	Signs getMsgExcommitPtbft(View view, unsigned int n);
+	std::set<MsgNewviewHotsus> getMsgNewviewHotsus(View view, unsigned int n);
+	Signs getMsgPrepareHotsus(View view, unsigned int n);
+	Signs getMsgPrecommitHotsus(View view, unsigned int n);
+	Signs getMsgExnewviewHotsus(View view, unsigned int n);
+	Signs getMsgExprepareHotsus(View view, unsigned int n);
+	Signs getMsgExprecommitHotsus(View view, unsigned int n);
+	Signs getMsgExcommitHotsus(View view, unsigned int n);
 
 	// Find the justification of the highest message
-	Justification findHighestMsgExnewviewPtbft(View view);
+	Justification findHighestMsgExnewviewHotsus(View view);
 
 	// Find the first message
-	MsgLdrpreparePtbft firstMsgLdrpreparePtbft(View view);
-	Justification firstMsgPreparePtbft(View view);
-	Justification firstMsgPrecommitPtbft(View view);
-	MsgExldrpreparePtbft firstMsgExldrpreparePtbft(View view);
-	Justification firstMsgExpreparePtbft(View view);
-	Justification firstMsgExprecommitPtbft(View view);
-	Justification firstMsgExcommitPtbft(View view);
+	MsgLdrprepareHotsus firstMsgLdrprepareHotsus(View view);
+	Justification firstMsgPrepareHotsus(View view);
+	Justification firstMsgPrecommitHotsus(View view);
+	MsgExldrprepareHotsus firstMsgExldrprepareHotsus(View view);
+	Justification firstMsgExprepareHotsus(View view);
+	Justification firstMsgExprecommitHotsus(View view);
+	Justification firstMsgExcommitHotsus(View view);
 
 	// Print
 	std::string toPrint();

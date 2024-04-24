@@ -506,16 +506,16 @@ struct MsgPrecommitDamysus
 	}
 };
 
-// Basic Ptbft
-struct MsgNewviewPtbft
+// Basic Hotsus
+struct MsgNewviewHotsus
 {
-	static const uint8_t opcode = HEADER_NEWVIEW_PTBFT;
+	static const uint8_t opcode = HEADER_NEWVIEW_HOTSUS;
 	salticidae::DataStream serialized;
 	RoundData roundData;
 	Signs signs;
 
-	MsgNewviewPtbft(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
-	MsgNewviewPtbft(salticidae::DataStream &&data) { data >> roundData >> signs; }
+	MsgNewviewHotsus(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
+	MsgNewviewHotsus(salticidae::DataStream &&data) { data >> roundData >> signs; }
 
 	void serialize(salticidae::DataStream &data) const
 	{
@@ -530,7 +530,7 @@ struct MsgNewviewPtbft
 	std::string toPrint()
 	{
 		std::string text = "";
-		text += "PTBFT_MSGNEWVIEW[";
+		text += "HOTSUS_MSGNEWVIEW[";
 		text += roundData.toPrint();
 		text += ",";
 		text += signs.toPrint();
@@ -538,7 +538,7 @@ struct MsgNewviewPtbft
 		return text;
 	}
 
-	bool operator<(const MsgNewviewPtbft &data) const
+	bool operator<(const MsgNewviewHotsus &data) const
 	{
 		if (signs < data.signs)
 		{
@@ -548,15 +548,15 @@ struct MsgNewviewPtbft
 	}
 };
 
-struct MsgLdrpreparePtbft
+struct MsgLdrprepareHotsus
 {
-	static const uint8_t opcode = HEADER_LDRPREPARE_PTBFT;
+	static const uint8_t opcode = HEADER_LDRPREPARE_HOTSUS;
 	salticidae::DataStream serialized;
 	Proposal<Accumulator> proposal;
 	Signs signs;
 
-	MsgLdrpreparePtbft(const Proposal<Accumulator> &proposal, const Signs &signs) : proposal(proposal), signs(signs) { serialized << proposal << signs; }
-	MsgLdrpreparePtbft(salticidae::DataStream &&data) { data >> proposal >> signs; }
+	MsgLdrprepareHotsus(const Proposal<Accumulator> &proposal, const Signs &signs) : proposal(proposal), signs(signs) { serialized << proposal << signs; }
+	MsgLdrprepareHotsus(salticidae::DataStream &&data) { data >> proposal >> signs; }
 
 	void serialize(salticidae::DataStream &data) const
 	{
@@ -571,7 +571,7 @@ struct MsgLdrpreparePtbft
 	std::string toPrint()
 	{
 		std::string text = "";
-		text += "PTBFT_MSGLDRPREPARE[";
+		text += "HOTSUS_MSGLDRPREPARE[";
 		text += proposal.toPrint();
 		text += ",";
 		text += signs.toPrint();
@@ -579,7 +579,7 @@ struct MsgLdrpreparePtbft
 		return text;
 	}
 
-	bool operator<(const MsgLdrpreparePtbft &data) const
+	bool operator<(const MsgLdrprepareHotsus &data) const
 	{
 		if (signs < data.signs)
 		{
@@ -589,15 +589,15 @@ struct MsgLdrpreparePtbft
 	}
 };
 
-struct MsgPreparePtbft
+struct MsgPrepareHotsus
 {
-	static const uint8_t opcode = HEADER_PREPARE_PTBFT;
+	static const uint8_t opcode = HEADER_PREPARE_HOTSUS;
 	salticidae::DataStream serialized;
 	RoundData roundData;
 	Signs signs;
 
-	MsgPreparePtbft(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
-	MsgPreparePtbft(salticidae::DataStream &&data) { data >> roundData >> signs; }
+	MsgPrepareHotsus(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
+	MsgPrepareHotsus(salticidae::DataStream &&data) { data >> roundData >> signs; }
 
 	void serialize(salticidae::DataStream &data) const
 	{
@@ -612,7 +612,7 @@ struct MsgPreparePtbft
 	std::string toPrint()
 	{
 		std::string text = "";
-		text += "PTBFT_MSGPREPARE[";
+		text += "HOTSUS_MSGPREPARE[";
 		text += roundData.toPrint();
 		text += ",";
 		text += signs.toPrint();
@@ -620,7 +620,7 @@ struct MsgPreparePtbft
 		return text;
 	}
 
-	bool operator<(const MsgPreparePtbft &data) const
+	bool operator<(const MsgPrepareHotsus &data) const
 	{
 		if (signs < data.signs)
 		{
@@ -630,15 +630,15 @@ struct MsgPreparePtbft
 	}
 };
 
-struct MsgPrecommitPtbft
+struct MsgPrecommitHotsus
 {
-	static const uint8_t opcode = HEADER_PRECOMMIT_PTBFT;
+	static const uint8_t opcode = HEADER_PRECOMMIT_HOTSUS;
 	salticidae::DataStream serialized;
 	RoundData roundData;
 	Signs signs;
 
-	MsgPrecommitPtbft(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
-	MsgPrecommitPtbft(salticidae::DataStream &&data) { data >> roundData >> signs; }
+	MsgPrecommitHotsus(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
+	MsgPrecommitHotsus(salticidae::DataStream &&data) { data >> roundData >> signs; }
 
 	void serialize(salticidae::DataStream &data) const
 	{
@@ -653,7 +653,7 @@ struct MsgPrecommitPtbft
 	std::string toPrint()
 	{
 		std::string text = "";
-		text += "PTBFT_MSGPRECOMMIT[";
+		text += "HOTSUS_MSGPRECOMMIT[";
 		text += roundData.toPrint();
 		text += ",";
 		text += signs.toPrint();
@@ -661,7 +661,7 @@ struct MsgPrecommitPtbft
 		return text;
 	}
 
-	bool operator<(const MsgPrecommitPtbft &data) const
+	bool operator<(const MsgPrecommitHotsus &data) const
 	{
 		if (signs < data.signs)
 		{
@@ -671,15 +671,15 @@ struct MsgPrecommitPtbft
 	}
 };
 
-struct MsgExnewviewPtbft
+struct MsgExnewviewHotsus
 {
-	static const uint8_t opcode = HEADER_EXNEWVIEW_PTBFT;
+	static const uint8_t opcode = HEADER_EXNEWVIEW_HOTSUS;
 	salticidae::DataStream serialized;
 	RoundData roundData;
 	Signs signs;
 
-	MsgExnewviewPtbft(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
-	MsgExnewviewPtbft(salticidae::DataStream &&data) { data >> roundData >> signs; }
+	MsgExnewviewHotsus(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
+	MsgExnewviewHotsus(salticidae::DataStream &&data) { data >> roundData >> signs; }
 
 	void serialize(salticidae::DataStream &data) const
 	{
@@ -694,7 +694,7 @@ struct MsgExnewviewPtbft
 	std::string toPrint()
 	{
 		std::string text = "";
-		text += "PTBFT_MSGEXNEWVIEW[";
+		text += "HOTSUS_MSGEXNEWVIEW[";
 		text += roundData.toPrint();
 		text += ",";
 		text += signs.toPrint();
@@ -702,7 +702,7 @@ struct MsgExnewviewPtbft
 		return text;
 	}
 
-	bool operator<(const MsgExnewviewPtbft &data) const
+	bool operator<(const MsgExnewviewHotsus &data) const
 	{
 		if (signs < data.signs)
 		{
@@ -712,15 +712,15 @@ struct MsgExnewviewPtbft
 	}
 };
 
-struct MsgExldrpreparePtbft
+struct MsgExldrprepareHotsus
 {
-	static const uint8_t opcode = HEADER_EXLDRPREPARE_PTBFT;
+	static const uint8_t opcode = HEADER_EXLDRPREPARE_HOTSUS;
 	salticidae::DataStream serialized;
 	Proposal<Justification> proposal;
 	Signs signs;
 
-	MsgExldrpreparePtbft(const Proposal<Justification> &proposal, const Signs &signs) : proposal(proposal), signs(signs) { serialized << proposal << signs; }
-	MsgExldrpreparePtbft(salticidae::DataStream &&data) { data >> proposal >> signs; }
+	MsgExldrprepareHotsus(const Proposal<Justification> &proposal, const Signs &signs) : proposal(proposal), signs(signs) { serialized << proposal << signs; }
+	MsgExldrprepareHotsus(salticidae::DataStream &&data) { data >> proposal >> signs; }
 
 	void serialize(salticidae::DataStream &data) const
 	{
@@ -735,7 +735,7 @@ struct MsgExldrpreparePtbft
 	std::string toPrint()
 	{
 		std::string text = "";
-		text += "PTBFT_MSGEXLDRPREPARE[";
+		text += "HOTSUS_MSGEXLDRPREPARE[";
 		text += proposal.toPrint();
 		text += ",";
 		text += signs.toPrint();
@@ -743,7 +743,7 @@ struct MsgExldrpreparePtbft
 		return text;
 	}
 
-	bool operator<(const MsgExldrpreparePtbft &data) const
+	bool operator<(const MsgExldrprepareHotsus &data) const
 	{
 		if (signs < data.signs)
 		{
@@ -753,15 +753,15 @@ struct MsgExldrpreparePtbft
 	}
 };
 
-struct MsgExpreparePtbft
+struct MsgExprepareHotsus
 {
-	static const uint8_t opcode = HEADER_EXPREPARE_PTBFT;
+	static const uint8_t opcode = HEADER_EXPREPARE_HOTSUS;
 	salticidae::DataStream serialized;
 	RoundData roundData;
 	Signs signs;
 
-	MsgExpreparePtbft(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
-	MsgExpreparePtbft(salticidae::DataStream &&data) { data >> roundData >> signs; }
+	MsgExprepareHotsus(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
+	MsgExprepareHotsus(salticidae::DataStream &&data) { data >> roundData >> signs; }
 
 	void serialize(salticidae::DataStream &data) const
 	{
@@ -776,7 +776,7 @@ struct MsgExpreparePtbft
 	std::string toPrint()
 	{
 		std::string text = "";
-		text += "PTBFT_MSGEXPREPARE[";
+		text += "HOTSUS_MSGEXPREPARE[";
 		text += roundData.toPrint();
 		text += ",";
 		text += signs.toPrint();
@@ -784,7 +784,7 @@ struct MsgExpreparePtbft
 		return text;
 	}
 
-	bool operator<(const MsgExpreparePtbft &data) const
+	bool operator<(const MsgExprepareHotsus &data) const
 	{
 		if (signs < data.signs)
 		{
@@ -794,15 +794,15 @@ struct MsgExpreparePtbft
 	}
 };
 
-struct MsgExprecommitPtbft
+struct MsgExprecommitHotsus
 {
-	static const uint8_t opcode = HEADER_EXPRECOMMIT_PTBFT;
+	static const uint8_t opcode = HEADER_EXPRECOMMIT_HOTSUS;
 	salticidae::DataStream serialized;
 	RoundData roundData;
 	Signs signs;
 
-	MsgExprecommitPtbft(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
-	MsgExprecommitPtbft(salticidae::DataStream &&data) { data >> roundData >> signs; }
+	MsgExprecommitHotsus(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
+	MsgExprecommitHotsus(salticidae::DataStream &&data) { data >> roundData >> signs; }
 
 	void serialize(salticidae::DataStream &data) const
 	{
@@ -817,7 +817,7 @@ struct MsgExprecommitPtbft
 	std::string toPrint()
 	{
 		std::string text = "";
-		text += "PTBFT_MSGEXPRECOMMIT[";
+		text += "HOTSUS_MSGEXPRECOMMIT[";
 		text += roundData.toPrint();
 		text += ",";
 		text += signs.toPrint();
@@ -825,7 +825,7 @@ struct MsgExprecommitPtbft
 		return text;
 	}
 
-	bool operator<(const MsgExprecommitPtbft &data) const
+	bool operator<(const MsgExprecommitHotsus &data) const
 	{
 		if (signs < data.signs)
 		{
@@ -835,15 +835,15 @@ struct MsgExprecommitPtbft
 	}
 };
 
-struct MsgExcommitPtbft
+struct MsgExcommitHotsus
 {
-	static const uint8_t opcode = HEADER_EXCOMMIT_PTBFT;
+	static const uint8_t opcode = HEADER_EXCOMMIT_HOTSUS;
 	salticidae::DataStream serialized;
 	RoundData roundData;
 	Signs signs;
 
-	MsgExcommitPtbft(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
-	MsgExcommitPtbft(salticidae::DataStream &&data) { data >> roundData >> signs; }
+	MsgExcommitHotsus(const RoundData &roundData, const Signs &signs) : roundData(roundData), signs(signs) { serialized << roundData << signs; }
+	MsgExcommitHotsus(salticidae::DataStream &&data) { data >> roundData >> signs; }
 
 	void serialize(salticidae::DataStream &data) const
 	{
@@ -858,7 +858,7 @@ struct MsgExcommitPtbft
 	std::string toPrint()
 	{
 		std::string text = "";
-		text += "PTBFT_MSGEXCOMMIT[";
+		text += "HOTSUS_MSGEXCOMMIT[";
 		text += roundData.toPrint();
 		text += ",";
 		text += signs.toPrint();
@@ -866,7 +866,7 @@ struct MsgExcommitPtbft
 		return text;
 	}
 
-	bool operator<(const MsgExcommitPtbft &data) const
+	bool operator<(const MsgExcommitHotsus &data) const
 	{
 		if (signs < data.signs)
 		{

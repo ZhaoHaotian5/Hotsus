@@ -1,65 +1,65 @@
 #include <set>
 #include "EnclaveBasic.h"
 
-Hash_t prepareHash_Ptbft_t = initiateHash_t();	  // Hash of the last prepared block
-View prepareView_Ptbft_t = 0;					  // View of [prepareHash_Ptbft_t]
-Hash_t preprepareHash_Ptbft_t = initiateHash_t(); // Copy of [prepareHash_Ptbft_t]
-View preprepareView_Ptbft_t = 0;				  // Copy of [prepareView_Ptbft_t]
-View view_Ptbft_t = 0;							  // Current view
-Phase phase_Ptbft_t = PHASE_NEWVIEW;			  // Current phase
+Hash_t prepareHash_Hotsus_t = initiateHash_t();	  // Hash of the last prepared block
+View prepareView_Hotsus_t = 0;					  // View of [prepareHash_Hotsus_t]
+Hash_t preprepareHash_Hotsus_t = initiateHash_t(); // Copy of [prepareHash_Hotsus_t]
+View preprepareView_Hotsus_t = 0;				  // Copy of [prepareView_Hotsus_t]
+View view_Hotsus_t = 0;							  // Current view
+Phase phase_Hotsus_t = PHASE_NEWVIEW;			  // Current phase
 
-void increment_Ptbft_t()
+void increment_Hotsus_t()
 {
-	if (phase_Ptbft_t == PHASE_NEWVIEW)
+	if (phase_Hotsus_t == PHASE_NEWVIEW)
 	{
-		phase_Ptbft_t = PHASE_PREPARE;
+		phase_Hotsus_t = PHASE_PREPARE;
 	}
-	else if (phase_Ptbft_t == PHASE_PREPARE)
+	else if (phase_Hotsus_t == PHASE_PREPARE)
 	{
-		phase_Ptbft_t = PHASE_PRECOMMIT;
+		phase_Hotsus_t = PHASE_PRECOMMIT;
 	}
-	else if (phase_Ptbft_t == PHASE_PRECOMMIT)
+	else if (phase_Hotsus_t == PHASE_PRECOMMIT)
 	{
-		phase_Ptbft_t = PHASE_NEWVIEW;
-		view_Ptbft_t++;
+		phase_Hotsus_t = PHASE_NEWVIEW;
+		view_Hotsus_t++;
 	}
 }
 
-void feedback_Ptbft_t()
+void feedback_Hotsus_t()
 {
-	phase_Ptbft_t == PHASE_EXNEWVIEW;
-	view_Ptbft_t--;
+	phase_Hotsus_t == PHASE_EXNEWVIEW;
+	view_Hotsus_t--;
 }
 
-void incrementExtra_Ptbft_t()
+void incrementExtra_Hotsus_t()
 {
-	if (phase_Ptbft_t == PHASE_EXNEWVIEW)
+	if (phase_Hotsus_t == PHASE_EXNEWVIEW)
 	{
-		phase_Ptbft_t = PHASE_EXPREPARE;
+		phase_Hotsus_t = PHASE_EXPREPARE;
 	}
-	else if (phase_Ptbft_t == PHASE_EXPREPARE)
+	else if (phase_Hotsus_t == PHASE_EXPREPARE)
 	{
-		phase_Ptbft_t = PHASE_EXPRECOMMIT;
+		phase_Hotsus_t = PHASE_EXPRECOMMIT;
 	}
-	else if (phase_Ptbft_t == PHASE_EXPRECOMMIT)
+	else if (phase_Hotsus_t == PHASE_EXPRECOMMIT)
 	{
-		phase_Ptbft_t = PHASE_EXCOMMIT;
+		phase_Hotsus_t = PHASE_EXCOMMIT;
 	}
-	else if (phase_Ptbft_t == PHASE_EXCOMMIT)
+	else if (phase_Hotsus_t == PHASE_EXCOMMIT)
 	{
-		phase_Ptbft_t = PHASE_NEWVIEW;
-		view_Ptbft_t++;
+		phase_Hotsus_t = PHASE_NEWVIEW;
+		view_Hotsus_t++;
 	}
 }
 
-Justification_t updateRoundData_Ptbft_t(Hash_t hash1, Hash_t hash2, View view)
+Justification_t updateRoundData_Hotsus_t(Hash_t hash1, Hash_t hash2, View view)
 {
 	RoundData_t roundData_t;
 	roundData_t.proposeHash = hash1;
-	roundData_t.proposeView = view_Ptbft_t;
+	roundData_t.proposeView = view_Hotsus_t;
 	roundData_t.justifyHash = hash2;
 	roundData_t.justifyView = view;
-	roundData_t.phase = phase_Ptbft_t;
+	roundData_t.phase = phase_Hotsus_t;
 	Sign_t sign_t = signData_t(roundData2string_t(roundData_t));
 	Signs_t signs_t;
 	signs_t.size = 1;
@@ -68,18 +68,18 @@ Justification_t updateRoundData_Ptbft_t(Hash_t hash1, Hash_t hash2, View view)
 	justification_t.set = 1;
 	justification_t.roundData = roundData_t;
 	justification_t.signs = signs_t;
-	increment_Ptbft_t();
+	increment_Hotsus_t();
 	return justification_t;
 }
 
-Justification_t updateExtraRoundData_Ptbft_t(Hash_t hash1, Hash_t hash2, View view)
+Justification_t updateExtraRoundData_Hotsus_t(Hash_t hash1, Hash_t hash2, View view)
 {
 	RoundData_t roundData_t;
 	roundData_t.proposeHash = hash1;
-	roundData_t.proposeView = view_Ptbft_t;
+	roundData_t.proposeView = view_Hotsus_t;
 	roundData_t.justifyHash = hash2;
 	roundData_t.justifyView = view;
-	roundData_t.phase = phase_Ptbft_t;
+	roundData_t.phase = phase_Hotsus_t;
 	Sign_t sign_t = signData_t(roundData2string_t(roundData_t));
 	Signs_t signs_t;
 	signs_t.size = 1;
@@ -88,11 +88,11 @@ Justification_t updateExtraRoundData_Ptbft_t(Hash_t hash1, Hash_t hash2, View vi
 	justification_t.set = 1;
 	justification_t.roundData = roundData_t;
 	justification_t.signs = signs_t;
-	incrementExtra_Ptbft_t();
+	incrementExtra_Hotsus_t();
 	return justification_t;
 }
 
-sgx_status_t TEE_verifyJustificationPtbft(Justification_t *justification_t, bool *b)
+sgx_status_t TEE_verifyJustificationHotsus(Justification_t *justification_t, bool *b)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
@@ -101,7 +101,7 @@ sgx_status_t TEE_verifyJustificationPtbft(Justification_t *justification_t, bool
 	return status_t;
 }
 
-sgx_status_t TEE_verifyProposalPtbft(Proposal_t *proposal_t, Signs_t *signs_t, bool *b)
+sgx_status_t TEE_verifyProposalHotsus(Proposal_t *proposal_t, Signs_t *signs_t, bool *b)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
@@ -110,7 +110,7 @@ sgx_status_t TEE_verifyProposalPtbft(Proposal_t *proposal_t, Signs_t *signs_t, b
 	return status_t;
 }
 
-sgx_status_t TEE_verifyExproposalPtbft(Exproposal_t *exproposal_t, Signs_t *signs_t, bool *b)
+sgx_status_t TEE_verifyExproposalHotsus(Exproposal_t *exproposal_t, Signs_t *signs_t, bool *b)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
@@ -119,17 +119,17 @@ sgx_status_t TEE_verifyExproposalPtbft(Exproposal_t *exproposal_t, Signs_t *sign
 	return status_t;
 }
 
-sgx_status_t TEE_initializeMsgNewviewPtbft(Justification_t *justification_MsgNewview_t)
+sgx_status_t TEE_initializeMsgNewviewHotsus(Justification_t *justification_MsgNewview_t)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
 	Hash_t hash_t = initiateDummyHash_t();
-	*justification_MsgNewview_t = updateRoundData_Ptbft_t(hash_t, prepareHash_Ptbft_t, prepareView_Ptbft_t);
+	*justification_MsgNewview_t = updateRoundData_Hotsus_t(hash_t, prepareHash_Hotsus_t, prepareView_Hotsus_t);
 
 	return status_t;
 }
 
-sgx_status_t TEE_initializeAccumulatorPtbft(Justifications_t *justifications_MsgNewview_t, Accumulator_t *accumulator_MsgLdrprepare_t)
+sgx_status_t TEE_initializeAccumulatorHotsus(Justifications_t *justifications_MsgNewview_t, Accumulator_t *accumulator_MsgLdrprepare_t)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
@@ -169,7 +169,7 @@ sgx_status_t TEE_initializeAccumulatorPtbft(Justifications_t *justifications_Msg
 	return status_t;
 }
 
-sgx_status_t TEE_initializeMsgLdrpreparePtbft(Proposal_t *proposal_MsgLdrprepare_t, Signs_t *signs_MsgLdrprepare_t)
+sgx_status_t TEE_initializeMsgLdrprepareHotsus(Proposal_t *proposal_MsgLdrprepare_t, Signs_t *signs_MsgLdrprepare_t)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
@@ -180,7 +180,7 @@ sgx_status_t TEE_initializeMsgLdrpreparePtbft(Proposal_t *proposal_MsgLdrprepare
 	return status_t;
 }
 
-sgx_status_t TEE_respondProposalPtbft(Hash_t *proposeHash_t, Accumulator_t *accumulator_MsgLdrprepare_t, Justification_t *justification_MsgPrepare_t)
+sgx_status_t TEE_respondProposalHotsus(Hash_t *proposeHash_t, Accumulator_t *accumulator_MsgLdrprepare_t, Justification_t *justification_MsgPrepare_t)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
@@ -188,9 +188,9 @@ sgx_status_t TEE_respondProposalPtbft(Hash_t *proposeHash_t, Accumulator_t *accu
 	Hash_t prepareHash_MsgLdrprepare_t = accumulator_MsgLdrprepare_t->prepareHash;
 	View prepareView_MsgLdrprepare = accumulator_MsgLdrprepare_t->prepareView;
 	unsigned int size_MsgLdrprepare = accumulator_MsgLdrprepare_t->size;
-	if (view_Ptbft_t == proposeView_MsgLdrprepare && size_MsgLdrprepare == MAX_NUM_SIGNATURES)
+	if (view_Hotsus_t == proposeView_MsgLdrprepare && size_MsgLdrprepare == MAX_NUM_SIGNATURES)
 	{
-		*justification_MsgPrepare_t = updateRoundData_Ptbft_t(*proposeHash_t, prepareHash_MsgLdrprepare_t, prepareView_MsgLdrprepare);
+		*justification_MsgPrepare_t = updateRoundData_Hotsus_t(*proposeHash_t, prepareHash_MsgLdrprepare_t, prepareView_MsgLdrprepare);
 	}
 	else
 	{
@@ -204,7 +204,7 @@ sgx_status_t TEE_respondProposalPtbft(Hash_t *proposeHash_t, Accumulator_t *accu
 	return status_t;
 }
 
-sgx_status_t TEE_saveMsgPreparePtbft(Justification_t *justification_MsgPrepare_t, Justification_t *justification_msgExprecommit_t)
+sgx_status_t TEE_saveMsgPrepareHotsus(Justification_t *justification_MsgPrepare_t, Justification_t *justification_msgExprecommit_t)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
@@ -212,13 +212,13 @@ sgx_status_t TEE_saveMsgPreparePtbft(Justification_t *justification_MsgPrepare_t
 	Hash_t proposeHash_MsgPrepare_t = roundData_MsgPrepare_t.proposeHash;
 	View proposeView_MsgPrepare_t = roundData_MsgPrepare_t.proposeView;
 	Phase phase_MsgPrepare_t = roundData_MsgPrepare_t.phase;
-	if (verifyJustification_t(justification_MsgPrepare_t) && justification_MsgPrepare_t->signs.size == getTrustedQuorumSize_t() && view_Ptbft_t == proposeView_MsgPrepare_t && phase_MsgPrepare_t == PHASE_PREPARE)
+	if (verifyJustification_t(justification_MsgPrepare_t) && justification_MsgPrepare_t->signs.size == getTrustedQuorumSize_t() && view_Hotsus_t == proposeView_MsgPrepare_t && phase_MsgPrepare_t == PHASE_PREPARE)
 	{
-		preprepareHash_Ptbft_t = prepareHash_Ptbft_t;
-		preprepareView_Ptbft_t = prepareView_Ptbft_t;
-		prepareHash_Ptbft_t = proposeHash_MsgPrepare_t;
-		prepareView_Ptbft_t = proposeView_MsgPrepare_t;
-		*justification_msgExprecommit_t = updateRoundData_Ptbft_t(proposeHash_MsgPrepare_t, initiateHash_t(), 0);
+		preprepareHash_Hotsus_t = prepareHash_Hotsus_t;
+		preprepareView_Hotsus_t = prepareView_Hotsus_t;
+		prepareHash_Hotsus_t = proposeHash_MsgPrepare_t;
+		prepareView_Hotsus_t = proposeView_MsgPrepare_t;
+		*justification_msgExprecommit_t = updateRoundData_Hotsus_t(proposeHash_MsgPrepare_t, initiateHash_t(), 0);
 	}
 	else
 	{
@@ -232,18 +232,18 @@ sgx_status_t TEE_saveMsgPreparePtbft(Justification_t *justification_MsgPrepare_t
 	return status_t;
 }
 
-sgx_status_t TEE_initializeMsgExnewviewPtbft(Justification_t *justification_MsgExnewview_t)
+sgx_status_t TEE_initializeMsgExnewviewHotsus(Justification_t *justification_MsgExnewview_t)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
-	feedback_Ptbft_t();
+	feedback_Hotsus_t();
 	Hash_t hash_t = initiateDummyHash_t();
-	*justification_MsgExnewview_t = updateExtraRoundData_Ptbft_t(hash_t, preprepareHash_Ptbft_t, preprepareView_Ptbft_t);
+	*justification_MsgExnewview_t = updateExtraRoundData_Hotsus_t(hash_t, preprepareHash_Hotsus_t, preprepareView_Hotsus_t);
 
 	return status_t;
 }
 
-sgx_status_t TEE_respondExproposalPtbft(Hash_t *proposeHash_t, Justification_t *justification_MsgExnewview_t, Justification_t *justification_MsgExprepare_t)
+sgx_status_t TEE_respondExproposalHotsus(Hash_t *proposeHash_t, Justification_t *justification_MsgExnewview_t, Justification_t *justification_MsgExprepare_t)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
@@ -253,9 +253,9 @@ sgx_status_t TEE_respondExproposalPtbft(Hash_t *proposeHash_t, Justification_t *
 	Hash_t justifyHash_MsgNewview_t = roundData_MsgNewview_t.justifyHash;
 	View justifyView_MsgNewview = roundData_MsgNewview_t.justifyView;
 	Phase phase_MsgNewview = roundData_MsgNewview_t.phase;
-	if (verify_t(signs_MsgNewview_t, roundData2string_t(roundData_MsgNewview_t)) && view_Ptbft_t == proposeView_MsgNewview && phase_MsgNewview == PHASE_EXNEWVIEW)
+	if (verify_t(signs_MsgNewview_t, roundData2string_t(roundData_MsgNewview_t)) && view_Hotsus_t == proposeView_MsgNewview && phase_MsgNewview == PHASE_EXNEWVIEW)
 	{
-		*justification_MsgExprepare_t = updateExtraRoundData_Ptbft_t(*proposeHash_t, justifyHash_MsgNewview_t, justifyView_MsgNewview);
+		*justification_MsgExprepare_t = updateExtraRoundData_Hotsus_t(*proposeHash_t, justifyHash_MsgNewview_t, justifyView_MsgNewview);
 	}
 	else
 	{
@@ -269,7 +269,7 @@ sgx_status_t TEE_respondExproposalPtbft(Hash_t *proposeHash_t, Justification_t *
 	return status_t;
 }
 
-sgx_status_t TEE_initializeMsgExldrpreparePtbft(Exproposal_t *proposal_MsgExldrprepare_t, Signs_t *signs_MsgExldrprepare_t)
+sgx_status_t TEE_initializeMsgExldrprepareHotsus(Exproposal_t *proposal_MsgExldrprepare_t, Signs_t *signs_MsgExldrprepare_t)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
@@ -280,7 +280,7 @@ sgx_status_t TEE_initializeMsgExldrpreparePtbft(Exproposal_t *proposal_MsgExldrp
 	return status_t;
 }
 
-sgx_status_t TEE_saveMsgExpreparePtbft(Justification_t *justification_MsgExprepare_t, Justification_t *justification_MsgExprecommit_t)
+sgx_status_t TEE_saveMsgExprepareHotsus(Justification_t *justification_MsgExprepare_t, Justification_t *justification_MsgExprecommit_t)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
@@ -288,11 +288,11 @@ sgx_status_t TEE_saveMsgExpreparePtbft(Justification_t *justification_MsgExprepa
 	Hash_t proposeHash_MsgExprepare_t = roundData_MsgExprepare_t.proposeHash;
 	View proposeView_MsgExprepare_t = roundData_MsgExprepare_t.proposeView;
 	Phase phase_MsgExprepare_t = roundData_MsgExprepare_t.phase;
-	if (verifyJustification_t(justification_MsgExprepare_t) && justification_MsgExprepare_t->signs.size == getGeneralQuorumSize_t() && view_Ptbft_t == proposeView_MsgExprepare_t && phase_MsgExprepare_t == PHASE_EXPREPARE)
+	if (verifyJustification_t(justification_MsgExprepare_t) && justification_MsgExprepare_t->signs.size == getGeneralQuorumSize_t() && view_Hotsus_t == proposeView_MsgExprepare_t && phase_MsgExprepare_t == PHASE_EXPREPARE)
 	{
-		prepareHash_Ptbft_t = proposeHash_MsgExprepare_t;
-		prepareView_Ptbft_t = proposeView_MsgExprepare_t;
-		*justification_MsgExprecommit_t = updateExtraRoundData_Ptbft_t(proposeHash_MsgExprepare_t, initiateHash_t(), 0);
+		prepareHash_Hotsus_t = proposeHash_MsgExprepare_t;
+		prepareView_Hotsus_t = proposeView_MsgExprepare_t;
+		*justification_MsgExprecommit_t = updateExtraRoundData_Hotsus_t(proposeHash_MsgExprepare_t, initiateHash_t(), 0);
 	}
 	else
 	{
@@ -306,7 +306,7 @@ sgx_status_t TEE_saveMsgExpreparePtbft(Justification_t *justification_MsgExprepa
 	return status_t;
 }
 
-sgx_status_t TEE_lockMsgExprecommitPtbft(Justification_t *justification_MsgExprecommit_t, Justification_t *justification_MsgExcommit_t)
+sgx_status_t TEE_lockMsgExprecommitHotsus(Justification_t *justification_MsgExprecommit_t, Justification_t *justification_MsgExcommit_t)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
@@ -314,11 +314,11 @@ sgx_status_t TEE_lockMsgExprecommitPtbft(Justification_t *justification_MsgExpre
 	Hash_t proposeHash_MsgExprecommit_t = roundData_MsgExprecommit_t.proposeHash;
 	View proposeView_MsgExprecommit_t = roundData_MsgExprecommit_t.proposeView;
 	Phase phase_MsgExprecommit_t = roundData_MsgExprecommit_t.phase;
-	if (verifyJustification_t(justification_MsgExprecommit_t) && justification_MsgExprecommit_t->signs.size == getGeneralQuorumSize_t() && view_Ptbft_t == proposeView_MsgExprecommit_t && phase_MsgExprecommit_t == PHASE_EXPRECOMMIT)
+	if (verifyJustification_t(justification_MsgExprecommit_t) && justification_MsgExprecommit_t->signs.size == getGeneralQuorumSize_t() && view_Hotsus_t == proposeView_MsgExprecommit_t && phase_MsgExprecommit_t == PHASE_EXPRECOMMIT)
 	{
-		prepareHash_Ptbft_t = proposeHash_MsgExprecommit_t;
-		prepareView_Ptbft_t = proposeView_MsgExprecommit_t;
-		*justification_MsgExcommit_t = updateExtraRoundData_Ptbft_t(proposeHash_MsgExprecommit_t, initiateHash_t(), 0);
+		prepareHash_Hotsus_t = proposeHash_MsgExprecommit_t;
+		prepareView_Hotsus_t = proposeView_MsgExprecommit_t;
+		*justification_MsgExcommit_t = updateExtraRoundData_Hotsus_t(proposeHash_MsgExprecommit_t, initiateHash_t(), 0);
 	}
 	else
 	{

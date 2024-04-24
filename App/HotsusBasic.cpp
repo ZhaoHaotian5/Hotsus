@@ -1,6 +1,6 @@
-#include "PtbftBasic.h"
+#include "HotsusBasic.h"
 
-void PtbftBasic::increment()
+void HotsusBasic::increment()
 {
 	if (this->phase == PHASE_NEWVIEW)
 	{
@@ -21,13 +21,13 @@ void PtbftBasic::increment()
 	}
 }
 
-void PtbftBasic::feedback()
+void HotsusBasic::feedback()
 {
 	this->phase = PHASE_EXNEWVIEW;
 	this->view--;
 }
 
-void PtbftBasic::incrementExtra()
+void HotsusBasic::incrementExtra()
 {
 	if (this->phase == PHASE_EXNEWVIEW)
 	{
@@ -48,13 +48,13 @@ void PtbftBasic::incrementExtra()
 	}
 }
 
-Sign PtbftBasic::signText(std::string text)
+Sign HotsusBasic::signText(std::string text)
 {
 	Sign sign = Sign(this->privateKey, this->replicaId, text);
 	return sign;
 }
 
-Justification PtbftBasic::updateRoundData(Hash hash1, Hash hash2, View view)
+Justification HotsusBasic::updateRoundData(Hash hash1, Hash hash2, View view)
 {
 	RoundData roundData = RoundData(hash1, this->view, hash2, view, this->phase);
 	Sign sign = this->signText(roundData.toString());
@@ -63,7 +63,7 @@ Justification PtbftBasic::updateRoundData(Hash hash1, Hash hash2, View view)
 	return justification;
 }
 
-Justification PtbftBasic::updateExtraRoundData(Hash hash1, Hash hash2, View view)
+Justification HotsusBasic::updateExtraRoundData(Hash hash1, Hash hash2, View view)
 {
 	RoundData roundData = RoundData(hash1, this->view, hash2, view, this->phase);
 	Sign sign = this->signText(roundData.toString());
@@ -72,13 +72,13 @@ Justification PtbftBasic::updateExtraRoundData(Hash hash1, Hash hash2, View view
 	return justification;
 }
 
-bool PtbftBasic::verifySigns(Signs signs, ReplicaID replicaId, Nodes nodes, std::string text)
+bool HotsusBasic::verifySigns(Signs signs, ReplicaID replicaId, Nodes nodes, std::string text)
 {
 	bool b = signs.verify(replicaId, nodes, text);
 	return b;
 }
 
-PtbftBasic::PtbftBasic()
+HotsusBasic::HotsusBasic()
 {
 	this->prepareHash = Hash(true); // The genesis block
 	this->prepareView = 0;
@@ -90,7 +90,7 @@ PtbftBasic::PtbftBasic()
 	this->trustedQuorumSize = 0;
 }
 
-PtbftBasic::PtbftBasic(ReplicaID replicaId, Key privateKey, unsigned int generalQuorumSize, unsigned int trustedQuorumSize)
+HotsusBasic::HotsusBasic(ReplicaID replicaId, Key privateKey, unsigned int generalQuorumSize, unsigned int trustedQuorumSize)
 {
 	this->prepareHash = Hash(true); // The genesis block
 	this->prepareView = 0;
@@ -104,31 +104,31 @@ PtbftBasic::PtbftBasic(ReplicaID replicaId, Key privateKey, unsigned int general
 	this->trustedQuorumSize = trustedQuorumSize;
 }
 
-bool PtbftBasic::verifyJustification(Nodes nodes, Justification justification)
+bool HotsusBasic::verifyJustification(Nodes nodes, Justification justification)
 {
 	bool b = this->verifySigns(justification.getSigns(), this->replicaId, nodes, justification.getRoundData().toString());
 	return b;
 }
 
-bool PtbftBasic::verifyProposal(Nodes nodes, Proposal<Accumulator> proposal, Signs signs)
+bool HotsusBasic::verifyProposal(Nodes nodes, Proposal<Accumulator> proposal, Signs signs)
 {
 	bool b = this->verifySigns(signs, this->replicaId, nodes, proposal.toString());
 	return b;
 }
 
-bool PtbftBasic::verifyExproposal(Nodes nodes, Proposal<Justification> exproposal, Signs signs)
+bool HotsusBasic::verifyExproposal(Nodes nodes, Proposal<Justification> exproposal, Signs signs)
 {
 	bool b = this->verifySigns(signs, this->replicaId, nodes, exproposal.toString());
 	return b;
 }
 
-Justification PtbftBasic::initializeMsgNewview()
+Justification HotsusBasic::initializeMsgNewview()
 {
 	Justification justification_MsgNewview = this->updateRoundData(Hash(false), this->prepareHash, this->prepareView);
 	return justification_MsgNewview;
 }
 
-Justification PtbftBasic::respondProposal(Nodes nodes, Hash proposeHash, Accumulator accumulator_MsgLdrprepare)
+Justification HotsusBasic::respondProposal(Nodes nodes, Hash proposeHash, Accumulator accumulator_MsgLdrprepare)
 {
 	View proposeView_MsgLdrprepare = accumulator_MsgLdrprepare.getProposeView();
 	Hash prepareHash_MsgLdrprepare = accumulator_MsgLdrprepare.getPrepareHash();
@@ -156,20 +156,20 @@ Justification PtbftBasic::respondProposal(Nodes nodes, Hash proposeHash, Accumul
 	}
 }
 
-void PtbftBasic::skipRound()
+void HotsusBasic::skipRound()
 {
 	this->phase = PHASE_NEWVIEW;
 	this->view++;
 }
 
-Justification PtbftBasic::initializeMsgExnewview()
+Justification HotsusBasic::initializeMsgExnewview()
 {
 	this->feedback();
 	Justification justification_MsgExnewview = this->updateExtraRoundData(Hash(false), this->preprepareHash, this->preprepareView);
 	return justification_MsgExnewview;
 }
 
-Justification PtbftBasic::respondExproposal(Nodes nodes, Hash proposeHash, Justification justification_MsgExnewview)
+Justification HotsusBasic::respondExproposal(Nodes nodes, Hash proposeHash, Justification justification_MsgExnewview)
 {
 	RoundData roundData_MsgExnewview = justification_MsgExnewview.getRoundData();
 	View proposeView_MsgExnewview = roundData_MsgExnewview.getProposeView();
@@ -191,7 +191,7 @@ Justification PtbftBasic::respondExproposal(Nodes nodes, Hash proposeHash, Justi
 	}
 }
 
-Justification PtbftBasic::saveMsgExprepare(Nodes nodes, Justification justification_MsgExprepare)
+Justification HotsusBasic::saveMsgExprepare(Nodes nodes, Justification justification_MsgExprepare)
 {
 	RoundData roundData_MsgExprepare = justification_MsgExprepare.getRoundData();
 	Hash proposeHash_MsgExprepare = roundData_MsgExprepare.getProposeHash();
@@ -214,7 +214,7 @@ Justification PtbftBasic::saveMsgExprepare(Nodes nodes, Justification justificat
 	}
 }
 
-Justification PtbftBasic::lockMsgExprecommit(Nodes nodes, Justification justification_MsgExprecommit)
+Justification HotsusBasic::lockMsgExprecommit(Nodes nodes, Justification justification_MsgExprecommit)
 {
 	RoundData roundData_MsgExprecommit = justification_MsgExprecommit.getRoundData();
 	Hash proposeHash_MsgExprecommit = roundData_MsgExprecommit.getProposeHash();

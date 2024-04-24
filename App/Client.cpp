@@ -332,7 +332,7 @@ int main(int argc, char const *argv[])
 #elif defined(BASIC_DAMYSUS)
 	long unsigned int sizeMessage = std::max({sizeof(MsgNewviewDamysus), sizeof(MsgLdrprepareDamysus), sizeof(MsgPrepareDamysus), sizeof(MsgPrecommitDamysus)});
 #elif defined(BASIC_HOTSUS)
-	long unsigned int sizeMessage = std::max({sizeof(MsgNewviewPtbft), sizeof(MsgLdrpreparePtbft), sizeof(MsgPreparePtbft), sizeof(MsgPrecommitPtbft), sizeof(MsgExnewviewPtbft), sizeof(MsgExldrpreparePtbft), sizeof(MsgExpreparePtbft), sizeof(MsgExprecommitPtbft), sizeof(MsgExcommitPtbft)});
+	long unsigned int sizeMessage = std::max({sizeof(MsgNewviewHotsus), sizeof(MsgLdrprepareHotsus), sizeof(MsgPrepareHotsus), sizeof(MsgPrecommitHotsus), sizeof(MsgExnewviewHotsus), sizeof(MsgExldrprepareHotsus), sizeof(MsgExprepareHotsus), sizeof(MsgExprecommitHotsus), sizeof(MsgExcommitHotsus)});
 #endif
 	long unsigned int size = std::max({sizeBasic, sizeMessage});
 

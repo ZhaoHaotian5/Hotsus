@@ -1,5 +1,5 @@
-#ifndef PTBFTBASIC_H
-#define PTBFTBASIC_H
+#ifndef HOTSUSBASIC_H
+#define HOTSUSBASIC_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +9,7 @@
 #include "Proposal.h"
 #include "Justification.h"
 
-class PtbftBasic
+class HotsusBasic
 {
 private:
 	Hash prepareHash;				// Hash of the last prepared block
@@ -32,8 +32,8 @@ private:
 	bool verifySigns(Signs signs, ReplicaID replicaId, Nodes nodes, std::string text);
 
 public:
-	PtbftBasic();
-	PtbftBasic(ReplicaID replicaId, Key privateKey, unsigned int generalQuorumSize, unsigned int trustedQuorumSize);
+	HotsusBasic();
+	HotsusBasic(ReplicaID replicaId, Key privateKey, unsigned int generalQuorumSize, unsigned int trustedQuorumSize);
 
 	bool verifyJustification(Nodes nodes, Justification justification);
 	bool verifyProposal(Nodes nodes, Proposal<Accumulator> proposal, Signs signs);

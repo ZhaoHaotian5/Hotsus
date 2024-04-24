@@ -795,12 +795,12 @@ Justification Log::firstMsgPrecommitDamysus(View view)
 	return justification;
 }
 
-// Basic Ptbft
-bool msgNewviewPtbftFrom(std::set<MsgNewviewPtbft> msgNewviews, std::set<ReplicaID> signers)
+// Basic Hotsus
+bool msgNewviewHotsusFrom(std::set<MsgNewviewHotsus> msgNewviews, std::set<ReplicaID> signers)
 {
-	for (std::set<MsgNewviewPtbft>::iterator itMsg = msgNewviews.begin(); itMsg != msgNewviews.end(); itMsg++)
+	for (std::set<MsgNewviewHotsus>::iterator itMsg = msgNewviews.begin(); itMsg != msgNewviews.end(); itMsg++)
 	{
-		MsgNewviewPtbft msgNewview = *itMsg;
+		MsgNewviewHotsus msgNewview = *itMsg;
 		std::set<ReplicaID> allSigners = msgNewview.signs.getSigners();
 		for (std::set<ReplicaID>::iterator itSigner = allSigners.begin(); itSigner != allSigners.end(); itSigner++)
 		{
@@ -814,19 +814,19 @@ bool msgNewviewPtbftFrom(std::set<MsgNewviewPtbft> msgNewviews, std::set<Replica
 	return false;
 }
 
-unsigned int Log::storeMsgNewviewPtbft(MsgNewviewPtbft msgNewview)
+unsigned int Log::storeMsgNewviewHotsus(MsgNewviewHotsus msgNewview)
 {
 	RoundData roundData_MsgNewview = msgNewview.roundData;
 	View proposeView_MsgNewview = roundData_MsgNewview.getProposeView();
 	std::set<ReplicaID> signers = msgNewview.signs.getSigners();
-	std::map<View, std::set<MsgNewviewPtbft>>::iterator itView = this->newviewsPtbft.find(proposeView_MsgNewview);
-	if (itView != this->newviewsPtbft.end())
+	std::map<View, std::set<MsgNewviewHotsus>>::iterator itView = this->newviewsHotsus.find(proposeView_MsgNewview);
+	if (itView != this->newviewsHotsus.end())
 	{
-		std::set<MsgNewviewPtbft> msgNewviews = itView->second;
-		if (!msgNewviewPtbftFrom(msgNewviews, signers))
+		std::set<MsgNewviewHotsus> msgNewviews = itView->second;
+		if (!msgNewviewHotsusFrom(msgNewviews, signers))
 		{
 			msgNewviews.insert(msgNewview);
-			this->newviewsPtbft[proposeView_MsgNewview] = msgNewviews;
+			this->newviewsHotsus[proposeView_MsgNewview] = msgNewviews;
 			if (DEBUG_LOG)
 			{
 				std::cout << COLOUR_GREEN << "Updated entry for MsgNewview in view " << proposeView_MsgNewview << " and the number of MsgNewview is: " << msgNewviews.size() << COLOUR_NORMAL << std::endl;
@@ -836,8 +836,8 @@ unsigned int Log::storeMsgNewviewPtbft(MsgNewviewPtbft msgNewview)
 	}
 	else
 	{
-		std::set<MsgNewviewPtbft> msgNewviews = {msgNewview};
-		this->newviewsPtbft[proposeView_MsgNewview] = msgNewviews;
+		std::set<MsgNewviewHotsus> msgNewviews = {msgNewview};
+		this->newviewsHotsus[proposeView_MsgNewview] = msgNewviews;
 		if (DEBUG_LOG)
 		{
 			std::cout << COLOUR_GREEN << "No entry for MsgNewview in view " << proposeView_MsgNewview << " and the number of MsgNewview is: 1" << COLOUR_NORMAL << std::endl;
@@ -847,11 +847,11 @@ unsigned int Log::storeMsgNewviewPtbft(MsgNewviewPtbft msgNewview)
 	return 0;
 }
 
-bool msgLdrpreparePtbftFrom(std::set<MsgLdrpreparePtbft> msgLdrprepares, std::set<ReplicaID> signers)
+bool msgLdrprepareHotsusFrom(std::set<MsgLdrprepareHotsus> msgLdrprepares, std::set<ReplicaID> signers)
 {
-	for (std::set<MsgLdrpreparePtbft>::iterator itMsg = msgLdrprepares.begin(); itMsg != msgLdrprepares.end(); itMsg++)
+	for (std::set<MsgLdrprepareHotsus>::iterator itMsg = msgLdrprepares.begin(); itMsg != msgLdrprepares.end(); itMsg++)
 	{
-		MsgLdrpreparePtbft msgLdrprepare = *itMsg;
+		MsgLdrprepareHotsus msgLdrprepare = *itMsg;
 		std::set<ReplicaID> allSigners = msgLdrprepare.signs.getSigners();
 		for (std::set<ReplicaID>::iterator itSigners = allSigners.begin(); itSigners != allSigners.end(); itSigners++)
 		{
@@ -865,20 +865,20 @@ bool msgLdrpreparePtbftFrom(std::set<MsgLdrpreparePtbft> msgLdrprepares, std::se
 	return false;
 }
 
-unsigned int Log::storeMsgLdrpreparePtbft(MsgLdrpreparePtbft msgLdrprepare)
+unsigned int Log::storeMsgLdrprepareHotsus(MsgLdrprepareHotsus msgLdrprepare)
 {
 	Accumulator accumulator_MsgLdrprepare = msgLdrprepare.proposal.getCertification();
 	View proposeView_MsgLdrprepare = accumulator_MsgLdrprepare.getProposeView();
 	std::set<ReplicaID> signers = msgLdrprepare.signs.getSigners();
 
-	std::map<View, std::set<MsgLdrpreparePtbft>>::iterator itView = this->ldrpreparesPtbft.find(proposeView_MsgLdrprepare);
-	if (itView != this->ldrpreparesPtbft.end())
+	std::map<View, std::set<MsgLdrprepareHotsus>>::iterator itView = this->ldrpreparesHotsus.find(proposeView_MsgLdrprepare);
+	if (itView != this->ldrpreparesHotsus.end())
 	{
-		std::set<MsgLdrpreparePtbft> msgLdrprepares = itView->second;
-		if (!msgLdrpreparePtbftFrom(msgLdrprepares, signers))
+		std::set<MsgLdrprepareHotsus> msgLdrprepares = itView->second;
+		if (!msgLdrprepareHotsusFrom(msgLdrprepares, signers))
 		{
 			msgLdrprepares.insert(msgLdrprepare);
-			this->ldrpreparesPtbft[proposeView_MsgLdrprepare] = msgLdrprepares;
+			this->ldrpreparesHotsus[proposeView_MsgLdrprepare] = msgLdrprepares;
 			if (DEBUG_LOG)
 			{
 				std::cout << COLOUR_GREEN << "Updated entry for MsgLdrprepare in view " << proposeView_MsgLdrprepare << " and the number of MsgLdrprepare is: " << msgLdrprepares.size() << COLOUR_NORMAL << std::endl;
@@ -888,8 +888,8 @@ unsigned int Log::storeMsgLdrpreparePtbft(MsgLdrpreparePtbft msgLdrprepare)
 	}
 	else
 	{
-		std::set<MsgLdrpreparePtbft> msgLdrprepares = {msgLdrprepare};
-		this->ldrpreparesPtbft[proposeView_MsgLdrprepare] = msgLdrprepares;
+		std::set<MsgLdrprepareHotsus> msgLdrprepares = {msgLdrprepare};
+		this->ldrpreparesHotsus[proposeView_MsgLdrprepare] = msgLdrprepares;
 		if (DEBUG_LOG)
 		{
 			std::cout << COLOUR_GREEN << "No entry for MsgLdrprepare in view " << proposeView_MsgLdrprepare << " and the number of MsgLdrprepare is: 1" << COLOUR_NORMAL << std::endl;
@@ -899,11 +899,11 @@ unsigned int Log::storeMsgLdrpreparePtbft(MsgLdrpreparePtbft msgLdrprepare)
 	return 0;
 }
 
-bool msgPreparePtbftFrom(std::set<MsgPreparePtbft> msgPrepares, std::set<ReplicaID> signers)
+bool msgPrepareHotsusFrom(std::set<MsgPrepareHotsus> msgPrepares, std::set<ReplicaID> signers)
 {
-	for (std::set<MsgPreparePtbft>::iterator itMsg = msgPrepares.begin(); itMsg != msgPrepares.end(); itMsg++)
+	for (std::set<MsgPrepareHotsus>::iterator itMsg = msgPrepares.begin(); itMsg != msgPrepares.end(); itMsg++)
 	{
-		MsgPreparePtbft msgPrepare = *itMsg;
+		MsgPrepareHotsus msgPrepare = *itMsg;
 		std::set<ReplicaID> allSigners = msgPrepare.signs.getSigners();
 		for (std::set<ReplicaID>::iterator itSigners = allSigners.begin(); itSigners != allSigners.end(); itSigners++)
 		{
@@ -917,20 +917,20 @@ bool msgPreparePtbftFrom(std::set<MsgPreparePtbft> msgPrepares, std::set<Replica
 	return false;
 }
 
-unsigned int Log::storeMsgPreparePtbft(MsgPreparePtbft msgPrepare)
+unsigned int Log::storeMsgPrepareHotsus(MsgPrepareHotsus msgPrepare)
 {
 	RoundData roundData_MsgPrepare = msgPrepare.roundData;
 	View proposeView_MsgPrepare = roundData_MsgPrepare.getProposeView();
 	std::set<ReplicaID> signers = msgPrepare.signs.getSigners();
 
-	std::map<View, std::set<MsgPreparePtbft>>::iterator itView = this->preparesPtbft.find(proposeView_MsgPrepare);
-	if (itView != this->preparesPtbft.end())
+	std::map<View, std::set<MsgPrepareHotsus>>::iterator itView = this->preparesHotsus.find(proposeView_MsgPrepare);
+	if (itView != this->preparesHotsus.end())
 	{
-		std::set<MsgPreparePtbft> msgPrepares = itView->second;
-		if (!msgPreparePtbftFrom(msgPrepares, signers))
+		std::set<MsgPrepareHotsus> msgPrepares = itView->second;
+		if (!msgPrepareHotsusFrom(msgPrepares, signers))
 		{
 			msgPrepares.insert(msgPrepare);
-			this->preparesPtbft[proposeView_MsgPrepare] = msgPrepares;
+			this->preparesHotsus[proposeView_MsgPrepare] = msgPrepares;
 			if (DEBUG_LOG)
 			{
 				std::cout << COLOUR_GREEN << "Updated entry for MsgPrepare in view " << proposeView_MsgPrepare << " and the number of MsgPrepare is: " << msgPrepares.size() << COLOUR_NORMAL << std::endl;
@@ -940,8 +940,8 @@ unsigned int Log::storeMsgPreparePtbft(MsgPreparePtbft msgPrepare)
 	}
 	else
 	{
-		std::set<MsgPreparePtbft> msgPrepares = {msgPrepare};
-		this->preparesPtbft[proposeView_MsgPrepare] = msgPrepares;
+		std::set<MsgPrepareHotsus> msgPrepares = {msgPrepare};
+		this->preparesHotsus[proposeView_MsgPrepare] = msgPrepares;
 		if (DEBUG_LOG)
 		{
 			std::cout << COLOUR_GREEN << "No entry for MsgPrepare in view " << proposeView_MsgPrepare << " and the number of MsgPrepare is: 1" << COLOUR_NORMAL << std::endl;
@@ -951,11 +951,11 @@ unsigned int Log::storeMsgPreparePtbft(MsgPreparePtbft msgPrepare)
 	return 0;
 }
 
-bool msgPrecommitPtbftFrom(std::set<MsgPrecommitPtbft> msgPrecommits, std::set<ReplicaID> signers)
+bool msgPrecommitHotsusFrom(std::set<MsgPrecommitHotsus> msgPrecommits, std::set<ReplicaID> signers)
 {
-	for (std::set<MsgPrecommitPtbft>::iterator itMsg = msgPrecommits.begin(); itMsg != msgPrecommits.end(); itMsg++)
+	for (std::set<MsgPrecommitHotsus>::iterator itMsg = msgPrecommits.begin(); itMsg != msgPrecommits.end(); itMsg++)
 	{
-		MsgPrecommitPtbft msgPrecommit = *itMsg;
+		MsgPrecommitHotsus msgPrecommit = *itMsg;
 		std::set<ReplicaID> allSigners = msgPrecommit.signs.getSigners();
 		for (std::set<ReplicaID>::iterator itSigners = allSigners.begin(); itSigners != allSigners.end(); itSigners++)
 		{
@@ -969,20 +969,20 @@ bool msgPrecommitPtbftFrom(std::set<MsgPrecommitPtbft> msgPrecommits, std::set<R
 	return false;
 }
 
-unsigned int Log::storeMsgPrecommitPtbft(MsgPrecommitPtbft msgPrecommit)
+unsigned int Log::storeMsgPrecommitHotsus(MsgPrecommitHotsus msgPrecommit)
 {
 	RoundData roundData_MsgPrecommit = msgPrecommit.roundData;
 	View proposeView_MsgPrecommit = roundData_MsgPrecommit.getProposeView();
 	std::set<ReplicaID> signers = msgPrecommit.signs.getSigners();
 
-	std::map<View, std::set<MsgPrecommitPtbft>>::iterator itView = this->precommitsPtbft.find(proposeView_MsgPrecommit);
-	if (itView != this->precommitsPtbft.end())
+	std::map<View, std::set<MsgPrecommitHotsus>>::iterator itView = this->precommitsHotsus.find(proposeView_MsgPrecommit);
+	if (itView != this->precommitsHotsus.end())
 	{
-		std::set<MsgPrecommitPtbft> msgPrecommits = itView->second;
-		if (!msgPrecommitPtbftFrom(msgPrecommits, signers))
+		std::set<MsgPrecommitHotsus> msgPrecommits = itView->second;
+		if (!msgPrecommitHotsusFrom(msgPrecommits, signers))
 		{
 			msgPrecommits.insert(msgPrecommit);
-			this->precommitsPtbft[proposeView_MsgPrecommit] = msgPrecommits;
+			this->precommitsHotsus[proposeView_MsgPrecommit] = msgPrecommits;
 			if (DEBUG_LOG)
 			{
 				std::cout << COLOUR_GREEN << "Updated entry for MsgPrecommit in view " << proposeView_MsgPrecommit << " and the number of MsgPrecommit is: " << msgPrecommits.size() << COLOUR_NORMAL << std::endl;
@@ -992,8 +992,8 @@ unsigned int Log::storeMsgPrecommitPtbft(MsgPrecommitPtbft msgPrecommit)
 	}
 	else
 	{
-		std::set<MsgPrecommitPtbft> msgPrecommits = {msgPrecommit};
-		this->precommitsPtbft[proposeView_MsgPrecommit] = {msgPrecommit};
+		std::set<MsgPrecommitHotsus> msgPrecommits = {msgPrecommit};
+		this->precommitsHotsus[proposeView_MsgPrecommit] = {msgPrecommit};
 		if (DEBUG_LOG)
 		{
 			std::cout << COLOUR_GREEN << "No entry for MsgPrecommit in view " << proposeView_MsgPrecommit << " and the number of MsgPrecommit is: 1" << COLOUR_NORMAL << std::endl;
@@ -1003,11 +1003,11 @@ unsigned int Log::storeMsgPrecommitPtbft(MsgPrecommitPtbft msgPrecommit)
 	return 0;
 }
 
-bool msgExnewviewPtbftFrom(std::set<MsgExnewviewPtbft> msgExnewviews, std::set<ReplicaID> signers)
+bool msgExnewviewHotsusFrom(std::set<MsgExnewviewHotsus> msgExnewviews, std::set<ReplicaID> signers)
 {
-	for (std::set<MsgExnewviewPtbft>::iterator itMsg = msgExnewviews.begin(); itMsg != msgExnewviews.end(); itMsg++)
+	for (std::set<MsgExnewviewHotsus>::iterator itMsg = msgExnewviews.begin(); itMsg != msgExnewviews.end(); itMsg++)
 	{
-		MsgExnewviewPtbft msgExnewview = *itMsg;
+		MsgExnewviewHotsus msgExnewview = *itMsg;
 		std::set<ReplicaID> allSigners = msgExnewview.signs.getSigners();
 		for (std::set<ReplicaID>::iterator itSigner = allSigners.begin(); itSigner != allSigners.end(); itSigner++)
 		{
@@ -1021,19 +1021,19 @@ bool msgExnewviewPtbftFrom(std::set<MsgExnewviewPtbft> msgExnewviews, std::set<R
 	return false;
 }
 
-unsigned int Log::storeMsgExnewviewPtbft(MsgExnewviewPtbft msgExnewview)
+unsigned int Log::storeMsgExnewviewHotsus(MsgExnewviewHotsus msgExnewview)
 {
 	RoundData roundData_MsgExnewview = msgExnewview.roundData;
 	View proposeView_MsgExnewview = roundData_MsgExnewview.getProposeView();
 	std::set<ReplicaID> signers = msgExnewview.signs.getSigners();
-	std::map<View, std::set<MsgExnewviewPtbft>>::iterator itView = this->exnewviewsPtbft.find(proposeView_MsgExnewview);
-	if (itView != this->exnewviewsPtbft.end())
+	std::map<View, std::set<MsgExnewviewHotsus>>::iterator itView = this->exnewviewsHotsus.find(proposeView_MsgExnewview);
+	if (itView != this->exnewviewsHotsus.end())
 	{
-		std::set<MsgExnewviewPtbft> msgExnewviews = itView->second;
-		if (!msgExnewviewPtbftFrom(msgExnewviews, signers))
+		std::set<MsgExnewviewHotsus> msgExnewviews = itView->second;
+		if (!msgExnewviewHotsusFrom(msgExnewviews, signers))
 		{
 			msgExnewviews.insert(msgExnewview);
-			this->exnewviewsPtbft[proposeView_MsgExnewview] = msgExnewviews;
+			this->exnewviewsHotsus[proposeView_MsgExnewview] = msgExnewviews;
 			if (DEBUG_LOG)
 			{
 				std::cout << COLOUR_GREEN << "Updated entry for MsgExnewview in view " << proposeView_MsgExnewview << " and the number of MsgExnewview is: " << msgExnewviews.size() << COLOUR_NORMAL << std::endl;
@@ -1043,8 +1043,8 @@ unsigned int Log::storeMsgExnewviewPtbft(MsgExnewviewPtbft msgExnewview)
 	}
 	else
 	{
-		std::set<MsgExnewviewPtbft> msgExnewviews = {msgExnewview};
-		this->exnewviewsPtbft[proposeView_MsgExnewview] = msgExnewviews;
+		std::set<MsgExnewviewHotsus> msgExnewviews = {msgExnewview};
+		this->exnewviewsHotsus[proposeView_MsgExnewview] = msgExnewviews;
 		if (DEBUG_LOG)
 		{
 			std::cout << COLOUR_GREEN << "No entry for MsgExnewview in view " << proposeView_MsgExnewview << " and the number of MsgExnewview is: 1" << COLOUR_NORMAL << std::endl;
@@ -1054,11 +1054,11 @@ unsigned int Log::storeMsgExnewviewPtbft(MsgExnewviewPtbft msgExnewview)
 	return 0;
 }
 
-bool msgExldrpreparePtbftFrom(std::set<MsgExldrpreparePtbft> msgExldrprepares, std::set<ReplicaID> signers)
+bool msgExldrprepareHotsusFrom(std::set<MsgExldrprepareHotsus> msgExldrprepares, std::set<ReplicaID> signers)
 {
-	for (std::set<MsgExldrpreparePtbft>::iterator itMsg = msgExldrprepares.begin(); itMsg != msgExldrprepares.end(); itMsg++)
+	for (std::set<MsgExldrprepareHotsus>::iterator itMsg = msgExldrprepares.begin(); itMsg != msgExldrprepares.end(); itMsg++)
 	{
-		MsgExldrpreparePtbft msgExldrprepare = *itMsg;
+		MsgExldrprepareHotsus msgExldrprepare = *itMsg;
 		std::set<ReplicaID> allSigners = msgExldrprepare.signs.getSigners();
 		for (std::set<ReplicaID>::iterator itSigner = allSigners.begin(); itSigner != allSigners.end(); itSigner++)
 		{
@@ -1072,19 +1072,19 @@ bool msgExldrpreparePtbftFrom(std::set<MsgExldrpreparePtbft> msgExldrprepares, s
 	return false;
 }
 
-unsigned int Log::storeMsgExldrpreparePtbft(MsgExldrpreparePtbft msgExldrprepare)
+unsigned int Log::storeMsgExldrprepareHotsus(MsgExldrprepareHotsus msgExldrprepare)
 {
 	Proposal<Justification> proposal_MsgExldrprepare = msgExldrprepare.proposal;
 	View proposeView_MsgExldrprepare = proposal_MsgExldrprepare.getCertification().getRoundData().getProposeView();
 	std::set<ReplicaID> signers = msgExldrprepare.signs.getSigners();
-	std::map<View, std::set<MsgExldrpreparePtbft>>::iterator itView = this->exldrpreparesPtbft.find(proposeView_MsgExldrprepare);
-	if (itView != this->exldrpreparesPtbft.end())
+	std::map<View, std::set<MsgExldrprepareHotsus>>::iterator itView = this->exldrpreparesHotsus.find(proposeView_MsgExldrprepare);
+	if (itView != this->exldrpreparesHotsus.end())
 	{
-		std::set<MsgExldrpreparePtbft> msgExldrprepares = itView->second;
-		if (!msgExldrpreparePtbftFrom(msgExldrprepares, signers))
+		std::set<MsgExldrprepareHotsus> msgExldrprepares = itView->second;
+		if (!msgExldrprepareHotsusFrom(msgExldrprepares, signers))
 		{
 			msgExldrprepares.insert(msgExldrprepare);
-			this->exldrpreparesPtbft[proposeView_MsgExldrprepare] = msgExldrprepares;
+			this->exldrpreparesHotsus[proposeView_MsgExldrprepare] = msgExldrprepares;
 			if (DEBUG_LOG)
 			{
 				std::cout << COLOUR_GREEN << "Updated entry for MsgExldrprepare in view " << proposeView_MsgExldrprepare << " and the number of MsgExldrprepare is: " << msgExldrprepares.size() << COLOUR_NORMAL << std::endl;
@@ -1094,8 +1094,8 @@ unsigned int Log::storeMsgExldrpreparePtbft(MsgExldrpreparePtbft msgExldrprepare
 	}
 	else
 	{
-		std::set<MsgExldrpreparePtbft> msgExldrprepares = {msgExldrprepare};
-		this->exldrpreparesPtbft[proposeView_MsgExldrprepare] = msgExldrprepares;
+		std::set<MsgExldrprepareHotsus> msgExldrprepares = {msgExldrprepare};
+		this->exldrpreparesHotsus[proposeView_MsgExldrprepare] = msgExldrprepares;
 		if (DEBUG_LOG)
 		{
 			std::cout << COLOUR_GREEN << "No entry for MsgExldrprepare in view " << proposeView_MsgExldrprepare << " and the number of MsgExldrprepare is: 1" << COLOUR_NORMAL << std::endl;
@@ -1105,11 +1105,11 @@ unsigned int Log::storeMsgExldrpreparePtbft(MsgExldrpreparePtbft msgExldrprepare
 	return 0;
 }
 
-bool msgExpreparePtbftFrom(std::set<MsgExpreparePtbft> msgExprepares, std::set<ReplicaID> signers)
+bool msgExprepareHotsusFrom(std::set<MsgExprepareHotsus> msgExprepares, std::set<ReplicaID> signers)
 {
-	for (std::set<MsgExpreparePtbft>::iterator itMsg = msgExprepares.begin(); itMsg != msgExprepares.end(); itMsg++)
+	for (std::set<MsgExprepareHotsus>::iterator itMsg = msgExprepares.begin(); itMsg != msgExprepares.end(); itMsg++)
 	{
-		MsgExpreparePtbft msgExprepare = *itMsg;
+		MsgExprepareHotsus msgExprepare = *itMsg;
 		std::set<ReplicaID> allSigners = msgExprepare.signs.getSigners();
 		for (std::set<ReplicaID>::iterator itSigner = allSigners.begin(); itSigner != allSigners.end(); itSigner++)
 		{
@@ -1123,19 +1123,19 @@ bool msgExpreparePtbftFrom(std::set<MsgExpreparePtbft> msgExprepares, std::set<R
 	return false;
 }
 
-unsigned int Log::storeMsgExpreparePtbft(MsgExpreparePtbft msgExprepare)
+unsigned int Log::storeMsgExprepareHotsus(MsgExprepareHotsus msgExprepare)
 {
 	RoundData roundData_MsgExprepare = msgExprepare.roundData;
 	View proposeView_MsgExprepare = roundData_MsgExprepare.getProposeView();
 	std::set<ReplicaID> signers = msgExprepare.signs.getSigners();
-	std::map<View, std::set<MsgExpreparePtbft>>::iterator itView = this->expreparesPtbft.find(proposeView_MsgExprepare);
-	if (itView != this->expreparesPtbft.end())
+	std::map<View, std::set<MsgExprepareHotsus>>::iterator itView = this->expreparesHotsus.find(proposeView_MsgExprepare);
+	if (itView != this->expreparesHotsus.end())
 	{
-		std::set<MsgExpreparePtbft> msgExprepares = itView->second;
-		if (!msgExpreparePtbftFrom(msgExprepares, signers))
+		std::set<MsgExprepareHotsus> msgExprepares = itView->second;
+		if (!msgExprepareHotsusFrom(msgExprepares, signers))
 		{
 			msgExprepares.insert(msgExprepare);
-			this->expreparesPtbft[proposeView_MsgExprepare] = msgExprepares;
+			this->expreparesHotsus[proposeView_MsgExprepare] = msgExprepares;
 			if (DEBUG_LOG)
 			{
 				std::cout << COLOUR_GREEN << "Updated entry for MsgExprepare in view " << proposeView_MsgExprepare << " and the number of MsgExprepare is: " << msgExprepares.size() << COLOUR_NORMAL << std::endl;
@@ -1145,8 +1145,8 @@ unsigned int Log::storeMsgExpreparePtbft(MsgExpreparePtbft msgExprepare)
 	}
 	else
 	{
-		std::set<MsgExpreparePtbft> msgExprepares = {msgExprepare};
-		this->expreparesPtbft[proposeView_MsgExprepare] = msgExprepares;
+		std::set<MsgExprepareHotsus> msgExprepares = {msgExprepare};
+		this->expreparesHotsus[proposeView_MsgExprepare] = msgExprepares;
 		if (DEBUG_LOG)
 		{
 			std::cout << COLOUR_GREEN << "No entry for MsgExprepare in view " << proposeView_MsgExprepare << " and the number of MsgExprepare is: 1" << COLOUR_NORMAL << std::endl;
@@ -1156,11 +1156,11 @@ unsigned int Log::storeMsgExpreparePtbft(MsgExpreparePtbft msgExprepare)
 	return 0;
 }
 
-bool msgExprecommitPtbftFrom(std::set<MsgExprecommitPtbft> msgExprecommits, std::set<ReplicaID> signers)
+bool msgExprecommitHotsusFrom(std::set<MsgExprecommitHotsus> msgExprecommits, std::set<ReplicaID> signers)
 {
-	for (std::set<MsgExprecommitPtbft>::iterator itMsg = msgExprecommits.begin(); itMsg != msgExprecommits.end(); itMsg++)
+	for (std::set<MsgExprecommitHotsus>::iterator itMsg = msgExprecommits.begin(); itMsg != msgExprecommits.end(); itMsg++)
 	{
-		MsgExprecommitPtbft msgExprecommit = *itMsg;
+		MsgExprecommitHotsus msgExprecommit = *itMsg;
 		std::set<ReplicaID> allSigners = msgExprecommit.signs.getSigners();
 		for (std::set<ReplicaID>::iterator itSigner = allSigners.begin(); itSigner != allSigners.end(); itSigner++)
 		{
@@ -1174,19 +1174,19 @@ bool msgExprecommitPtbftFrom(std::set<MsgExprecommitPtbft> msgExprecommits, std:
 	return false;
 }
 
-unsigned int Log::storeMsgExprecommitPtbft(MsgExprecommitPtbft msgExprecommit)
+unsigned int Log::storeMsgExprecommitHotsus(MsgExprecommitHotsus msgExprecommit)
 {
 	RoundData roundData_MsgExprecommit = msgExprecommit.roundData;
 	View proposeView_MsgExprecommit = roundData_MsgExprecommit.getProposeView();
 	std::set<ReplicaID> signers = msgExprecommit.signs.getSigners();
-	std::map<View, std::set<MsgExprecommitPtbft>>::iterator itView = this->exprecommitsPtbft.find(proposeView_MsgExprecommit);
-	if (itView != this->exprecommitsPtbft.end())
+	std::map<View, std::set<MsgExprecommitHotsus>>::iterator itView = this->exprecommitsHotsus.find(proposeView_MsgExprecommit);
+	if (itView != this->exprecommitsHotsus.end())
 	{
-		std::set<MsgExprecommitPtbft> msgExprecommits = itView->second;
-		if (!msgExprecommitPtbftFrom(msgExprecommits, signers))
+		std::set<MsgExprecommitHotsus> msgExprecommits = itView->second;
+		if (!msgExprecommitHotsusFrom(msgExprecommits, signers))
 		{
 			msgExprecommits.insert(msgExprecommit);
-			this->exprecommitsPtbft[proposeView_MsgExprecommit] = msgExprecommits;
+			this->exprecommitsHotsus[proposeView_MsgExprecommit] = msgExprecommits;
 			if (DEBUG_LOG)
 			{
 				std::cout << COLOUR_GREEN << "Updated entry for MsgExprecommit in view " << proposeView_MsgExprecommit << " and the number of MsgExprecommit is: " << msgExprecommits.size() << COLOUR_NORMAL << std::endl;
@@ -1196,8 +1196,8 @@ unsigned int Log::storeMsgExprecommitPtbft(MsgExprecommitPtbft msgExprecommit)
 	}
 	else
 	{
-		std::set<MsgExprecommitPtbft> msgExprecommits = {msgExprecommit};
-		this->exprecommitsPtbft[proposeView_MsgExprecommit] = msgExprecommits;
+		std::set<MsgExprecommitHotsus> msgExprecommits = {msgExprecommit};
+		this->exprecommitsHotsus[proposeView_MsgExprecommit] = msgExprecommits;
 		if (DEBUG_LOG)
 		{
 			std::cout << COLOUR_GREEN << "No entry for MsgExprecommit in view " << proposeView_MsgExprecommit << " and the number of MsgExprecommit is: 1" << COLOUR_NORMAL << std::endl;
@@ -1207,11 +1207,11 @@ unsigned int Log::storeMsgExprecommitPtbft(MsgExprecommitPtbft msgExprecommit)
 	return 0;
 }
 
-bool msgExcommitPtbftFrom(std::set<MsgExcommitPtbft> msgExcommits, std::set<ReplicaID> signers)
+bool msgExcommitHotsusFrom(std::set<MsgExcommitHotsus> msgExcommits, std::set<ReplicaID> signers)
 {
-	for (std::set<MsgExcommitPtbft>::iterator itMsg = msgExcommits.begin(); itMsg != msgExcommits.end(); itMsg++)
+	for (std::set<MsgExcommitHotsus>::iterator itMsg = msgExcommits.begin(); itMsg != msgExcommits.end(); itMsg++)
 	{
-		MsgExcommitPtbft msgExcommit = *itMsg;
+		MsgExcommitHotsus msgExcommit = *itMsg;
 		std::set<ReplicaID> allSigners = msgExcommit.signs.getSigners();
 		for (std::set<ReplicaID>::iterator itSigner = allSigners.begin(); itSigner != allSigners.end(); itSigner++)
 		{
@@ -1225,19 +1225,19 @@ bool msgExcommitPtbftFrom(std::set<MsgExcommitPtbft> msgExcommits, std::set<Repl
 	return false;
 }
 
-unsigned int Log::storeMsgExcommitPtbft(MsgExcommitPtbft msgExcommit)
+unsigned int Log::storeMsgExcommitHotsus(MsgExcommitHotsus msgExcommit)
 {
 	RoundData roundData_MsgExcommit = msgExcommit.roundData;
 	View proposeView_MsgExcommit = roundData_MsgExcommit.getProposeView();
 	std::set<ReplicaID> signers = msgExcommit.signs.getSigners();
-	std::map<View, std::set<MsgExcommitPtbft>>::iterator itView = this->excommitsPtbft.find(proposeView_MsgExcommit);
-	if (itView != this->excommitsPtbft.end())
+	std::map<View, std::set<MsgExcommitHotsus>>::iterator itView = this->excommitsHotsus.find(proposeView_MsgExcommit);
+	if (itView != this->excommitsHotsus.end())
 	{
-		std::set<MsgExcommitPtbft> msgExcommits = itView->second;
-		if (!msgExcommitPtbftFrom(msgExcommits, signers))
+		std::set<MsgExcommitHotsus> msgExcommits = itView->second;
+		if (!msgExcommitHotsusFrom(msgExcommits, signers))
 		{
 			msgExcommits.insert(msgExcommit);
-			this->excommitsPtbft[proposeView_MsgExcommit] = msgExcommits;
+			this->excommitsHotsus[proposeView_MsgExcommit] = msgExcommits;
 			if (DEBUG_LOG)
 			{
 				std::cout << COLOUR_GREEN << "Updated entry for MsgExcommit in view " << proposeView_MsgExcommit << " and the number of MsgExcommit is: " << msgExcommits.size() << COLOUR_NORMAL << std::endl;
@@ -1247,8 +1247,8 @@ unsigned int Log::storeMsgExcommitPtbft(MsgExcommitPtbft msgExcommit)
 	}
 	else
 	{
-		std::set<MsgExcommitPtbft> msgExcommits = {msgExcommit};
-		this->excommitsPtbft[proposeView_MsgExcommit] = msgExcommits;
+		std::set<MsgExcommitHotsus> msgExcommits = {msgExcommit};
+		this->excommitsHotsus[proposeView_MsgExcommit] = msgExcommits;
 		if (DEBUG_LOG)
 		{
 			std::cout << COLOUR_GREEN << "No entry for MsgExcommit in view " << proposeView_MsgExcommit << " and the number of MsgExcommit is: 1" << COLOUR_NORMAL << std::endl;
@@ -1258,32 +1258,32 @@ unsigned int Log::storeMsgExcommitPtbft(MsgExcommitPtbft msgExcommit)
 	return 0;
 }
 
-std::set<MsgNewviewPtbft> Log::getMsgNewviewPtbft(View view, unsigned int n)
+std::set<MsgNewviewHotsus> Log::getMsgNewviewHotsus(View view, unsigned int n)
 {
-	std::set<MsgNewviewPtbft> msgNewview;
-	std::map<View, std::set<MsgNewviewPtbft>>::iterator itView = this->newviewsPtbft.find(view);
-	if (itView != this->newviewsPtbft.end())
+	std::set<MsgNewviewHotsus> msgNewview;
+	std::map<View, std::set<MsgNewviewHotsus>>::iterator itView = this->newviewsHotsus.find(view);
+	if (itView != this->newviewsHotsus.end())
 	{
-		std::set<MsgNewviewPtbft> msgNewviews = itView->second;
-		for (std::set<MsgNewviewPtbft>::iterator itMsg = msgNewviews.begin(); msgNewview.size() < n && itMsg != msgNewviews.end(); itMsg++)
+		std::set<MsgNewviewHotsus> msgNewviews = itView->second;
+		for (std::set<MsgNewviewHotsus>::iterator itMsg = msgNewviews.begin(); msgNewview.size() < n && itMsg != msgNewviews.end(); itMsg++)
 		{
-			MsgNewviewPtbft msg = *itMsg;
+			MsgNewviewHotsus msg = *itMsg;
 			msgNewview.insert(msg);
 		}
 	}
 	return msgNewview;
 }
 
-Signs Log::getMsgPreparePtbft(View view, unsigned int n)
+Signs Log::getMsgPrepareHotsus(View view, unsigned int n)
 {
 	Signs signs;
-	std::map<View, std::set<MsgPreparePtbft>>::iterator itView = this->preparesPtbft.find(view);
-	if (itView != this->preparesPtbft.end())
+	std::map<View, std::set<MsgPrepareHotsus>>::iterator itView = this->preparesHotsus.find(view);
+	if (itView != this->preparesHotsus.end())
 	{
-		std::set<MsgPreparePtbft> msgPrepares = itView->second;
-		for (std::set<MsgPreparePtbft>::iterator itMsg = msgPrepares.begin(); signs.getSize() < n && itMsg != msgPrepares.end(); itMsg++)
+		std::set<MsgPrepareHotsus> msgPrepares = itView->second;
+		for (std::set<MsgPrepareHotsus>::iterator itMsg = msgPrepares.begin(); signs.getSize() < n && itMsg != msgPrepares.end(); itMsg++)
 		{
-			MsgPreparePtbft msgPrepare = *itMsg;
+			MsgPrepareHotsus msgPrepare = *itMsg;
 			Signs signs_MsgPrepare = msgPrepare.signs;
 			if (DEBUG_LOG)
 			{
@@ -1299,16 +1299,16 @@ Signs Log::getMsgPreparePtbft(View view, unsigned int n)
 	return signs;
 }
 
-Signs Log::getMsgPrecommitPtbft(View view, unsigned int n)
+Signs Log::getMsgPrecommitHotsus(View view, unsigned int n)
 {
 	Signs signs;
-	std::map<View, std::set<MsgPrecommitPtbft>>::iterator itView = this->precommitsPtbft.find(view);
-	if (itView != this->precommitsPtbft.end())
+	std::map<View, std::set<MsgPrecommitHotsus>>::iterator itView = this->precommitsHotsus.find(view);
+	if (itView != this->precommitsHotsus.end())
 	{
-		std::set<MsgPrecommitPtbft> msgPrecommits = itView->second;
-		for (std::set<MsgPrecommitPtbft>::iterator itMsg = msgPrecommits.begin(); signs.getSize() < n && itMsg != msgPrecommits.end(); itMsg++)
+		std::set<MsgPrecommitHotsus> msgPrecommits = itView->second;
+		for (std::set<MsgPrecommitHotsus>::iterator itMsg = msgPrecommits.begin(); signs.getSize() < n && itMsg != msgPrecommits.end(); itMsg++)
 		{
-			MsgPrecommitPtbft msgPrecommit = *itMsg;
+			MsgPrecommitHotsus msgPrecommit = *itMsg;
 			Signs signs_MsgPrecommit = msgPrecommit.signs;
 			if (DEBUG_LOG)
 			{
@@ -1324,16 +1324,16 @@ Signs Log::getMsgPrecommitPtbft(View view, unsigned int n)
 	return signs;
 }
 
-Signs Log::getMsgExnewviewPtbft(View view, unsigned int n)
+Signs Log::getMsgExnewviewHotsus(View view, unsigned int n)
 {
 	Signs signs;
-	std::map<View, std::set<MsgExnewviewPtbft>>::iterator itView = this->exnewviewsPtbft.find(view);
-	if (itView != this->exnewviewsPtbft.end())
+	std::map<View, std::set<MsgExnewviewHotsus>>::iterator itView = this->exnewviewsHotsus.find(view);
+	if (itView != this->exnewviewsHotsus.end())
 	{
-		std::set<MsgExnewviewPtbft> msgExnewviews = itView->second;
-		for (std::set<MsgExnewviewPtbft>::iterator itMsg = msgExnewviews.begin(); signs.getSize() < n && itMsg != msgExnewviews.end(); itMsg++)
+		std::set<MsgExnewviewHotsus> msgExnewviews = itView->second;
+		for (std::set<MsgExnewviewHotsus>::iterator itMsg = msgExnewviews.begin(); signs.getSize() < n && itMsg != msgExnewviews.end(); itMsg++)
 		{
-			MsgExnewviewPtbft msgExnewview = *itMsg;
+			MsgExnewviewHotsus msgExnewview = *itMsg;
 			Signs signs_MsgExnewview = msgExnewview.signs;
 			if (DEBUG_LOG)
 			{
@@ -1349,16 +1349,16 @@ Signs Log::getMsgExnewviewPtbft(View view, unsigned int n)
 	return signs;
 }
 
-Signs Log::getMsgExpreparePtbft(View view, unsigned int n)
+Signs Log::getMsgExprepareHotsus(View view, unsigned int n)
 {
 	Signs signs;
-	std::map<View, std::set<MsgExpreparePtbft>>::iterator itView = this->expreparesPtbft.find(view);
-	if (itView != this->expreparesPtbft.end())
+	std::map<View, std::set<MsgExprepareHotsus>>::iterator itView = this->expreparesHotsus.find(view);
+	if (itView != this->expreparesHotsus.end())
 	{
-		std::set<MsgExpreparePtbft> msgExprepares = itView->second;
-		for (std::set<MsgExpreparePtbft>::iterator itMsg = msgExprepares.begin(); signs.getSize() < n && itMsg != msgExprepares.end(); itMsg++)
+		std::set<MsgExprepareHotsus> msgExprepares = itView->second;
+		for (std::set<MsgExprepareHotsus>::iterator itMsg = msgExprepares.begin(); signs.getSize() < n && itMsg != msgExprepares.end(); itMsg++)
 		{
-			MsgExpreparePtbft msgExprepare = *itMsg;
+			MsgExprepareHotsus msgExprepare = *itMsg;
 			Signs signs_MsgExprepare = msgExprepare.signs;
 			if (DEBUG_LOG)
 			{
@@ -1374,16 +1374,16 @@ Signs Log::getMsgExpreparePtbft(View view, unsigned int n)
 	return signs;
 }
 
-Signs Log::getMsgExprecommitPtbft(View view, unsigned int n)
+Signs Log::getMsgExprecommitHotsus(View view, unsigned int n)
 {
 	Signs signs;
-	std::map<View, std::set<MsgExprecommitPtbft>>::iterator itView = this->exprecommitsPtbft.find(view);
-	if (itView != this->exprecommitsPtbft.end())
+	std::map<View, std::set<MsgExprecommitHotsus>>::iterator itView = this->exprecommitsHotsus.find(view);
+	if (itView != this->exprecommitsHotsus.end())
 	{
-		std::set<MsgExprecommitPtbft> msgExprecommits = itView->second;
-		for (std::set<MsgExprecommitPtbft>::iterator itMsg = msgExprecommits.begin(); signs.getSize() < n && itMsg != msgExprecommits.end(); itMsg++)
+		std::set<MsgExprecommitHotsus> msgExprecommits = itView->second;
+		for (std::set<MsgExprecommitHotsus>::iterator itMsg = msgExprecommits.begin(); signs.getSize() < n && itMsg != msgExprecommits.end(); itMsg++)
 		{
-			MsgExprecommitPtbft msgExprecommit = *itMsg;
+			MsgExprecommitHotsus msgExprecommit = *itMsg;
 			Signs signs_MsgExprecommit = msgExprecommit.signs;
 			if (DEBUG_LOG)
 			{
@@ -1399,16 +1399,16 @@ Signs Log::getMsgExprecommitPtbft(View view, unsigned int n)
 	return signs;
 }
 
-Signs Log::getMsgExcommitPtbft(View view, unsigned int n)
+Signs Log::getMsgExcommitHotsus(View view, unsigned int n)
 {
 	Signs signs;
-	std::map<View, std::set<MsgExcommitPtbft>>::iterator itView = this->excommitsPtbft.find(view);
-	if (itView != this->excommitsPtbft.end())
+	std::map<View, std::set<MsgExcommitHotsus>>::iterator itView = this->excommitsHotsus.find(view);
+	if (itView != this->excommitsHotsus.end())
 	{
-		std::set<MsgExcommitPtbft> msgExcommits = itView->second;
-		for (std::set<MsgExcommitPtbft>::iterator itMsg = msgExcommits.begin(); signs.getSize() < n && itMsg != msgExcommits.end(); itMsg++)
+		std::set<MsgExcommitHotsus> msgExcommits = itView->second;
+		for (std::set<MsgExcommitHotsus>::iterator itMsg = msgExcommits.begin(); signs.getSize() < n && itMsg != msgExcommits.end(); itMsg++)
 		{
-			MsgExcommitPtbft msgExcommit = *itMsg;
+			MsgExcommitHotsus msgExcommit = *itMsg;
 			Signs signs_MsgExcommit = msgExcommit.signs;
 			if (DEBUG_LOG)
 			{
@@ -1424,17 +1424,17 @@ Signs Log::getMsgExcommitPtbft(View view, unsigned int n)
 	return signs;
 }
 
-Justification Log::findHighestMsgExnewviewPtbft(View view)
+Justification Log::findHighestMsgExnewviewHotsus(View view)
 {
-	std::map<View, std::set<MsgExnewviewPtbft>>::iterator itView = this->exnewviewsPtbft.find(view);
+	std::map<View, std::set<MsgExnewviewHotsus>>::iterator itView = this->exnewviewsHotsus.find(view);
 	Justification justification_MsgExnewview = Justification();
-	if (itView != this->exnewviewsPtbft.end())
+	if (itView != this->exnewviewsHotsus.end())
 	{
-		std::set<MsgExnewviewPtbft> msgExnewviews = itView->second;
+		std::set<MsgExnewviewHotsus> msgExnewviews = itView->second;
 		View highView = 0;
-		for (std::set<MsgExnewviewPtbft>::iterator itMsg = msgExnewviews.begin(); itMsg != msgExnewviews.end(); itMsg++)
+		for (std::set<MsgExnewviewHotsus>::iterator itMsg = msgExnewviews.begin(); itMsg != msgExnewviews.end(); itMsg++)
 		{
-			MsgExnewviewPtbft msgExnewview = *itMsg;
+			MsgExnewviewHotsus msgExnewview = *itMsg;
 			RoundData roundData_MsgExnewview = msgExnewview.roundData;
 			Signs signs_MsgExnewview = msgExnewview.signs;
 			View justifyView_MsgExnewview = roundData_MsgExnewview.getJustifyView();
@@ -1448,35 +1448,35 @@ Justification Log::findHighestMsgExnewviewPtbft(View view)
 	return justification_MsgExnewview;
 }
 
-MsgLdrpreparePtbft Log::firstMsgLdrpreparePtbft(View view)
+MsgLdrprepareHotsus Log::firstMsgLdrprepareHotsus(View view)
 {
-	std::map<View, std::set<MsgLdrpreparePtbft>>::iterator itView = this->ldrpreparesPtbft.find(view);
-	if (itView != this->ldrpreparesPtbft.end())
+	std::map<View, std::set<MsgLdrprepareHotsus>>::iterator itView = this->ldrpreparesHotsus.find(view);
+	if (itView != this->ldrpreparesHotsus.end())
 	{
-		std::set<MsgLdrpreparePtbft> msgLdrprepares = itView->second;
+		std::set<MsgLdrprepareHotsus> msgLdrprepares = itView->second;
 		if (msgLdrprepares.size() > 0)
 		{
-			std::set<MsgLdrpreparePtbft>::iterator itMsg = msgLdrprepares.begin();
-			MsgLdrpreparePtbft msgLdrprepare = *itMsg;
+			std::set<MsgLdrprepareHotsus>::iterator itMsg = msgLdrprepares.begin();
+			MsgLdrprepareHotsus msgLdrprepare = *itMsg;
 			return msgLdrprepare;
 		}
 	}
 	Proposal<Accumulator> proposal;
 	Signs signs;
-	MsgLdrpreparePtbft msgLdrprepare = MsgLdrpreparePtbft(proposal, signs);
+	MsgLdrprepareHotsus msgLdrprepare = MsgLdrprepareHotsus(proposal, signs);
 	return msgLdrprepare;
 }
 
-Justification Log::firstMsgPreparePtbft(View view)
+Justification Log::firstMsgPrepareHotsus(View view)
 {
-	std::map<View, std::set<MsgPreparePtbft>>::iterator itView = this->preparesPtbft.find(view);
-	if (itView != this->preparesPtbft.end())
+	std::map<View, std::set<MsgPrepareHotsus>>::iterator itView = this->preparesHotsus.find(view);
+	if (itView != this->preparesHotsus.end())
 	{
-		std::set<MsgPreparePtbft> msgPrepares = itView->second;
+		std::set<MsgPrepareHotsus> msgPrepares = itView->second;
 		if (msgPrepares.size() > 0)
 		{
-			std::set<MsgPreparePtbft>::iterator itMsg = msgPrepares.begin();
-			MsgPreparePtbft msgPrepare = *itMsg;
+			std::set<MsgPrepareHotsus>::iterator itMsg = msgPrepares.begin();
+			MsgPrepareHotsus msgPrepare = *itMsg;
 			RoundData roundData_MsgPrepare = msgPrepare.roundData;
 			Signs signs_MsgPrepare = msgPrepare.signs;
 			Justification justification_MsgPrepare = Justification(roundData_MsgPrepare, signs_MsgPrepare);
@@ -1487,16 +1487,16 @@ Justification Log::firstMsgPreparePtbft(View view)
 	return justification;
 }
 
-Justification Log::firstMsgPrecommitPtbft(View view)
+Justification Log::firstMsgPrecommitHotsus(View view)
 {
-	std::map<View, std::set<MsgPrecommitPtbft>>::iterator itView = this->precommitsPtbft.find(view);
-	if (itView != this->precommitsPtbft.end())
+	std::map<View, std::set<MsgPrecommitHotsus>>::iterator itView = this->precommitsHotsus.find(view);
+	if (itView != this->precommitsHotsus.end())
 	{
-		std::set<MsgPrecommitPtbft> msgPrecommits = itView->second;
+		std::set<MsgPrecommitHotsus> msgPrecommits = itView->second;
 		if (msgPrecommits.size() > 0)
 		{
-			std::set<MsgPrecommitPtbft>::iterator itMsg = msgPrecommits.begin();
-			MsgPrecommitPtbft msgPrecommit = *itMsg;
+			std::set<MsgPrecommitHotsus>::iterator itMsg = msgPrecommits.begin();
+			MsgPrecommitHotsus msgPrecommit = *itMsg;
 			RoundData roundData_MsgPrecommit = msgPrecommit.roundData;
 			Signs signs_MsgPrecommit = msgPrecommit.signs;
 			Justification justification_MsgPrecommit = Justification(roundData_MsgPrecommit, signs_MsgPrecommit);
@@ -1507,35 +1507,35 @@ Justification Log::firstMsgPrecommitPtbft(View view)
 	return justification;
 }
 
-MsgExldrpreparePtbft Log::firstMsgExldrpreparePtbft(View view)
+MsgExldrprepareHotsus Log::firstMsgExldrprepareHotsus(View view)
 {
-	std::map<View, std::set<MsgExldrpreparePtbft>>::iterator itView = this->exldrpreparesPtbft.find(view);
-	if (itView != this->exldrpreparesPtbft.end())
+	std::map<View, std::set<MsgExldrprepareHotsus>>::iterator itView = this->exldrpreparesHotsus.find(view);
+	if (itView != this->exldrpreparesHotsus.end())
 	{
-		std::set<MsgExldrpreparePtbft> msgExldrprepares = itView->second;
+		std::set<MsgExldrprepareHotsus> msgExldrprepares = itView->second;
 		if (msgExldrprepares.size() > 0)
 		{
-			std::set<MsgExldrpreparePtbft>::iterator itMsg = msgExldrprepares.begin();
-			MsgExldrpreparePtbft msgExldrprepare = *itMsg;
+			std::set<MsgExldrprepareHotsus>::iterator itMsg = msgExldrprepares.begin();
+			MsgExldrprepareHotsus msgExldrprepare = *itMsg;
 			return msgExldrprepare;
 		}
 	}
 	Proposal<Justification> proposal;
 	Signs signs;
-	MsgExldrpreparePtbft msgExldrprepare = MsgExldrpreparePtbft(proposal, signs);
+	MsgExldrprepareHotsus msgExldrprepare = MsgExldrprepareHotsus(proposal, signs);
 	return msgExldrprepare;
 }
 
-Justification Log::firstMsgExpreparePtbft(View view)
+Justification Log::firstMsgExprepareHotsus(View view)
 {
-	std::map<View, std::set<MsgExpreparePtbft>>::iterator itView = this->expreparesPtbft.find(view);
-	if (itView != this->expreparesPtbft.end())
+	std::map<View, std::set<MsgExprepareHotsus>>::iterator itView = this->expreparesHotsus.find(view);
+	if (itView != this->expreparesHotsus.end())
 	{
-		std::set<MsgExpreparePtbft> msgExprepares = itView->second;
+		std::set<MsgExprepareHotsus> msgExprepares = itView->second;
 		if (msgExprepares.size() > 0)
 		{
-			std::set<MsgExpreparePtbft>::iterator itMsg = msgExprepares.begin();
-			MsgExpreparePtbft msgExprepare = *itMsg;
+			std::set<MsgExprepareHotsus>::iterator itMsg = msgExprepares.begin();
+			MsgExprepareHotsus msgExprepare = *itMsg;
 			RoundData roundData_MsgExprepare = msgExprepare.roundData;
 			Signs signs_MsgExprepare = msgExprepare.signs;
 			Justification justification_MsgExprepare = Justification(roundData_MsgExprepare, signs_MsgExprepare);
@@ -1546,16 +1546,16 @@ Justification Log::firstMsgExpreparePtbft(View view)
 	return justification;
 }
 
-Justification Log::firstMsgExprecommitPtbft(View view)
+Justification Log::firstMsgExprecommitHotsus(View view)
 {
-	std::map<View, std::set<MsgExprecommitPtbft>>::iterator itView = this->exprecommitsPtbft.find(view);
-	if (itView != this->exprecommitsPtbft.end())
+	std::map<View, std::set<MsgExprecommitHotsus>>::iterator itView = this->exprecommitsHotsus.find(view);
+	if (itView != this->exprecommitsHotsus.end())
 	{
-		std::set<MsgExprecommitPtbft> msgExprecommits = itView->second;
+		std::set<MsgExprecommitHotsus> msgExprecommits = itView->second;
 		if (msgExprecommits.size() > 0)
 		{
-			std::set<MsgExprecommitPtbft>::iterator itMsg = msgExprecommits.begin();
-			MsgExprecommitPtbft msgExprecommit = *itMsg;
+			std::set<MsgExprecommitHotsus>::iterator itMsg = msgExprecommits.begin();
+			MsgExprecommitHotsus msgExprecommit = *itMsg;
 			RoundData roundData_MsgExprecommit = msgExprecommit.roundData;
 			Signs signs_MsgExprecommit = msgExprecommit.signs;
 			Justification justification_MsgExprecommit = Justification(roundData_MsgExprecommit, signs_MsgExprecommit);
@@ -1566,16 +1566,16 @@ Justification Log::firstMsgExprecommitPtbft(View view)
 	return justification;
 }
 
-Justification Log::firstMsgExcommitPtbft(View view)
+Justification Log::firstMsgExcommitHotsus(View view)
 {
-	std::map<View, std::set<MsgExcommitPtbft>>::iterator itView = this->excommitsPtbft.find(view);
-	if (itView != this->excommitsPtbft.end())
+	std::map<View, std::set<MsgExcommitHotsus>>::iterator itView = this->excommitsHotsus.find(view);
+	if (itView != this->excommitsHotsus.end())
 	{
-		std::set<MsgExcommitPtbft> msgExcommits = itView->second;
+		std::set<MsgExcommitHotsus> msgExcommits = itView->second;
 		if (msgExcommits.size() > 0)
 		{
-			std::set<MsgExcommitPtbft>::iterator itMsg = msgExcommits.begin();
-			MsgExcommitPtbft msgExcommit = *itMsg;
+			std::set<MsgExcommitHotsus>::iterator itMsg = msgExcommits.begin();
+			MsgExcommitHotsus msgExcommit = *itMsg;
 			RoundData roundData_MsgExcommit = msgExcommit.roundData;
 			Signs signs_MsgExcommit = msgExcommit.signs;
 			Justification justification_MsgExcommit = Justification(roundData_MsgExcommit, signs_MsgExcommit);
@@ -1656,68 +1656,68 @@ std::string Log::toPrint()
 		text += "MsgPrecommitDamysus: View = " + std::to_string(view) + "; The number of MsgPrecommitDamysus is: " + std::to_string(msgs.size()) + "\n";
 	}
 #elif defined(BASIC_HOTSUS)
-	// MsgNewviewPtbft
-	for (std::map<View, std::set<MsgNewviewPtbft>>::iterator itView = this->newviewsPtbft.begin(); itView != this->newviewsPtbft.end(); itView++)
+	// MsgNewviewHotsus
+	for (std::map<View, std::set<MsgNewviewHotsus>>::iterator itView = this->newviewsHotsus.begin(); itView != this->newviewsHotsus.end(); itView++)
 	{
 		View view = itView->first;
-		std::set<MsgNewviewPtbft> msgs = itView->second;
-		text += "MsgNewviewPtbft: View = " + std::to_string(view) + "; The number of MsgNewviewPtbft is: " + std::to_string(msgs.size()) + "\n";
+		std::set<MsgNewviewHotsus> msgs = itView->second;
+		text += "MsgNewviewHotsus: View = " + std::to_string(view) + "; The number of MsgNewviewHotsus is: " + std::to_string(msgs.size()) + "\n";
 	}
-	// MsgLdrpreparePtbft
-	for (std::map<View, std::set<MsgLdrpreparePtbft>>::iterator itView = this->ldrpreparesPtbft.begin(); itView != this->ldrpreparesPtbft.end(); itView++)
+	// MsgLdrprepareHotsus
+	for (std::map<View, std::set<MsgLdrprepareHotsus>>::iterator itView = this->ldrpreparesHotsus.begin(); itView != this->ldrpreparesHotsus.end(); itView++)
 	{
 		View view = itView->first;
-		std::set<MsgLdrpreparePtbft> msgs = itView->second;
-		text += "MsgLdrpreparePtbft: View = " + std::to_string(view) + "; The number of MsgLdrpreparePtbft is: " + std::to_string(msgs.size()) + "\n";
+		std::set<MsgLdrprepareHotsus> msgs = itView->second;
+		text += "MsgLdrprepareHotsus: View = " + std::to_string(view) + "; The number of MsgLdrprepareHotsus is: " + std::to_string(msgs.size()) + "\n";
 	}
-	// MsgPreparePtbft
-	for (std::map<View, std::set<MsgPreparePtbft>>::iterator itView = this->preparesPtbft.begin(); itView != this->preparesPtbft.end(); itView++)
+	// MsgPrepareHotsus
+	for (std::map<View, std::set<MsgPrepareHotsus>>::iterator itView = this->preparesHotsus.begin(); itView != this->preparesHotsus.end(); itView++)
 	{
 		View view = itView->first;
-		std::set<MsgPreparePtbft> msgs = itView->second;
-		text += "MsgPreparePtbft: View = " + std::to_string(view) + "; The number of MsgPreparePtbft is: " + std::to_string(msgs.size()) + "\n";
+		std::set<MsgPrepareHotsus> msgs = itView->second;
+		text += "MsgPrepareHotsus: View = " + std::to_string(view) + "; The number of MsgPrepareHotsus is: " + std::to_string(msgs.size()) + "\n";
 	}
-	// MsgPrecommitPtbft
-	for (std::map<View, std::set<MsgPrecommitPtbft>>::iterator itView = this->precommitsPtbft.begin(); itView != this->precommitsPtbft.end(); itView++)
+	// MsgPrecommitHotsus
+	for (std::map<View, std::set<MsgPrecommitHotsus>>::iterator itView = this->precommitsHotsus.begin(); itView != this->precommitsHotsus.end(); itView++)
 	{
 		View view = itView->first;
-		std::set<MsgPrecommitPtbft> msgs = itView->second;
-		text += "MsgPrecommitPtbft: View = " + std::to_string(view) + "; The number of MsgPrecommitPtbft is: " + std::to_string(msgs.size()) + "\n";
+		std::set<MsgPrecommitHotsus> msgs = itView->second;
+		text += "MsgPrecommitHotsus: View = " + std::to_string(view) + "; The number of MsgPrecommitHotsus is: " + std::to_string(msgs.size()) + "\n";
 	}
-	// MsgExnewviewPtbft
-	for (std::map<View, std::set<MsgExnewviewPtbft>>::iterator itView = this->exnewviewsPtbft.begin(); itView != this->exnewviewsPtbft.end(); itView++)
+	// MsgExnewviewHotsus
+	for (std::map<View, std::set<MsgExnewviewHotsus>>::iterator itView = this->exnewviewsHotsus.begin(); itView != this->exnewviewsHotsus.end(); itView++)
 	{
 		View view = itView->first;
-		std::set<MsgExnewviewPtbft> msgs = itView->second;
-		text += "MsgExnewviewPtbft: View = " + std::to_string(view) + "; The number of MsgExnewviewPtbft is: " + std::to_string(msgs.size()) + "\n";
+		std::set<MsgExnewviewHotsus> msgs = itView->second;
+		text += "MsgExnewviewHotsus: View = " + std::to_string(view) + "; The number of MsgExnewviewHotsus is: " + std::to_string(msgs.size()) + "\n";
 	}
-	// MsgExldrpreparePtbft
-	for (std::map<View, std::set<MsgExldrpreparePtbft>>::iterator itView = this->exldrpreparesPtbft.begin(); itView != this->exldrpreparesPtbft.end(); itView++)
+	// MsgExldrprepareHotsus
+	for (std::map<View, std::set<MsgExldrprepareHotsus>>::iterator itView = this->exldrpreparesHotsus.begin(); itView != this->exldrpreparesHotsus.end(); itView++)
 	{
 		View view = itView->first;
-		std::set<MsgExldrpreparePtbft> msgs = itView->second;
-		text += "MsgExldrpreparePtbft: View = " + std::to_string(view) + "; The number of MsgExldrpreparePtbft is: " + std::to_string(msgs.size()) + "\n";
+		std::set<MsgExldrprepareHotsus> msgs = itView->second;
+		text += "MsgExldrprepareHotsus: View = " + std::to_string(view) + "; The number of MsgExldrprepareHotsus is: " + std::to_string(msgs.size()) + "\n";
 	}
-	// MsgExpreparePtbft
-	for (std::map<View, std::set<MsgExpreparePtbft>>::iterator itView = this->expreparesPtbft.begin(); itView != this->expreparesPtbft.end(); itView++)
+	// MsgExprepareHotsus
+	for (std::map<View, std::set<MsgExprepareHotsus>>::iterator itView = this->expreparesHotsus.begin(); itView != this->expreparesHotsus.end(); itView++)
 	{
 		View view = itView->first;
-		std::set<MsgExpreparePtbft> msgs = itView->second;
-		text += "MsgExpreparePtbft: View = " + std::to_string(view) + "; The number of MsgExpreparePtbft is: " + std::to_string(msgs.size()) + "\n";
+		std::set<MsgExprepareHotsus> msgs = itView->second;
+		text += "MsgExprepareHotsus: View = " + std::to_string(view) + "; The number of MsgExprepareHotsus is: " + std::to_string(msgs.size()) + "\n";
 	}
-	// MsgExprecommitPtbft
-	for (std::map<View, std::set<MsgExprecommitPtbft>>::iterator itView = this->exprecommitsPtbft.begin(); itView != this->exprecommitsPtbft.end(); itView++)
+	// MsgExprecommitHotsus
+	for (std::map<View, std::set<MsgExprecommitHotsus>>::iterator itView = this->exprecommitsHotsus.begin(); itView != this->exprecommitsHotsus.end(); itView++)
 	{
 		View view = itView->first;
-		std::set<MsgExprecommitPtbft> msgs = itView->second;
-		text += "MsgExprecommitPtbft: View = " + std::to_string(view) + "; The number of MsgExprecommitPtbft is: " + std::to_string(msgs.size()) + "\n";
+		std::set<MsgExprecommitHotsus> msgs = itView->second;
+		text += "MsgExprecommitHotsus: View = " + std::to_string(view) + "; The number of MsgExprecommitHotsus is: " + std::to_string(msgs.size()) + "\n";
 	}
-	// MsgExcommitPtbft
-	for (std::map<View, std::set<MsgExcommitPtbft>>::iterator itView = this->excommitsPtbft.begin(); itView != this->excommitsPtbft.end(); itView++)
+	// MsgExcommitHotsus
+	for (std::map<View, std::set<MsgExcommitHotsus>>::iterator itView = this->excommitsHotsus.begin(); itView != this->excommitsHotsus.end(); itView++)
 	{
 		View view = itView->first;
-		std::set<MsgExcommitPtbft> msgs = itView->second;
-		text += "MsgExcommitPtbft: View = " + std::to_string(view) + "; The number of MsgExcommitPtbft is: " + std::to_string(msgs.size()) + "\n";
+		std::set<MsgExcommitHotsus> msgs = itView->second;
+		text += "MsgExcommitHotsus: View = " + std::to_string(view) + "; The number of MsgExcommitHotsus is: " + std::to_string(msgs.size()) + "\n";
 	}
 #endif
 

@@ -1,4 +1,4 @@
-#include "Ptbft.h"
+#include "Hotsus.h"
 
 // Local variables
 Time startTime = std::chrono::steady_clock::now();
@@ -7,19 +7,19 @@ Time currentTime;
 std::string statisticsValues;
 std::string statisticsDone;
 Statistics statistics;
-PtbftBasic ptbftBasic;
+HotsusBasic hotsusBasic;
 sgx_enclave_id_t global_eid = 0;
 
 // Opcodes
-const uint8_t MsgNewviewPtbft::opcode;
-const uint8_t MsgLdrpreparePtbft::opcode;
-const uint8_t MsgPreparePtbft::opcode;
-const uint8_t MsgPrecommitPtbft::opcode;
-const uint8_t MsgExnewviewPtbft::opcode;
-const uint8_t MsgExldrpreparePtbft::opcode;
-const uint8_t MsgExpreparePtbft::opcode;
-const uint8_t MsgExprecommitPtbft::opcode;
-const uint8_t MsgExcommitPtbft::opcode;
+const uint8_t MsgNewviewHotsus::opcode;
+const uint8_t MsgLdrprepareHotsus::opcode;
+const uint8_t MsgPrepareHotsus::opcode;
+const uint8_t MsgPrecommitHotsus::opcode;
+const uint8_t MsgExnewviewHotsus::opcode;
+const uint8_t MsgExldrprepareHotsus::opcode;
+const uint8_t MsgExprepareHotsus::opcode;
+const uint8_t MsgExprecommitHotsus::opcode;
+const uint8_t MsgExcommitHotsus::opcode;
 const uint8_t MsgTransaction::opcode;
 const uint8_t MsgReply::opcode;
 const uint8_t MsgStart::opcode;
@@ -199,12 +199,12 @@ void TEE_Print(const char *text)
 }
 
 // Print functions
-std::string Ptbft::printReplicaId()
+std::string Hotsus::printReplicaId()
 {
 	return "[" + std::to_string(this->replicaId) + "-" + std::to_string(this->view) + "]";
 }
 
-void Ptbft::printNowTime(std::string msg)
+void Hotsus::printNowTime(std::string msg)
 {
 	auto now = std::chrono::steady_clock::now();
 	double time = std::chrono::duration_cast<std::chrono::microseconds>(now - startView).count();
@@ -212,7 +212,7 @@ void Ptbft::printNowTime(std::string msg)
 	std::cout << COLOUR_BLUE << this->printReplicaId() << msg << " @ " << etime << COLOUR_NORMAL << std::endl;
 }
 
-void Ptbft::printClientInfo()
+void Hotsus::printClientInfo()
 {
 	for (Clients::iterator it = this->clients.begin(); it != this->clients.end(); it++)
 	{
@@ -234,7 +234,7 @@ void Ptbft::printClientInfo()
 	}
 }
 
-std::string Ptbft::recipients2string(Peers recipients)
+std::string Hotsus::recipients2string(Peers recipients)
 {
 	std::string text = "";
 	for (Peers::iterator it = recipients.begin(); it != recipients.end(); it++)
@@ -246,19 +246,19 @@ std::string Ptbft::recipients2string(Peers recipients)
 }
 
 // Setting functions
-unsigned int Ptbft::getLeaderOf(View view)
+unsigned int Hotsus::getLeaderOf(View view)
 {
 	unsigned int leader = this->view % this->numTrustedReplicas + this->numGeneralReplicas;
 	return leader;
 }
 
-unsigned int Ptbft::getCurrentLeader()
+unsigned int Hotsus::getCurrentLeader()
 {
 	unsigned int leader = this->getLeaderOf(this->view);
 	return leader;
 }
 
-bool Ptbft::amLeaderOf(View view)
+bool Hotsus::amLeaderOf(View view)
 {
 	if (this->replicaId == this->getLeaderOf(view))
 	{
@@ -270,7 +270,7 @@ bool Ptbft::amLeaderOf(View view)
 	}
 }
 
-bool Ptbft::amCurrentLeader()
+bool Hotsus::amCurrentLeader()
 {
 	if (this->replicaId == this->getCurrentLeader())
 	{
@@ -282,7 +282,7 @@ bool Ptbft::amCurrentLeader()
 	}
 }
 
-std::vector<ReplicaID> Ptbft::getGeneralReplicaIds()
+std::vector<ReplicaID> Hotsus::getGeneralReplicaIds()
 {
 	std::vector<ReplicaID> generalNodeIds;
 	for (unsigned int i = 0; i < this->numGeneralReplicas; i++)
@@ -292,7 +292,7 @@ std::vector<ReplicaID> Ptbft::getGeneralReplicaIds()
 	return generalNodeIds;
 }
 
-bool Ptbft::amGeneralReplicaIds()
+bool Hotsus::amGeneralReplicaIds()
 {
 	std::vector<ReplicaID> generalNodeIds = this->getGeneralReplicaIds();
 	for (std::vector<ReplicaID>::iterator itReplica = generalNodeIds.begin(); itReplica != generalNodeIds.end(); itReplica++)
@@ -306,7 +306,7 @@ bool Ptbft::amGeneralReplicaIds()
 	return false;
 }
 
-Peers Ptbft::removeFromPeers(ReplicaID replicaId)
+Peers Hotsus::removeFromPeers(ReplicaID replicaId)
 {
 	Peers peers;
 	for (Peers::iterator itPeers = this->peers.begin(); itPeers != this->peers.end(); itPeers++)
@@ -320,7 +320,7 @@ Peers Ptbft::removeFromPeers(ReplicaID replicaId)
 	return peers;
 }
 
-Peers Ptbft::removeFromPeers(std::vector<ReplicaID> generalNodeIds)
+Peers Hotsus::removeFromPeers(std::vector<ReplicaID> generalNodeIds)
 {
 	Peers peers;
 	for (Peers::iterator itPeers = this->peers.begin(); itPeers != this->peers.end(); itPeers++)
@@ -343,7 +343,7 @@ Peers Ptbft::removeFromPeers(std::vector<ReplicaID> generalNodeIds)
 	return peers;
 }
 
-Peers Ptbft::keepFromPeers(ReplicaID replicaId)
+Peers Hotsus::keepFromPeers(ReplicaID replicaId)
 {
 	Peers peers;
 	for (Peers::iterator itPeers = this->peers.begin(); itPeers != this->peers.end(); itPeers++)
@@ -357,7 +357,7 @@ Peers Ptbft::keepFromPeers(ReplicaID replicaId)
 	return peers;
 }
 
-std::vector<salticidae::PeerId> Ptbft::getPeerIds(Peers recipients)
+std::vector<salticidae::PeerId> Hotsus::getPeerIds(Peers recipients)
 {
 	std::vector<salticidae::PeerId> returnPeerId;
 	for (Peers::iterator it = recipients.begin(); it != recipients.end(); it++)
@@ -368,7 +368,7 @@ std::vector<salticidae::PeerId> Ptbft::getPeerIds(Peers recipients)
 	return returnPeerId;
 }
 
-void Ptbft::setTimer()
+void Hotsus::setTimer()
 {
 	this->timer.del();
 	this->timer.add(this->leaderChangeTime);
@@ -376,7 +376,7 @@ void Ptbft::setTimer()
 }
 
 // Reply to clients
-void Ptbft::replyTransactions(Transaction *transactions)
+void Hotsus::replyTransactions(Transaction *transactions)
 {
 	for (int i = 0; i < MAX_NUM_TRANSACTIONS; i++)
 	{
@@ -405,7 +405,7 @@ void Ptbft::replyTransactions(Transaction *transactions)
 	}
 }
 
-void Ptbft::replyHash(Hash hash)
+void Hotsus::replyHash(Hash hash)
 {
 	std::map<View, Block>::iterator it = this->blocks.find(this->view);
 	if (it != this->blocks.end())
@@ -441,7 +441,7 @@ void Ptbft::replyHash(Hash hash)
 }
 
 // Call TEE functions
-bool Ptbft::verifyJustificationPtbft(Justification justification)
+bool Hotsus::verifyJustificationHotsus(Justification justification)
 {
 	bool b;
 	if (!this->amGeneralReplicaIds())
@@ -450,16 +450,16 @@ bool Ptbft::verifyJustificationPtbft(Justification justification)
 		setJustification(justification, &justification_t);
 		sgx_status_t extra_t;
 		sgx_status_t status_t;
-		status_t = TEE_verifyJustificationPtbft(global_eid, &extra_t, &justification_t, &b);
+		status_t = TEE_verifyJustificationHotsus(global_eid, &extra_t, &justification_t, &b);
 	}
 	else
 	{
-		b = ptbftBasic.verifyJustification(this->nodes, justification);
+		b = hotsusBasic.verifyJustification(this->nodes, justification);
 	}
 	return b;
 }
 
-bool Ptbft::verifyProposalPtbft(Proposal<Accumulator> proposal, Signs signs)
+bool Hotsus::verifyProposalHotsus(Proposal<Accumulator> proposal, Signs signs)
 {
 	bool b;
 	if (!this->amGeneralReplicaIds())
@@ -470,16 +470,16 @@ bool Ptbft::verifyProposalPtbft(Proposal<Accumulator> proposal, Signs signs)
 		setSigns(signs, &signs_t);
 		sgx_status_t extra_t;
 		sgx_status_t status_t;
-		status_t = TEE_verifyProposalPtbft(global_eid, &extra_t, &proposal_t, &signs_t, &b);
+		status_t = TEE_verifyProposalHotsus(global_eid, &extra_t, &proposal_t, &signs_t, &b);
 	}
 	else
 	{
-		b = ptbftBasic.verifyProposal(this->nodes, proposal, signs);
+		b = hotsusBasic.verifyProposal(this->nodes, proposal, signs);
 	}
 	return b;
 }
 
-bool Ptbft::verifyExproposalPtbft(Proposal<Justification> exproposal, Signs signs)
+bool Hotsus::verifyExproposalHotsus(Proposal<Justification> exproposal, Signs signs)
 {
 	bool b;
 	if (!this->amGeneralReplicaIds())
@@ -490,16 +490,16 @@ bool Ptbft::verifyExproposalPtbft(Proposal<Justification> exproposal, Signs sign
 		setSigns(signs, &signs_t);
 		sgx_status_t extra_t;
 		sgx_status_t status_t;
-		status_t = TEE_verifyExproposalPtbft(global_eid, &extra_t, &exproposal_t, &signs_t, &b);
+		status_t = TEE_verifyExproposalHotsus(global_eid, &extra_t, &exproposal_t, &signs_t, &b);
 	}
 	else
 	{
-		b = ptbftBasic.verifyExproposal(this->nodes, exproposal, signs);
+		b = hotsusBasic.verifyExproposal(this->nodes, exproposal, signs);
 	}
 	return b;
 }
 
-Justification Ptbft::initializeMsgNewviewPtbft()
+Justification Hotsus::initializeMsgNewviewHotsus()
 {
 	Justification justification_MsgNewview = Justification();
 	if (!this->amGeneralReplicaIds())
@@ -507,41 +507,41 @@ Justification Ptbft::initializeMsgNewviewPtbft()
 		Justification_t justification_MsgNewview_t;
 		sgx_status_t extra_t;
 		sgx_status_t status_t;
-		status_t = TEE_initializeMsgNewviewPtbft(global_eid, &extra_t, &justification_MsgNewview_t);
+		status_t = TEE_initializeMsgNewviewHotsus(global_eid, &extra_t, &justification_MsgNewview_t);
 		justification_MsgNewview = getJustification(&justification_MsgNewview_t);
 	}
 	else
 	{
-		justification_MsgNewview = ptbftBasic.initializeMsgNewview();
+		justification_MsgNewview = hotsusBasic.initializeMsgNewview();
 	}
 	return justification_MsgNewview;
 }
 
-Accumulator Ptbft::initializeAccumulatorPtbft(Justification justifications_MsgNewview[MAX_NUM_SIGNATURES])
+Accumulator Hotsus::initializeAccumulatorHotsus(Justification justifications_MsgNewview[MAX_NUM_SIGNATURES])
 {
 	Justifications_t justifications_MsgNewview_t;
 	setJustifications(justifications_MsgNewview, &justifications_MsgNewview_t);
 	Accumulator_t accumulator_MsgLdrprepare_t;
 	sgx_status_t extra_t;
 	sgx_status_t status_t;
-	status_t = TEE_initializeAccumulatorPtbft(global_eid, &extra_t, &justifications_MsgNewview_t, &accumulator_MsgLdrprepare_t);
+	status_t = TEE_initializeAccumulatorHotsus(global_eid, &extra_t, &justifications_MsgNewview_t, &accumulator_MsgLdrprepare_t);
 	Accumulator accumulator_MsgLdrprepare = getAccumulator(&accumulator_MsgLdrprepare_t);
 	return accumulator_MsgLdrprepare;
 }
 
-Signs Ptbft::initializeMsgLdrpreparePtbft(Proposal<Accumulator> proposal_MsgLdrprepare)
+Signs Hotsus::initializeMsgLdrprepareHotsus(Proposal<Accumulator> proposal_MsgLdrprepare)
 {
 	Proposal_t proposal_MsgLdrprepare_t;
 	setProposal(proposal_MsgLdrprepare, &proposal_MsgLdrprepare_t);
 	Signs_t signs_MsgLdrprepare_t;
 	sgx_status_t extra_t;
 	sgx_status_t status_t;
-	status_t = TEE_initializeMsgLdrpreparePtbft(global_eid, &extra_t, &proposal_MsgLdrprepare_t, &signs_MsgLdrprepare_t);
+	status_t = TEE_initializeMsgLdrprepareHotsus(global_eid, &extra_t, &proposal_MsgLdrprepare_t, &signs_MsgLdrprepare_t);
 	Signs signs_MsgLdrprepare = getSigns(&signs_MsgLdrprepare_t);
 	return signs_MsgLdrprepare;
 }
 
-Justification Ptbft::respondMsgLdrprepareProposalPtbft(Hash proposeHash, Accumulator accumulator_MsgLdrprepare)
+Justification Hotsus::respondMsgLdrprepareProposalHotsus(Hash proposeHash, Accumulator accumulator_MsgLdrprepare)
 {
 	Justification justification_MsgPrepare = Justification();
 	if (!this->amGeneralReplicaIds())
@@ -553,34 +553,34 @@ Justification Ptbft::respondMsgLdrprepareProposalPtbft(Hash proposeHash, Accumul
 		Justification_t justification_MsgPrepare_t;
 		sgx_status_t extra_t;
 		sgx_status_t status_t;
-		status_t = TEE_respondProposalPtbft(global_eid, &extra_t, &proposeHash_t, &accumulator_MsgLdrprepare_t, &justification_MsgPrepare_t);
+		status_t = TEE_respondProposalHotsus(global_eid, &extra_t, &proposeHash_t, &accumulator_MsgLdrprepare_t, &justification_MsgPrepare_t);
 		justification_MsgPrepare = getJustification(&justification_MsgPrepare_t);
 	}
 	else
 	{
-		justification_MsgPrepare = ptbftBasic.respondProposal(this->nodes, proposeHash, accumulator_MsgLdrprepare);
+		justification_MsgPrepare = hotsusBasic.respondProposal(this->nodes, proposeHash, accumulator_MsgLdrprepare);
 	}
 	return justification_MsgPrepare;
 }
 
-Justification Ptbft::saveMsgPreparePtbft(Justification justification_MsgPrepare)
+Justification Hotsus::saveMsgPrepareHotsus(Justification justification_MsgPrepare)
 {
 	Justification_t justification_MsgPrepare_t;
 	setJustification(justification_MsgPrepare, &justification_MsgPrepare_t);
 	Justification_t justification_MsgPrecommit_t;
 	sgx_status_t extra;
 	sgx_status_t status_t;
-	status_t = TEE_saveMsgPreparePtbft(global_eid, &extra, &justification_MsgPrepare_t, &justification_MsgPrecommit_t);
+	status_t = TEE_saveMsgPrepareHotsus(global_eid, &extra, &justification_MsgPrepare_t, &justification_MsgPrecommit_t);
 	Justification justification_MsgPrecommit = getJustification(&justification_MsgPrecommit_t);
 	return justification_MsgPrecommit;
 }
 
-void Ptbft::skipRoundPtbft()
+void Hotsus::skipRoundHotsus()
 {
-	ptbftBasic.skipRound();
+	hotsusBasic.skipRound();
 }
 
-Justification Ptbft::initializeMsgExnewviewPtbft()
+Justification Hotsus::initializeMsgExnewviewHotsus()
 {
 	Justification justification_MsgExnewview = Justification();
 	if (!this->amGeneralReplicaIds())
@@ -588,17 +588,17 @@ Justification Ptbft::initializeMsgExnewviewPtbft()
 		Justification_t justification_MsgExnewview_t;
 		sgx_status_t extra_t;
 		sgx_status_t status_t;
-		status_t = TEE_initializeMsgExnewviewPtbft(global_eid, &extra_t, &justification_MsgExnewview_t);
+		status_t = TEE_initializeMsgExnewviewHotsus(global_eid, &extra_t, &justification_MsgExnewview_t);
 		justification_MsgExnewview = getJustification(&justification_MsgExnewview_t);
 	}
 	else
 	{
-		justification_MsgExnewview = ptbftBasic.initializeMsgExnewview();
+		justification_MsgExnewview = hotsusBasic.initializeMsgExnewview();
 	}
 	return justification_MsgExnewview;
 }
 
-Justification Ptbft::respondMsgExnewviewProposalPtbft(Hash proposeHash, Justification justification_MsgExnewview)
+Justification Hotsus::respondMsgExnewviewProposalHotsus(Hash proposeHash, Justification justification_MsgExnewview)
 {
 	Hash_t proposeHash_t;
 	setHash(proposeHash, &proposeHash_t);
@@ -607,24 +607,24 @@ Justification Ptbft::respondMsgExnewviewProposalPtbft(Hash proposeHash, Justific
 	Justification_t justification_MsgExprepare_t;
 	sgx_status_t extra_t;
 	sgx_status_t status_t;
-	status_t = TEE_respondExproposalPtbft(global_eid, &extra_t, &proposeHash_t, &justification_MsgExnewview_t, &justification_MsgExprepare_t);
+	status_t = TEE_respondExproposalHotsus(global_eid, &extra_t, &proposeHash_t, &justification_MsgExnewview_t, &justification_MsgExprepare_t);
 	Justification justification_MsgExprepare = getJustification(&justification_MsgExprepare_t);
 	return justification_MsgExprepare;
 }
 
-Signs Ptbft::initializeMsgExldrpreparePtbft(Proposal<Justification> proposal_MsgExldrprepare)
+Signs Hotsus::initializeMsgExldrprepareHotsus(Proposal<Justification> proposal_MsgExldrprepare)
 {
 	Exproposal_t proposal_MsgExldrprepare_t;
 	setExproposal(proposal_MsgExldrprepare, &proposal_MsgExldrprepare_t);
 	Signs_t signs_MsgExldrprepare_t;
 	sgx_status_t extra_t;
 	sgx_status_t status_t;
-	status_t = TEE_initializeMsgExldrpreparePtbft(global_eid, &extra_t, &proposal_MsgExldrprepare_t, &signs_MsgExldrprepare_t);
+	status_t = TEE_initializeMsgExldrprepareHotsus(global_eid, &extra_t, &proposal_MsgExldrprepare_t, &signs_MsgExldrprepare_t);
 	Signs signs_MsgExldrprepare = getSigns(&signs_MsgExldrprepare_t);
 	return signs_MsgExldrprepare;
 }
 
-Justification Ptbft::respondMsgExldrprepareProposalPtbft(Hash proposeHash, Justification justification_MsgExnewview)
+Justification Hotsus::respondMsgExldrprepareProposalHotsus(Hash proposeHash, Justification justification_MsgExnewview)
 {
 	Justification justification_MsgExprepare = Justification();
 	if (!this->amGeneralReplicaIds())
@@ -636,17 +636,17 @@ Justification Ptbft::respondMsgExldrprepareProposalPtbft(Hash proposeHash, Justi
 		Justification_t justification_MsgExprepare_t;
 		sgx_status_t extra_t;
 		sgx_status_t status_t;
-		status_t = TEE_respondExproposalPtbft(global_eid, &extra_t, &proposeHash_t, &justification_MsgExnewview_t, &justification_MsgExprepare_t);
+		status_t = TEE_respondExproposalHotsus(global_eid, &extra_t, &proposeHash_t, &justification_MsgExnewview_t, &justification_MsgExprepare_t);
 		justification_MsgExprepare = getJustification(&justification_MsgExprepare_t);
 	}
 	else
 	{
-		justification_MsgExprepare = ptbftBasic.respondExproposal(this->nodes, proposeHash, justification_MsgExnewview);
+		justification_MsgExprepare = hotsusBasic.respondExproposal(this->nodes, proposeHash, justification_MsgExnewview);
 	}
 	return justification_MsgExprepare;
 }
 
-Justification Ptbft::saveMsgExpreparePtbft(Justification justification_MsgExprepare)
+Justification Hotsus::saveMsgExprepareHotsus(Justification justification_MsgExprepare)
 {
 	Justification justification_MsgExprecommit = Justification();
 	if (!this->amGeneralReplicaIds())
@@ -656,17 +656,17 @@ Justification Ptbft::saveMsgExpreparePtbft(Justification justification_MsgExprep
 		Justification_t justification_MsgExprecommit_t;
 		sgx_status_t extra_t;
 		sgx_status_t status_t;
-		status_t = TEE_saveMsgExpreparePtbft(global_eid, &extra_t, &justification_MsgExprepare_t, &justification_MsgExprecommit_t);
+		status_t = TEE_saveMsgExprepareHotsus(global_eid, &extra_t, &justification_MsgExprepare_t, &justification_MsgExprecommit_t);
 		justification_MsgExprecommit = getJustification(&justification_MsgExprecommit_t);
 	}
 	else
 	{
-		Justification justification_MsgExprecommit = ptbftBasic.saveMsgExprepare(this->nodes, justification_MsgExprepare);
+		Justification justification_MsgExprecommit = hotsusBasic.saveMsgExprepare(this->nodes, justification_MsgExprepare);
 	}
 	return justification_MsgExprecommit;
 }
 
-Justification Ptbft::lockMsgExprecommitPtbft(Justification justification_MsgExprecommit)
+Justification Hotsus::lockMsgExprecommitHotsus(Justification justification_MsgExprecommit)
 {
 	Justification justification_MsgExcommit = Justification();
 	if (!this->amGeneralReplicaIds())
@@ -676,23 +676,23 @@ Justification Ptbft::lockMsgExprecommitPtbft(Justification justification_MsgExpr
 		Justification_t justification_MsgExcommit_t;
 		sgx_status_t extra_t;
 		sgx_status_t status_t;
-		status_t = TEE_lockMsgExprecommitPtbft(global_eid, &extra_t, &justification_MsgExprecommit_t, &justification_MsgExcommit_t);
+		status_t = TEE_lockMsgExprecommitHotsus(global_eid, &extra_t, &justification_MsgExprecommit_t, &justification_MsgExcommit_t);
 		justification_MsgExcommit = getJustification(&justification_MsgExcommit_t);
 	}
 	else
 	{
-		justification_MsgExcommit = ptbftBasic.lockMsgExprecommit(this->nodes, justification_MsgExprecommit);
+		justification_MsgExcommit = hotsusBasic.lockMsgExprecommit(this->nodes, justification_MsgExprecommit);
 	}
 	return justification_MsgExcommit;
 }
 
-Accumulator Ptbft::initializeAccumulator(std::set<MsgNewviewPtbft> msgNewviews)
+Accumulator Hotsus::initializeAccumulator(std::set<MsgNewviewHotsus> msgNewviews)
 {
 	Justification justifications_MsgNewview[MAX_NUM_SIGNATURES];
 	unsigned int i = 0;
-	for (std::set<MsgNewviewPtbft>::iterator it = msgNewviews.begin(); it != msgNewviews.end() && i < MAX_NUM_SIGNATURES; it++, i++)
+	for (std::set<MsgNewviewHotsus>::iterator it = msgNewviews.begin(); it != msgNewviews.end() && i < MAX_NUM_SIGNATURES; it++, i++)
 	{
-		MsgNewviewPtbft msgNewview = *it;
+		MsgNewviewHotsus msgNewview = *it;
 		RoundData roundData_MsgNewview = msgNewview.roundData;
 		Signs signs_MsgNewview = msgNewview.signs;
 		Justification justification_MsgNewview = Justification(roundData_MsgNewview, signs_MsgNewview);
@@ -708,12 +708,12 @@ Accumulator Ptbft::initializeAccumulator(std::set<MsgNewviewPtbft> msgNewviews)
 	}
 
 	Accumulator accumulator_MsgLdrprepare;
-	accumulator_MsgLdrprepare = this->initializeAccumulatorPtbft(justifications_MsgNewview);
+	accumulator_MsgLdrprepare = this->initializeAccumulatorHotsus(justifications_MsgNewview);
 	return accumulator_MsgLdrprepare;
 }
 
 // Receive messages
-void Ptbft::receiveMsgStartPtbft(MsgStart msgStart, const ClientNet::conn_t &conn)
+void Hotsus::receiveMsgStartHotsus(MsgStart msgStart, const ClientNet::conn_t &conn)
 {
 	ClientID clientId = msgStart.clientId;
 	if (this->clients.find(clientId) == this->clients.end())
@@ -727,58 +727,58 @@ void Ptbft::receiveMsgStartPtbft(MsgStart msgStart, const ClientNet::conn_t &con
 	}
 }
 
-void Ptbft::receiveMsgTransactionPtbft(MsgTransaction msgTransaction, const ClientNet::conn_t &conn)
+void Hotsus::receiveMsgTransactionHotsus(MsgTransaction msgTransaction, const ClientNet::conn_t &conn)
 {
 	this->handleMsgTransaction(msgTransaction);
 }
 
-void Ptbft::receiveMsgNewviewPtbft(MsgNewviewPtbft msgNewview, const PeerNet::conn_t &conn)
+void Hotsus::receiveMsgNewviewHotsus(MsgNewviewHotsus msgNewview, const PeerNet::conn_t &conn)
 {
-	this->handleMsgNewviewPtbft(msgNewview);
+	this->handleMsgNewviewHotsus(msgNewview);
 }
 
-void Ptbft::receiveMsgLdrpreparePtbft(MsgLdrpreparePtbft msgLdrprepare, const PeerNet::conn_t &conn)
+void Hotsus::receiveMsgLdrprepareHotsus(MsgLdrprepareHotsus msgLdrprepare, const PeerNet::conn_t &conn)
 {
-	this->handleMsgLdrpreparePtbft(msgLdrprepare);
+	this->handleMsgLdrprepareHotsus(msgLdrprepare);
 }
 
-void Ptbft::receiveMsgPreparePtbft(MsgPreparePtbft msgPrepare, const PeerNet::conn_t &conn)
+void Hotsus::receiveMsgPrepareHotsus(MsgPrepareHotsus msgPrepare, const PeerNet::conn_t &conn)
 {
-	this->handleMsgPreparePtbft(msgPrepare);
+	this->handleMsgPrepareHotsus(msgPrepare);
 }
 
-void Ptbft::receiveMsgPrecommitPtbft(MsgPrecommitPtbft msgPrecommit, const PeerNet::conn_t &conn)
+void Hotsus::receiveMsgPrecommitHotsus(MsgPrecommitHotsus msgPrecommit, const PeerNet::conn_t &conn)
 {
-	this->handleMsgPrecommitPtbft(msgPrecommit);
+	this->handleMsgPrecommitHotsus(msgPrecommit);
 }
 
-void Ptbft::receiveMsgExnewviewPtbft(MsgExnewviewPtbft msgExnewview, const PeerNet::conn_t &conn)
+void Hotsus::receiveMsgExnewviewHotsus(MsgExnewviewHotsus msgExnewview, const PeerNet::conn_t &conn)
 {
-	this->handleMsgExnewviewPtbft(msgExnewview);
+	this->handleMsgExnewviewHotsus(msgExnewview);
 }
 
-void Ptbft::receiveMsgExldrpreparePtbft(MsgExldrpreparePtbft msgExldrprepare, const PeerNet::conn_t &conn)
+void Hotsus::receiveMsgExldrprepareHotsus(MsgExldrprepareHotsus msgExldrprepare, const PeerNet::conn_t &conn)
 {
-	this->handleMsgExldrpreparePtbft(msgExldrprepare);
+	this->handleMsgExldrprepareHotsus(msgExldrprepare);
 }
 
-void Ptbft::receiveMsgExpreparePtbft(MsgExpreparePtbft msgExprepare, const PeerNet::conn_t &conn)
+void Hotsus::receiveMsgExprepareHotsus(MsgExprepareHotsus msgExprepare, const PeerNet::conn_t &conn)
 {
-	this->handleMsgExpreparePtbft(msgExprepare);
+	this->handleMsgExprepareHotsus(msgExprepare);
 }
 
-void Ptbft::receiveMsgExprecommitPtbft(MsgExprecommitPtbft msgExprecommit, const PeerNet::conn_t &conn)
+void Hotsus::receiveMsgExprecommitHotsus(MsgExprecommitHotsus msgExprecommit, const PeerNet::conn_t &conn)
 {
-	this->handleMsgExprecommitPtbft(msgExprecommit);
+	this->handleMsgExprecommitHotsus(msgExprecommit);
 }
 
-void Ptbft::receiveMsgExcommitPtbft(MsgExcommitPtbft msgExcommit, const PeerNet::conn_t &conn)
+void Hotsus::receiveMsgExcommitHotsus(MsgExcommitHotsus msgExcommit, const PeerNet::conn_t &conn)
 {
-	this->handleMsgExcommitPtbft(msgExcommit);
+	this->handleMsgExcommitHotsus(msgExcommit);
 }
 
 // Send messages
-void Ptbft::sendMsgNewviewPtbft(MsgNewviewPtbft msgNewview, Peers recipients)
+void Hotsus::sendMsgNewviewHotsus(MsgNewviewHotsus msgNewview, Peers recipients)
 {
 	if (DEBUG_HELP)
 	{
@@ -787,11 +787,11 @@ void Ptbft::sendMsgNewviewPtbft(MsgNewviewPtbft msgNewview, Peers recipients)
 	this->peerNet.multicast_msg(msgNewview, getPeerIds(recipients));
 	if (DEBUG_TIME)
 	{
-		this->printNowTime("Sending MsgNewviewPtbft");
+		this->printNowTime("Sending MsgNewviewHotsus");
 	}
 }
 
-void Ptbft::sendMsgLdrpreparePtbft(MsgLdrpreparePtbft msgLdrprepare, Peers recipients)
+void Hotsus::sendMsgLdrprepareHotsus(MsgLdrprepareHotsus msgLdrprepare, Peers recipients)
 {
 	if (DEBUG_HELP)
 	{
@@ -800,11 +800,11 @@ void Ptbft::sendMsgLdrpreparePtbft(MsgLdrpreparePtbft msgLdrprepare, Peers recip
 	this->peerNet.multicast_msg(msgLdrprepare, getPeerIds(recipients));
 	if (DEBUG_TIME)
 	{
-		this->printNowTime("Sending MsgLdrpreparePtbft");
+		this->printNowTime("Sending MsgLdrprepareHotsus");
 	}
 }
 
-void Ptbft::sendMsgPreparePtbft(MsgPreparePtbft msgPrepare, Peers recipients)
+void Hotsus::sendMsgPrepareHotsus(MsgPrepareHotsus msgPrepare, Peers recipients)
 {
 	if (DEBUG_HELP)
 	{
@@ -813,11 +813,11 @@ void Ptbft::sendMsgPreparePtbft(MsgPreparePtbft msgPrepare, Peers recipients)
 	this->peerNet.multicast_msg(msgPrepare, getPeerIds(recipients));
 	if (DEBUG_TIME)
 	{
-		this->printNowTime("Sending MsgPreparePtbft");
+		this->printNowTime("Sending MsgPrepareHotsus");
 	}
 }
 
-void Ptbft::sendMsgPrecommitPtbft(MsgPrecommitPtbft msgPrecommit, Peers recipients)
+void Hotsus::sendMsgPrecommitHotsus(MsgPrecommitHotsus msgPrecommit, Peers recipients)
 {
 	if (DEBUG_HELP)
 	{
@@ -826,11 +826,11 @@ void Ptbft::sendMsgPrecommitPtbft(MsgPrecommitPtbft msgPrecommit, Peers recipien
 	this->peerNet.multicast_msg(msgPrecommit, getPeerIds(recipients));
 	if (DEBUG_TIME)
 	{
-		this->printNowTime("Sending MsgPrecommitPtbft");
+		this->printNowTime("Sending MsgPrecommitHotsus");
 	}
 }
 
-void Ptbft::sendMsgExnewviewPtbft(MsgExnewviewPtbft msgExnewview, Peers recipients)
+void Hotsus::sendMsgExnewviewHotsus(MsgExnewviewHotsus msgExnewview, Peers recipients)
 {
 	if (DEBUG_HELP)
 	{
@@ -839,11 +839,11 @@ void Ptbft::sendMsgExnewviewPtbft(MsgExnewviewPtbft msgExnewview, Peers recipien
 	this->peerNet.multicast_msg(msgExnewview, getPeerIds(recipients));
 	if (DEBUG_TIME)
 	{
-		this->printNowTime("Sending MsgExnewviewPtbft");
+		this->printNowTime("Sending MsgExnewviewHotsus");
 	}
 }
 
-void Ptbft::sendMsgExldrpreparePtbft(MsgExldrpreparePtbft msgExldrprepare, Peers recipients)
+void Hotsus::sendMsgExldrprepareHotsus(MsgExldrprepareHotsus msgExldrprepare, Peers recipients)
 {
 	if (DEBUG_HELP)
 	{
@@ -852,11 +852,11 @@ void Ptbft::sendMsgExldrpreparePtbft(MsgExldrpreparePtbft msgExldrprepare, Peers
 	this->peerNet.multicast_msg(msgExldrprepare, getPeerIds(recipients));
 	if (DEBUG_TIME)
 	{
-		this->printNowTime("Sending MsgExldrpreparePtbft");
+		this->printNowTime("Sending MsgExldrprepareHotsus");
 	}
 }
 
-void Ptbft::sendMsgExpreparePtbft(MsgExpreparePtbft msgExprepare, Peers recipients)
+void Hotsus::sendMsgExprepareHotsus(MsgExprepareHotsus msgExprepare, Peers recipients)
 {
 	if (DEBUG_HELP)
 	{
@@ -865,11 +865,11 @@ void Ptbft::sendMsgExpreparePtbft(MsgExpreparePtbft msgExprepare, Peers recipien
 	this->peerNet.multicast_msg(msgExprepare, getPeerIds(recipients));
 	if (DEBUG_TIME)
 	{
-		this->printNowTime("Sending MsgExpreparePtbft");
+		this->printNowTime("Sending MsgExprepareHotsus");
 	}
 }
 
-void Ptbft::sendMsgExprecommitPtbft(MsgExprecommitPtbft msgExprecommit, Peers recipients)
+void Hotsus::sendMsgExprecommitHotsus(MsgExprecommitHotsus msgExprecommit, Peers recipients)
 {
 	if (DEBUG_HELP)
 	{
@@ -878,11 +878,11 @@ void Ptbft::sendMsgExprecommitPtbft(MsgExprecommitPtbft msgExprecommit, Peers re
 	this->peerNet.multicast_msg(msgExprecommit, getPeerIds(recipients));
 	if (DEBUG_TIME)
 	{
-		this->printNowTime("Sending MsgExprecommitPtbft");
+		this->printNowTime("Sending MsgExprecommitHotsus");
 	}
 }
 
-void Ptbft::sendMsgExcommitPtbft(MsgExcommitPtbft msgExcommit, Peers recipients)
+void Hotsus::sendMsgExcommitHotsus(MsgExcommitHotsus msgExcommit, Peers recipients)
 {
 	if (DEBUG_HELP)
 	{
@@ -891,12 +891,12 @@ void Ptbft::sendMsgExcommitPtbft(MsgExcommitPtbft msgExcommit, Peers recipients)
 	this->peerNet.multicast_msg(msgExcommit, getPeerIds(recipients));
 	if (DEBUG_TIME)
 	{
-		this->printNowTime("Sending MsgExcommitPtbft");
+		this->printNowTime("Sending MsgExcommitHotsus");
 	}
 }
 
 // Handle messages
-void Ptbft::handleMsgTransaction(MsgTransaction msgTransaction)
+void Hotsus::handleMsgTransaction(MsgTransaction msgTransaction)
 {
 	std::lock_guard<std::mutex> guard(mutexTransaction);
 	auto start = std::chrono::steady_clock::now();
@@ -953,7 +953,7 @@ void Ptbft::handleMsgTransaction(MsgTransaction msgTransaction)
 	statistics.addHandleTime(time);
 }
 
-void Ptbft::handleEarlierMessagesPtbft()
+void Hotsus::handleEarlierMessagesHotsus()
 {
 	// Check if there are enough messages to start the next view
 	if (this->amCurrentLeader())
@@ -962,10 +962,10 @@ void Ptbft::handleEarlierMessagesPtbft()
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Leader handling earlier messages" << COLOUR_NORMAL << std::endl;
 		}
-		std::set<MsgNewviewPtbft> msgNewviews = this->log.getMsgNewviewPtbft(this->view, this->generalQuorumSize);
+		std::set<MsgNewviewHotsus> msgNewviews = this->log.getMsgNewviewHotsus(this->view, this->generalQuorumSize);
 		if (msgNewviews.size() == this->generalQuorumSize)
 		{
-			this->initiateMsgNewviewPtbft();
+			this->initiateMsgNewviewHotsus();
 		}
 	}
 	else
@@ -975,7 +975,7 @@ void Ptbft::handleEarlierMessagesPtbft()
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Replica handling earlier messages" << COLOUR_NORMAL << std::endl;
 		}
 		// Check if the view has already been locked
-		Signs signs_MsgPrecommit = this->log.getMsgPrecommitPtbft(this->view, this->trustedQuorumSize);
+		Signs signs_MsgPrecommit = this->log.getMsgPrecommitHotsus(this->view, this->trustedQuorumSize);
 		if (signs_MsgPrecommit.getSize() == this->trustedQuorumSize)
 		{
 			if (DEBUG_HELP)
@@ -984,38 +984,38 @@ void Ptbft::handleEarlierMessagesPtbft()
 			}
 
 			// Skip the prepare phase and pre-commit phase
-			this->initializeMsgNewviewPtbft();
-			this->initializeMsgNewviewPtbft();
+			this->initializeMsgNewviewHotsus();
+			this->initializeMsgNewviewHotsus();
 
 			// Execute the block
-			Justification justification_MsgPrecommit = this->log.firstMsgPrecommitPtbft(this->view);
+			Justification justification_MsgPrecommit = this->log.firstMsgPrecommitHotsus(this->view);
 			RoundData roundData_MsgPrecommit = justification_MsgPrecommit.getRoundData();
 			Signs signs_MsgPrecommit = justification_MsgPrecommit.getSigns();
-			if (signs_MsgPrecommit.getSize() == this->trustedQuorumSize && this->verifyJustificationPtbft(justification_MsgPrecommit))
+			if (signs_MsgPrecommit.getSize() == this->trustedQuorumSize && this->verifyJustificationHotsus(justification_MsgPrecommit))
 			{
-				this->executeBlockPtbft(roundData_MsgPrecommit);
+				this->executeBlockHotsus(roundData_MsgPrecommit);
 			}
 		}
 		else
 		{
-			Signs signs_MsgPrepare = this->log.getMsgPreparePtbft(this->view, this->trustedQuorumSize);
+			Signs signs_MsgPrepare = this->log.getMsgPrepareHotsus(this->view, this->trustedQuorumSize);
 			if (signs_MsgPrepare.getSize() == this->trustedQuorumSize)
 			{
 				if (DEBUG_HELP)
 				{
 					std::cout << COLOUR_BLUE << this->printReplicaId() << "Catching up using MsgPrepare certificate" << COLOUR_NORMAL << std::endl;
 				}
-				Justification justification_MsgPrepare = this->log.firstMsgPreparePtbft(this->view);
+				Justification justification_MsgPrepare = this->log.firstMsgPrepareHotsus(this->view);
 
 				// Skip the prepare phase
-				this->initializeMsgNewviewPtbft();
+				this->initializeMsgNewviewHotsus();
 
 				// Store [justification_MsgPrepare]
-				this->respondMsgPreparePtbft(justification_MsgPrepare);
+				this->respondMsgPrepareHotsus(justification_MsgPrepare);
 			}
 			else
 			{
-				MsgLdrpreparePtbft msgLdrprepare = this->log.firstMsgLdrpreparePtbft(this->view);
+				MsgLdrprepareHotsus msgLdrprepare = this->log.firstMsgLdrprepareHotsus(this->view);
 
 				// Check if the proposal has been stored
 				if (msgLdrprepare.signs.getSize() == 1)
@@ -1027,14 +1027,14 @@ void Ptbft::handleEarlierMessagesPtbft()
 					Proposal<Accumulator> proposal = msgLdrprepare.proposal;
 					Accumulator accumulator_MsgLdrprepare = proposal.getCertification();
 					Block block = proposal.getBlock();
-					this->respondMsgLdrpreparePtbft(accumulator_MsgLdrprepare, block);
+					this->respondMsgLdrprepareHotsus(accumulator_MsgLdrprepare, block);
 				}
 			}
 		}
 	}
 }
 
-void Ptbft::handleMsgNewviewPtbft(MsgNewviewPtbft msgNewview)
+void Hotsus::handleMsgNewviewHotsus(MsgNewviewHotsus msgNewview)
 {
 	auto start = std::chrono::steady_clock::now();
 
@@ -1051,9 +1051,9 @@ void Ptbft::handleMsgNewviewPtbft(MsgNewviewPtbft msgNewview)
 	{
 		if (proposeView_MsgNewview == this->view)
 		{
-			if (this->log.storeMsgNewviewPtbft(msgNewview) == this->generalQuorumSize)
+			if (this->log.storeMsgNewviewHotsus(msgNewview) == this->generalQuorumSize)
 			{
-				this->initiateMsgNewviewPtbft();
+				this->initiateMsgNewviewHotsus();
 			}
 		}
 		else
@@ -1062,7 +1062,7 @@ void Ptbft::handleMsgNewviewPtbft(MsgNewviewPtbft msgNewview)
 			{
 				std::cout << COLOUR_BLUE << this->printReplicaId() << "Storing MsgNewview: " << msgNewview.toPrint() << COLOUR_NORMAL << std::endl;
 			}
-			this->log.storeMsgNewviewPtbft(msgNewview);
+			this->log.storeMsgNewviewHotsus(msgNewview);
 		}
 	}
 	else
@@ -1078,7 +1078,7 @@ void Ptbft::handleMsgNewviewPtbft(MsgNewviewPtbft msgNewview)
 	statistics.addHandleTime(time);
 }
 
-void Ptbft::handleMsgLdrpreparePtbft(MsgLdrpreparePtbft msgLdrprepare)
+void Hotsus::handleMsgLdrprepareHotsus(MsgLdrprepareHotsus msgLdrprepare)
 {
 	auto start = std::chrono::steady_clock::now();
 
@@ -1094,11 +1094,11 @@ void Ptbft::handleMsgLdrpreparePtbft(MsgLdrpreparePtbft msgLdrprepare)
 	Block block = proposal_MsgLdrprepare.getBlock();
 
 	// Verify the [signs_MsgLdrprepare] in [msgLdrprepare]
-	if (this->verifyProposalPtbft(proposal_MsgLdrprepare, signs_MsgLdrprepare) && block.extends(prepareHash_MsgLdrprepare) && proposeView_MsgLdrprepare >= this->view)
+	if (this->verifyProposalHotsus(proposal_MsgLdrprepare, signs_MsgLdrprepare) && block.extends(prepareHash_MsgLdrprepare) && proposeView_MsgLdrprepare >= this->view)
 	{
 		if (proposeView_MsgLdrprepare == this->view)
 		{
-			this->respondMsgLdrpreparePtbft(accumulator_MsgLdrprepare, block);
+			this->respondMsgLdrprepareHotsus(accumulator_MsgLdrprepare, block);
 		}
 		else
 		{
@@ -1106,7 +1106,7 @@ void Ptbft::handleMsgLdrpreparePtbft(MsgLdrpreparePtbft msgLdrprepare)
 			{
 				std::cout << COLOUR_BLUE << this->printReplicaId() << "Storing MsgLdrprepare: " << msgLdrprepare.toPrint() << COLOUR_NORMAL << std::endl;
 			}
-			this->log.storeMsgLdrpreparePtbft(msgLdrprepare);
+			this->log.storeMsgLdrprepareHotsus(msgLdrprepare);
 		}
 	}
 
@@ -1115,7 +1115,7 @@ void Ptbft::handleMsgLdrpreparePtbft(MsgLdrpreparePtbft msgLdrprepare)
 	statistics.addHandleTime(time);
 }
 
-void Ptbft::handleMsgPreparePtbft(MsgPreparePtbft msgPrepare)
+void Hotsus::handleMsgPrepareHotsus(MsgPrepareHotsus msgPrepare)
 {
 	auto start = std::chrono::steady_clock::now();
 
@@ -1135,16 +1135,16 @@ void Ptbft::handleMsgPreparePtbft(MsgPreparePtbft msgPrepare)
 		{
 			if (this->amCurrentLeader())
 			{
-				if (this->log.storeMsgPreparePtbft(msgPrepare) == this->trustedQuorumSize)
+				if (this->log.storeMsgPrepareHotsus(msgPrepare) == this->trustedQuorumSize)
 				{
-					this->initiateMsgPreparePtbft(roundData_MsgPrepare);
+					this->initiateMsgPrepareHotsus(roundData_MsgPrepare);
 				}
 			}
 			else
 			{
 				if (signs_MsgPrepare.getSize() == this->trustedQuorumSize)
 				{
-					this->respondMsgPreparePtbft(justification_MsgPrepare);
+					this->respondMsgPrepareHotsus(justification_MsgPrepare);
 				}
 			}
 		}
@@ -1154,7 +1154,7 @@ void Ptbft::handleMsgPreparePtbft(MsgPreparePtbft msgPrepare)
 			{
 				std::cout << COLOUR_BLUE << this->printReplicaId() << "Storing MsgPrepare: " << msgPrepare.toPrint() << COLOUR_NORMAL << std::endl;
 			}
-			this->log.storeMsgPreparePtbft(msgPrepare);
+			this->log.storeMsgPrepareHotsus(msgPrepare);
 		}
 	}
 
@@ -1163,7 +1163,7 @@ void Ptbft::handleMsgPreparePtbft(MsgPreparePtbft msgPrepare)
 	statistics.addHandleTime(time);
 }
 
-void Ptbft::handleMsgPrecommitPtbft(MsgPrecommitPtbft msgPrecommit)
+void Hotsus::handleMsgPrecommitHotsus(MsgPrecommitHotsus msgPrecommit)
 {
 	auto start = std::chrono::steady_clock::now();
 
@@ -1183,20 +1183,20 @@ void Ptbft::handleMsgPrecommitPtbft(MsgPrecommitPtbft msgPrecommit)
 		{
 			if (this->amCurrentLeader())
 			{
-				if (this->log.storeMsgPrecommitPtbft(msgPrecommit) == this->trustedQuorumSize)
+				if (this->log.storeMsgPrecommitHotsus(msgPrecommit) == this->trustedQuorumSize)
 				{
-					this->initiateMsgPrecommitPtbft(roundData_MsgPrecommit);
+					this->initiateMsgPrecommitHotsus(roundData_MsgPrecommit);
 				}
 			}
 			else
 			{
-				if (signs_MsgPrecommit.getSize() == this->trustedQuorumSize && this->verifyJustificationPtbft(justification_MsgPrecommit))
+				if (signs_MsgPrecommit.getSize() == this->trustedQuorumSize && this->verifyJustificationHotsus(justification_MsgPrecommit))
 				{
 					if (this->amGeneralReplicaIds())
 					{
-						this->skipRoundPtbft();
+						this->skipRoundHotsus();
 					}
-					this->executeBlockPtbft(roundData_MsgPrecommit);
+					this->executeBlockHotsus(roundData_MsgPrecommit);
 				}
 				else
 				{
@@ -1212,13 +1212,13 @@ void Ptbft::handleMsgPrecommitPtbft(MsgPrecommitPtbft msgPrecommit)
 			}
 			if (this->amLeaderOf(proposeView_MsgPrecommit))
 			{
-				this->log.storeMsgPrecommitPtbft(msgPrecommit);
+				this->log.storeMsgPrecommitHotsus(msgPrecommit);
 			}
 			else
 			{
-				if (this->verifyJustificationPtbft(justification_MsgPrecommit))
+				if (this->verifyJustificationHotsus(justification_MsgPrecommit))
 				{
-					this->log.storeMsgPrecommitPtbft(msgPrecommit);
+					this->log.storeMsgPrecommitHotsus(msgPrecommit);
 				}
 			}
 		}
@@ -1229,7 +1229,7 @@ void Ptbft::handleMsgPrecommitPtbft(MsgPrecommitPtbft msgPrecommit)
 	statistics.addHandleTime(time);
 }
 
-void Ptbft::handleMsgExnewviewPtbft(MsgExnewviewPtbft msgExnewview)
+void Hotsus::handleMsgExnewviewHotsus(MsgExnewviewHotsus msgExnewview)
 {
 	auto start = std::chrono::steady_clock::now();
 
@@ -1246,9 +1246,9 @@ void Ptbft::handleMsgExnewviewPtbft(MsgExnewviewPtbft msgExnewview)
 	{
 		if (proposeView_MsgExnewview == this->view)
 		{
-			if (this->log.storeMsgExnewviewPtbft(msgExnewview) == this->generalQuorumSize)
+			if (this->log.storeMsgExnewviewHotsus(msgExnewview) == this->generalQuorumSize)
 			{
-				this->initiateMsgExnewviewPtbft();
+				this->initiateMsgExnewviewHotsus();
 			}
 		}
 		else
@@ -1257,7 +1257,7 @@ void Ptbft::handleMsgExnewviewPtbft(MsgExnewviewPtbft msgExnewview)
 			{
 				std::cout << COLOUR_BLUE << this->printReplicaId() << "Storing MsgExnewview: " << msgExnewview.toPrint() << COLOUR_NORMAL << std::endl;
 			}
-			this->log.storeMsgExnewviewPtbft(msgExnewview);
+			this->log.storeMsgExnewviewHotsus(msgExnewview);
 		}
 	}
 	else
@@ -1273,7 +1273,7 @@ void Ptbft::handleMsgExnewviewPtbft(MsgExnewviewPtbft msgExnewview)
 	statistics.addHandleTime(time);
 }
 
-void Ptbft::handleMsgExldrpreparePtbft(MsgExldrpreparePtbft msgExldrprepare)
+void Hotsus::handleMsgExldrprepareHotsus(MsgExldrprepareHotsus msgExldrprepare)
 {
 	auto start = std::chrono::steady_clock::now();
 
@@ -1290,11 +1290,11 @@ void Ptbft::handleMsgExldrpreparePtbft(MsgExldrpreparePtbft msgExldrprepare)
 	Block block = proposal_MsgExldrprepare.getBlock();
 
 	// Verify the [signs_MsgExldrprepare] in [msgExldrprepare]
-	if (this->verifyExproposalPtbft(proposal_MsgExldrprepare, signs_MsgExldrprepare) && block.extends(justifyHash_MsgExnewview) && proposeView_MsgExnewview >= this->view)
+	if (this->verifyExproposalHotsus(proposal_MsgExldrprepare, signs_MsgExldrprepare) && block.extends(justifyHash_MsgExnewview) && proposeView_MsgExnewview >= this->view)
 	{
 		if (proposeView_MsgExnewview == this->view)
 		{
-			this->respondMsgExldrpreparePtbft(justification_MsgExnewview, block);
+			this->respondMsgExldrprepareHotsus(justification_MsgExnewview, block);
 		}
 		else
 		{
@@ -1302,7 +1302,7 @@ void Ptbft::handleMsgExldrpreparePtbft(MsgExldrpreparePtbft msgExldrprepare)
 			{
 				std::cout << COLOUR_BLUE << this->printReplicaId() << "Storing MsgExldrprepare: " << msgExldrprepare.toPrint() << COLOUR_NORMAL << std::endl;
 			}
-			this->log.storeMsgExldrpreparePtbft(msgExldrprepare);
+			this->log.storeMsgExldrprepareHotsus(msgExldrprepare);
 		}
 	}
 
@@ -1311,7 +1311,7 @@ void Ptbft::handleMsgExldrpreparePtbft(MsgExldrpreparePtbft msgExldrprepare)
 	statistics.addHandleTime(time);
 }
 
-void Ptbft::handleMsgExpreparePtbft(MsgExpreparePtbft msgExprepare)
+void Hotsus::handleMsgExprepareHotsus(MsgExprepareHotsus msgExprepare)
 {
 	auto start = std::chrono::steady_clock::now();
 
@@ -1331,16 +1331,16 @@ void Ptbft::handleMsgExpreparePtbft(MsgExpreparePtbft msgExprepare)
 		{
 			if (this->amCurrentLeader())
 			{
-				if (this->log.storeMsgExpreparePtbft(msgExprepare) == this->generalQuorumSize)
+				if (this->log.storeMsgExprepareHotsus(msgExprepare) == this->generalQuorumSize)
 				{
-					this->initiateMsgExpreparePtbft(roundData_MsgExprepare);
+					this->initiateMsgExprepareHotsus(roundData_MsgExprepare);
 				}
 			}
 			else
 			{
 				if (signs_MsgExprepare.getSize() == this->generalQuorumSize)
 				{
-					this->respondMsgExpreparePtbft(justification_MsgExprepare);
+					this->respondMsgExprepareHotsus(justification_MsgExprepare);
 				}
 			}
 		}
@@ -1350,7 +1350,7 @@ void Ptbft::handleMsgExpreparePtbft(MsgExpreparePtbft msgExprepare)
 			{
 				std::cout << COLOUR_BLUE << this->printReplicaId() << "Storing MsgExprepare: " << msgExprepare.toPrint() << COLOUR_NORMAL << std::endl;
 			}
-			this->log.storeMsgExpreparePtbft(msgExprepare);
+			this->log.storeMsgExprepareHotsus(msgExprepare);
 		}
 	}
 
@@ -1359,7 +1359,7 @@ void Ptbft::handleMsgExpreparePtbft(MsgExpreparePtbft msgExprepare)
 	statistics.addHandleTime(time);
 }
 
-void Ptbft::handleMsgExprecommitPtbft(MsgExprecommitPtbft msgExprecommit)
+void Hotsus::handleMsgExprecommitHotsus(MsgExprecommitHotsus msgExprecommit)
 {
 	auto start = std::chrono::steady_clock::now();
 
@@ -1379,16 +1379,16 @@ void Ptbft::handleMsgExprecommitPtbft(MsgExprecommitPtbft msgExprecommit)
 		{
 			if (this->amCurrentLeader())
 			{
-				if (this->log.storeMsgExprecommitPtbft(msgExprecommit) == this->generalQuorumSize)
+				if (this->log.storeMsgExprecommitHotsus(msgExprecommit) == this->generalQuorumSize)
 				{
-					this->initiateMsgExprecommitPtbft(roundData_MsgExprecommit);
+					this->initiateMsgExprecommitHotsus(roundData_MsgExprecommit);
 				}
 			}
 			else
 			{
 				if (signs_MsgExprecommit.getSize() == this->generalQuorumSize)
 				{
-					this->respondMsgExprecommitPtbft(justification_MsgExprecommit);
+					this->respondMsgExprecommitHotsus(justification_MsgExprecommit);
 				}
 			}
 		}
@@ -1398,7 +1398,7 @@ void Ptbft::handleMsgExprecommitPtbft(MsgExprecommitPtbft msgExprecommit)
 			{
 				std::cout << COLOUR_BLUE << this->printReplicaId() << "Storing MsgExprecommit: " << msgExprecommit.toPrint() << COLOUR_NORMAL << std::endl;
 			}
-			this->log.storeMsgExprecommitPtbft(msgExprecommit);
+			this->log.storeMsgExprecommitHotsus(msgExprecommit);
 		}
 	}
 
@@ -1407,7 +1407,7 @@ void Ptbft::handleMsgExprecommitPtbft(MsgExprecommitPtbft msgExprecommit)
 	statistics.addHandleTime(time);
 }
 
-void Ptbft::handleMsgExcommitPtbft(MsgExcommitPtbft msgExcommit)
+void Hotsus::handleMsgExcommitHotsus(MsgExcommitHotsus msgExcommit)
 {
 	auto start = std::chrono::steady_clock::now();
 
@@ -1427,16 +1427,16 @@ void Ptbft::handleMsgExcommitPtbft(MsgExcommitPtbft msgExcommit)
 		{
 			if (this->amCurrentLeader())
 			{
-				if (this->log.storeMsgExcommitPtbft(msgExcommit) == this->generalQuorumSize)
+				if (this->log.storeMsgExcommitHotsus(msgExcommit) == this->generalQuorumSize)
 				{
-					this->initiateMsgExcommitPtbft(roundData_MsgExcommit);
+					this->initiateMsgExcommitHotsus(roundData_MsgExcommit);
 				}
 			}
 			else
 			{
-				if (signs_MsgExcommit.getSize() == this->generalQuorumSize && this->verifyJustificationPtbft(justification_MsgExcommit))
+				if (signs_MsgExcommit.getSize() == this->generalQuorumSize && this->verifyJustificationHotsus(justification_MsgExcommit))
 				{
-					this->executeBlockPtbft(roundData_MsgExcommit);
+					this->executeBlockHotsus(roundData_MsgExcommit);
 				}
 			}
 		}
@@ -1448,13 +1448,13 @@ void Ptbft::handleMsgExcommitPtbft(MsgExcommitPtbft msgExcommit)
 			}
 			if (this->amLeaderOf(proposeView_MsgExcommit))
 			{
-				this->log.storeMsgExcommitPtbft(msgExcommit);
+				this->log.storeMsgExcommitHotsus(msgExcommit);
 			}
 			else
 			{
-				if (this->verifyJustificationPtbft(justification_MsgExcommit))
+				if (this->verifyJustificationHotsus(justification_MsgExcommit))
 				{
-					this->log.storeMsgExcommitPtbft(msgExcommit);
+					this->log.storeMsgExcommitHotsus(msgExcommit);
 				}
 			}
 		}
@@ -1466,9 +1466,9 @@ void Ptbft::handleMsgExcommitPtbft(MsgExcommitPtbft msgExcommit)
 }
 
 // Initiate messages
-void Ptbft::initiateMsgNewviewPtbft()
+void Hotsus::initiateMsgNewviewHotsus()
 {
-	std::set<MsgNewviewPtbft> msgNewviews = this->log.getMsgNewviewPtbft(this->view, this->generalQuorumSize);
+	std::set<MsgNewviewHotsus> msgNewviews = this->log.getMsgNewviewHotsus(this->view, this->generalQuorumSize);
 	if (msgNewviews.size() == this->generalQuorumSize)
 	{
 		if (DEBUG_HELP)
@@ -1481,10 +1481,10 @@ void Ptbft::initiateMsgNewviewPtbft()
 		{
 			// Create [block] extends the highest prepared block
 			Hash prepareHash_MsgLdrprepare = accumulator_MsgLdrprepare.getPrepareHash();
-			Block block = this->createNewBlockPtbft(prepareHash_MsgLdrprepare);
+			Block block = this->createNewBlockHotsus(prepareHash_MsgLdrprepare);
 
 			// Create [justification_MsgPrepare] for that [block]
-			Justification justification_MsgPrepare = this->respondMsgLdrprepareProposalPtbft(block.hash(), accumulator_MsgLdrprepare);
+			Justification justification_MsgPrepare = this->respondMsgLdrprepareProposalHotsus(block.hash(), accumulator_MsgLdrprepare);
 			if (justification_MsgPrepare.isSet())
 			{
 				if (DEBUG_HELP)
@@ -1495,12 +1495,12 @@ void Ptbft::initiateMsgNewviewPtbft()
 
 				// Create [msgLdrprepare] out of [block]
 				Proposal<Accumulator> proposal_MsgLdrprepare = Proposal<Accumulator>(accumulator_MsgLdrprepare, block);
-				Signs signs_MsgLdrprepare = this->initializeMsgLdrpreparePtbft(proposal_MsgLdrprepare);
-				MsgLdrpreparePtbft msgLdrprepare = MsgLdrpreparePtbft(proposal_MsgLdrprepare, signs_MsgLdrprepare);
+				Signs signs_MsgLdrprepare = this->initializeMsgLdrprepareHotsus(proposal_MsgLdrprepare);
+				MsgLdrprepareHotsus msgLdrprepare = MsgLdrprepareHotsus(proposal_MsgLdrprepare, signs_MsgLdrprepare);
 
 				// Send [msgLdrprepare] to replicas
 				Peers recipients = this->removeFromPeers(this->replicaId);
-				this->sendMsgLdrpreparePtbft(msgLdrprepare, recipients);
+				this->sendMsgLdrprepareHotsus(msgLdrprepare, recipients);
 				if (DEBUG_HELP)
 				{
 					std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgLdrprepare to replicas: " << msgLdrprepare.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1509,16 +1509,16 @@ void Ptbft::initiateMsgNewviewPtbft()
 				// Create [msgPrepare]
 				RoundData roundData_MsgPrepare = justification_MsgPrepare.getRoundData();
 				Signs signs_MsgPrepare = justification_MsgPrepare.getSigns();
-				MsgPreparePtbft msgPrepare = MsgPreparePtbft(roundData_MsgPrepare, signs_MsgPrepare);
+				MsgPrepareHotsus msgPrepare = MsgPrepareHotsus(roundData_MsgPrepare, signs_MsgPrepare);
 				if (DEBUG_HELP)
 				{
 					std::cout << COLOUR_BLUE << this->printReplicaId() << "Hold on MsgPrepare to its own: " << msgPrepare.toPrint() << COLOUR_NORMAL << std::endl;
 				}
 
 				// Store own [msgPrepare] in the log
-				if (this->log.storeMsgPreparePtbft(msgPrepare) == this->trustedQuorumSize)
+				if (this->log.storeMsgPrepareHotsus(msgPrepare) == this->trustedQuorumSize)
 				{
-					this->initiateMsgPreparePtbft(msgPrepare.roundData);
+					this->initiateMsgPrepareHotsus(msgPrepare.roundData);
 				}
 			}
 		}
@@ -1532,10 +1532,10 @@ void Ptbft::initiateMsgNewviewPtbft()
 	}
 }
 
-void Ptbft::initiateMsgPreparePtbft(RoundData roundData_MsgPrepare)
+void Hotsus::initiateMsgPrepareHotsus(RoundData roundData_MsgPrepare)
 {
 	View proposeView_MsgPrepare = roundData_MsgPrepare.getProposeView();
-	Signs signs_MsgPrepare = this->log.getMsgPreparePtbft(proposeView_MsgPrepare, this->trustedQuorumSize);
+	Signs signs_MsgPrepare = this->log.getMsgPrepareHotsus(proposeView_MsgPrepare, this->trustedQuorumSize);
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "MsgPrepare signatures: " << signs_MsgPrepare.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1545,38 +1545,38 @@ void Ptbft::initiateMsgPreparePtbft(RoundData roundData_MsgPrepare)
 	if (signs_MsgPrepare.getSize() == this->trustedQuorumSize)
 	{
 		// Create [msgPrepare]
-		MsgPreparePtbft msgPrepare = MsgPreparePtbft(roundData_MsgPrepare, signs_MsgPrepare);
+		MsgPrepareHotsus msgPrepare = MsgPrepareHotsus(roundData_MsgPrepare, signs_MsgPrepare);
 
 		// Send [msgPrepare] to replicas
 		Peers recipients = this->removeFromPeers(this->getGeneralReplicaIds());
-		this->sendMsgPreparePtbft(msgPrepare, recipients);
+		this->sendMsgPrepareHotsus(msgPrepare, recipients);
 		if (DEBUG_HELP)
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgPrepare to replicas: " << msgPrepare.toPrint() << COLOUR_NORMAL << std::endl;
 		}
 
 		// Create [msgPrecommit]
-		Justification justification_MsgPrecommit = this->saveMsgPreparePtbft(justification_MsgPrepare);
+		Justification justification_MsgPrecommit = this->saveMsgPrepareHotsus(justification_MsgPrepare);
 		RoundData roundData_MsgPrecommit = justification_MsgPrecommit.getRoundData();
 		Signs signs_MsgPrecommit = justification_MsgPrecommit.getSigns();
-		MsgPrecommitPtbft msgPrecommit = MsgPrecommitPtbft(roundData_MsgPrecommit, signs_MsgPrecommit);
+		MsgPrecommitHotsus msgPrecommit = MsgPrecommitHotsus(roundData_MsgPrecommit, signs_MsgPrecommit);
 		if (DEBUG_HELP)
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Hold on MsgPrecommit to its own: " << msgPrecommit.toPrint() << COLOUR_NORMAL << std::endl;
 		}
 
 		// Store own [msgPrecommit] in the log
-		if (this->log.storeMsgPrecommitPtbft(msgPrecommit) >= this->trustedQuorumSize)
+		if (this->log.storeMsgPrecommitHotsus(msgPrecommit) >= this->trustedQuorumSize)
 		{
-			this->initiateMsgPrecommitPtbft(justification_MsgPrecommit.getRoundData());
+			this->initiateMsgPrecommitHotsus(justification_MsgPrecommit.getRoundData());
 		}
 	}
 }
 
-void Ptbft::initiateMsgPrecommitPtbft(RoundData roundData_MsgPrecommit)
+void Hotsus::initiateMsgPrecommitHotsus(RoundData roundData_MsgPrecommit)
 {
 	View proposeView_MsgPrecommit = roundData_MsgPrecommit.getProposeView();
-	Signs signs_MsgPrecommit = this->log.getMsgPrecommitPtbft(proposeView_MsgPrecommit, this->trustedQuorumSize);
+	Signs signs_MsgPrecommit = this->log.getMsgPrecommitHotsus(proposeView_MsgPrecommit, this->trustedQuorumSize);
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "MsgPrecommit signatures: " << signs_MsgPrecommit.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1585,27 +1585,27 @@ void Ptbft::initiateMsgPrecommitPtbft(RoundData roundData_MsgPrecommit)
 	if (signs_MsgPrecommit.getSize() == this->trustedQuorumSize)
 	{
 		// Create [msgPrecommit]
-		MsgPrecommitPtbft msgPrecommit = MsgPrecommitPtbft(roundData_MsgPrecommit, signs_MsgPrecommit);
+		MsgPrecommitHotsus msgPrecommit = MsgPrecommitHotsus(roundData_MsgPrecommit, signs_MsgPrecommit);
 
 		// Send [msgPrecommit] to replicas
 		Peers recipients = this->removeFromPeers(this->replicaId);
-		this->sendMsgPrecommitPtbft(msgPrecommit, recipients);
+		this->sendMsgPrecommitHotsus(msgPrecommit, recipients);
 		if (DEBUG_HELP)
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgPrecommit to replicas: " << msgPrecommit.toPrint() << COLOUR_NORMAL << std::endl;
 		}
 
 		// Execute the block
-		this->executeBlockPtbft(roundData_MsgPrecommit);
+		this->executeBlockHotsus(roundData_MsgPrecommit);
 	}
 	else
 	{
 		// Create [msgPrecommit]
-		MsgPrecommitPtbft msgPrecommit = MsgPrecommitPtbft(roundData_MsgPrecommit, signs_MsgPrecommit);
+		MsgPrecommitHotsus msgPrecommit = MsgPrecommitHotsus(roundData_MsgPrecommit, signs_MsgPrecommit);
 
 		// Send [msgPrecommit] to replicas
 		Peers recipients = this->removeFromPeers(this->replicaId);
-		this->sendMsgPrecommitPtbft(msgPrecommit, recipients);
+		this->sendMsgPrecommitHotsus(msgPrecommit, recipients);
 		if (DEBUG_HELP)
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgPrecommit to replicas: " << msgPrecommit.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1615,20 +1615,20 @@ void Ptbft::initiateMsgPrecommitPtbft(RoundData roundData_MsgPrecommit)
 	}
 }
 
-void Ptbft::initiateMsgExnewviewPtbft()
+void Hotsus::initiateMsgExnewviewHotsus()
 {
 	// Create [block] extends the highest prepared block
-	Justification justification_MsgExnewview = this->log.findHighestMsgExnewviewPtbft(this->view);
+	Justification justification_MsgExnewview = this->log.findHighestMsgExnewviewHotsus(this->view);
 	RoundData roundData_MsgExnewview = justification_MsgExnewview.getRoundData();
 	Hash justifyHash_MsgExnewview = roundData_MsgExnewview.getJustifyHash();
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "Highest Newview for view " << this->view << ": " << justification_MsgExnewview.toPrint() << COLOUR_NORMAL << std::endl;
 	}
-	Block block = createNewBlockPtbft(justifyHash_MsgExnewview);
+	Block block = createNewBlockHotsus(justifyHash_MsgExnewview);
 
 	// Create [justification_MsgExprepare] for that [block]
-	Justification justification_MsgExprepare = this->respondMsgExnewviewProposalPtbft(block.hash(), justification_MsgExnewview);
+	Justification justification_MsgExprepare = this->respondMsgExnewviewProposalHotsus(block.hash(), justification_MsgExnewview);
 	if (justification_MsgExprepare.isSet())
 	{
 		if (DEBUG_HELP)
@@ -1639,12 +1639,12 @@ void Ptbft::initiateMsgExnewviewPtbft()
 
 		// Create [msgExldrprepare] out of [block]
 		Proposal<Justification> proposal_MsgExldrprepare = Proposal<Justification>(justification_MsgExnewview, block);
-		Signs signs_MsgExldrprepare = this->initializeMsgExldrpreparePtbft(proposal_MsgExldrprepare);
-		MsgExldrpreparePtbft msgExldrprepare = MsgExldrpreparePtbft(proposal_MsgExldrprepare, signs_MsgExldrprepare);
+		Signs signs_MsgExldrprepare = this->initializeMsgExldrprepareHotsus(proposal_MsgExldrprepare);
+		MsgExldrprepareHotsus msgExldrprepare = MsgExldrprepareHotsus(proposal_MsgExldrprepare, signs_MsgExldrprepare);
 
 		// Send [msgExldrprepare] to replicas
 		Peers recipients = this->removeFromPeers(this->replicaId);
-		this->sendMsgExldrpreparePtbft(msgExldrprepare, recipients);
+		this->sendMsgExldrprepareHotsus(msgExldrprepare, recipients);
 		if (DEBUG_HELP)
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgExldrprepare to replicas: " << msgExldrprepare.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1653,7 +1653,7 @@ void Ptbft::initiateMsgExnewviewPtbft()
 		// Create [msgExprepare]
 		RoundData roundData_MsgExprepare = justification_MsgExprepare.getRoundData();
 		Signs signs_MsgExprepare = justification_MsgExprepare.getSigns();
-		MsgExpreparePtbft msgExprepare = MsgExpreparePtbft(roundData_MsgExprepare, signs_MsgExprepare);
+		MsgExprepareHotsus msgExprepare = MsgExprepareHotsus(roundData_MsgExprepare, signs_MsgExprepare);
 		if (DEBUG_HELP)
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Hold on MsgExprepare to its own: " << msgExprepare.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1668,10 +1668,10 @@ void Ptbft::initiateMsgExnewviewPtbft()
 	}
 }
 
-void Ptbft::initiateMsgExpreparePtbft(RoundData roundData_MsgExprepare)
+void Hotsus::initiateMsgExprepareHotsus(RoundData roundData_MsgExprepare)
 {
 	View proposeView_MsgExprepare = roundData_MsgExprepare.getProposeView();
-	Signs signs_MsgExprepare = this->log.getMsgExpreparePtbft(proposeView_MsgExprepare, this->generalQuorumSize);
+	Signs signs_MsgExprepare = this->log.getMsgExprepareHotsus(proposeView_MsgExprepare, this->generalQuorumSize);
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "MsgExprepare signatures: " << signs_MsgExprepare.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1681,21 +1681,21 @@ void Ptbft::initiateMsgExpreparePtbft(RoundData roundData_MsgExprepare)
 	if (signs_MsgExprepare.getSize() == this->generalQuorumSize)
 	{
 		// Create [msgExprepare]
-		MsgExpreparePtbft msgExprepare = MsgExpreparePtbft(roundData_MsgExprepare, signs_MsgExprepare);
+		MsgExprepareHotsus msgExprepare = MsgExprepareHotsus(roundData_MsgExprepare, signs_MsgExprepare);
 
 		// Send [msgExprepare] to replicas
 		Peers recipients = this->removeFromPeers(this->replicaId);
-		this->sendMsgExpreparePtbft(msgExprepare, recipients);
+		this->sendMsgExprepareHotsus(msgExprepare, recipients);
 		if (DEBUG_HELP)
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgExprepare to replicas: " << msgExprepare.toPrint() << COLOUR_NORMAL << std::endl;
 		}
 
 		// Create [msgExprecommit]
-		Justification justification_MsgExprecommit = this->saveMsgExpreparePtbft(justification_MsgExprepare);
+		Justification justification_MsgExprecommit = this->saveMsgExprepareHotsus(justification_MsgExprepare);
 		RoundData roundData_MsgExprecommit = justification_MsgExprecommit.getRoundData();
 		Signs signs_MsgExprecommit = justification_MsgExprecommit.getSigns();
-		MsgExprecommitPtbft msgExprecommit = MsgExprecommitPtbft(roundData_MsgExprecommit, signs_MsgExprecommit);
+		MsgExprecommitHotsus msgExprecommit = MsgExprecommitHotsus(roundData_MsgExprecommit, signs_MsgExprecommit);
 		if (DEBUG_HELP)
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Hold on MsgExprecommit to its own: " << msgExprecommit.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1703,10 +1703,10 @@ void Ptbft::initiateMsgExpreparePtbft(RoundData roundData_MsgExprepare)
 	}
 }
 
-void Ptbft::initiateMsgExprecommitPtbft(RoundData roundData_MsgExprecommit)
+void Hotsus::initiateMsgExprecommitHotsus(RoundData roundData_MsgExprecommit)
 {
 	View proposeView_MsgExprecommit = roundData_MsgExprecommit.getProposeView();
-	Signs signs_MsgExprecommit = this->log.getMsgExprecommitPtbft(proposeView_MsgExprecommit, this->generalQuorumSize);
+	Signs signs_MsgExprecommit = this->log.getMsgExprecommitHotsus(proposeView_MsgExprecommit, this->generalQuorumSize);
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "MsgExprecommit signatures: " << signs_MsgExprecommit.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1716,21 +1716,21 @@ void Ptbft::initiateMsgExprecommitPtbft(RoundData roundData_MsgExprecommit)
 	if (signs_MsgExprecommit.getSize() == this->generalQuorumSize)
 	{
 		// Create [msgExprecommit]
-		MsgExprecommitPtbft msgExprecommit = MsgExprecommitPtbft(roundData_MsgExprecommit, signs_MsgExprecommit);
+		MsgExprecommitHotsus msgExprecommit = MsgExprecommitHotsus(roundData_MsgExprecommit, signs_MsgExprecommit);
 
 		// Send [msgExprecommit] to replicas
 		Peers recipients = this->removeFromPeers(this->replicaId);
-		this->sendMsgExprecommitPtbft(msgExprecommit, recipients);
+		this->sendMsgExprecommitHotsus(msgExprecommit, recipients);
 		if (DEBUG_HELP)
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgExprecommit to replicas: " << msgExprecommit.toPrint() << COLOUR_NORMAL << std::endl;
 		}
 
 		// Create [msgExcommit]
-		Justification justification_MsgExcommit = this->lockMsgExprecommitPtbft(justification_MsgExprecommit);
+		Justification justification_MsgExcommit = this->lockMsgExprecommitHotsus(justification_MsgExprecommit);
 		RoundData roundData_MsgExcommit = justification_MsgExcommit.getRoundData();
 		Signs signs_MsgExcommit = justification_MsgExcommit.getSigns();
-		MsgExcommitPtbft msgExcommit = MsgExcommitPtbft(roundData_MsgExcommit, signs_MsgExcommit);
+		MsgExcommitHotsus msgExcommit = MsgExcommitHotsus(roundData_MsgExcommit, signs_MsgExcommit);
 		if (DEBUG_HELP)
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Hold on MsgExcommit to its own: " << msgExcommit.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1738,10 +1738,10 @@ void Ptbft::initiateMsgExprecommitPtbft(RoundData roundData_MsgExprecommit)
 	}
 }
 
-void Ptbft::initiateMsgExcommitPtbft(RoundData roundData_MsgExcommit)
+void Hotsus::initiateMsgExcommitHotsus(RoundData roundData_MsgExcommit)
 {
 	View proposeView_MsgExcommit = roundData_MsgExcommit.getProposeView();
-	Signs signs_MsgExcommit = this->log.getMsgExcommitPtbft(proposeView_MsgExcommit, this->generalQuorumSize);
+	Signs signs_MsgExcommit = this->log.getMsgExcommitHotsus(proposeView_MsgExcommit, this->generalQuorumSize);
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "MsgExcommit signatures: " << signs_MsgExcommit.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1750,26 +1750,26 @@ void Ptbft::initiateMsgExcommitPtbft(RoundData roundData_MsgExcommit)
 	if (signs_MsgExcommit.getSize() == this->generalQuorumSize)
 	{
 		// Create [msgExcommit]
-		MsgExcommitPtbft msgExcommit = MsgExcommitPtbft(roundData_MsgExcommit, signs_MsgExcommit);
+		MsgExcommitHotsus msgExcommit = MsgExcommitHotsus(roundData_MsgExcommit, signs_MsgExcommit);
 
 		// Send [msgExcommit] to replicas
 		Peers recipients = this->removeFromPeers(this->replicaId);
-		this->sendMsgExcommitPtbft(msgExcommit, recipients);
+		this->sendMsgExcommitHotsus(msgExcommit, recipients);
 		if (DEBUG_HELP)
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgExcommit to replicas: " << msgExcommit.toPrint() << COLOUR_NORMAL << std::endl;
 		}
 
 		// Execute the block
-		this->executeBlockPtbft(roundData_MsgExcommit);
+		this->executeBlockHotsus(roundData_MsgExcommit);
 	}
 }
 
 // Respond messages
-void Ptbft::respondMsgLdrpreparePtbft(Accumulator accumulator_MsgLdrprepare, Block block)
+void Hotsus::respondMsgLdrprepareHotsus(Accumulator accumulator_MsgLdrprepare, Block block)
 {
 	// Create own [justification_MsgPrepare] for that [block]
-	Justification justification_MsgPrepare = this->respondMsgLdrprepareProposalPtbft(block.hash(), accumulator_MsgLdrprepare);
+	Justification justification_MsgPrepare = this->respondMsgLdrprepareProposalHotsus(block.hash(), accumulator_MsgLdrprepare);
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "justification_MsgPrepare: " << justification_MsgPrepare.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1785,13 +1785,13 @@ void Ptbft::respondMsgLdrpreparePtbft(Accumulator accumulator_MsgLdrprepare, Blo
 		// Create [msgPrepare] out of [block]
 		RoundData roundData_MsgPrepare = justification_MsgPrepare.getRoundData();
 		Signs signs_MsgPrepare = justification_MsgPrepare.getSigns();
-		MsgPreparePtbft msgPrepare = MsgPreparePtbft(justification_MsgPrepare.getRoundData(), justification_MsgPrepare.getSigns());
+		MsgPrepareHotsus msgPrepare = MsgPrepareHotsus(justification_MsgPrepare.getRoundData(), justification_MsgPrepare.getSigns());
 
 		// Send [msgPrepare] to leader
 		if (!this->amGeneralReplicaIds())
 		{
 			Peers recipients = this->keepFromPeers(this->getCurrentLeader());
-			this->sendMsgPreparePtbft(msgPrepare, recipients);
+			this->sendMsgPrepareHotsus(msgPrepare, recipients);
 			if (DEBUG_HELP)
 			{
 				std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgPrepare to leader: " << msgPrepare.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1800,29 +1800,29 @@ void Ptbft::respondMsgLdrpreparePtbft(Accumulator accumulator_MsgLdrprepare, Blo
 	}
 }
 
-void Ptbft::respondMsgPreparePtbft(Justification justification_MsgPrepare)
+void Hotsus::respondMsgPrepareHotsus(Justification justification_MsgPrepare)
 {
 	// Create [justification_MsgPrecommit]
-	Justification justification_MsgPrecommit = this->saveMsgPreparePtbft(justification_MsgPrepare);
+	Justification justification_MsgPrecommit = this->saveMsgPrepareHotsus(justification_MsgPrepare);
 
 	// Create [msgPrecommit]
 	RoundData roundData_MsgPrecommit = justification_MsgPrecommit.getRoundData();
 	Signs signs_MsgPrecommit = justification_MsgPrecommit.getSigns();
-	MsgPrecommitPtbft msgPrecommit = MsgPrecommitPtbft(roundData_MsgPrecommit, signs_MsgPrecommit);
+	MsgPrecommitHotsus msgPrecommit = MsgPrecommitHotsus(roundData_MsgPrecommit, signs_MsgPrecommit);
 
 	// Send [msgPrecommit] to leader
 	Peers recipients = this->keepFromPeers(this->getCurrentLeader());
-	this->sendMsgPrecommitPtbft(msgPrecommit, recipients);
+	this->sendMsgPrecommitHotsus(msgPrecommit, recipients);
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgPrecommit to leader: " << msgPrecommit.toPrint() << COLOUR_NORMAL << std::endl;
 	}
 }
 
-void Ptbft::respondMsgExldrpreparePtbft(Justification justification_MsgExnewview, Block block)
+void Hotsus::respondMsgExldrprepareHotsus(Justification justification_MsgExnewview, Block block)
 {
 	// Create own [justification_MsgExprepare] for that [block]
-	Justification justification_MsgExprepare = this->respondMsgExldrprepareProposalPtbft(block.hash(), justification_MsgExnewview);
+	Justification justification_MsgExprepare = this->respondMsgExldrprepareProposalHotsus(block.hash(), justification_MsgExnewview);
 	if (justification_MsgExprepare.isSet())
 	{
 		if (DEBUG_HELP)
@@ -1834,11 +1834,11 @@ void Ptbft::respondMsgExldrpreparePtbft(Justification justification_MsgExnewview
 		// Create [msgExprepare] out of [block]
 		RoundData roundData_MsgExprepare = justification_MsgExprepare.getRoundData();
 		Signs signs_MsgExprepare = justification_MsgExprepare.getSigns();
-		MsgExpreparePtbft msgExprepare = MsgExpreparePtbft(roundData_MsgExprepare, signs_MsgExprepare);
+		MsgExprepareHotsus msgExprepare = MsgExprepareHotsus(roundData_MsgExprepare, signs_MsgExprepare);
 
 		// Send [msgExprepare] to leader
 		Peers recipients = this->keepFromPeers(this->getCurrentLeader());
-		this->sendMsgExpreparePtbft(msgExprepare, recipients);
+		this->sendMsgExprepareHotsus(msgExprepare, recipients);
 		if (DEBUG_HELP)
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgExprepare to leader: " << msgExprepare.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1846,38 +1846,38 @@ void Ptbft::respondMsgExldrpreparePtbft(Justification justification_MsgExnewview
 	}
 }
 
-void Ptbft::respondMsgExpreparePtbft(Justification justification_MsgExprepare)
+void Hotsus::respondMsgExprepareHotsus(Justification justification_MsgExprepare)
 {
 	// Create [justification_MsgExprecommit]
-	Justification justification_MsgExprecommit = this->saveMsgExpreparePtbft(justification_MsgExprepare);
+	Justification justification_MsgExprecommit = this->saveMsgExprepareHotsus(justification_MsgExprepare);
 
 	// Create [msgExprecommit]
 	RoundData roundData_MsgExprecommit = justification_MsgExprecommit.getRoundData();
 	Signs signs_MsgExprecommit = justification_MsgExprecommit.getSigns();
-	MsgExprecommitPtbft msgExprecommit = MsgExprecommitPtbft(roundData_MsgExprecommit, signs_MsgExprecommit);
+	MsgExprecommitHotsus msgExprecommit = MsgExprecommitHotsus(roundData_MsgExprecommit, signs_MsgExprecommit);
 
 	// Send [msgExprecommit] to leader
 	Peers recipients = this->keepFromPeers(this->getCurrentLeader());
-	this->sendMsgExprecommitPtbft(msgExprecommit, recipients);
+	this->sendMsgExprecommitHotsus(msgExprecommit, recipients);
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgExprecommit to leader: " << msgExprecommit.toPrint() << COLOUR_NORMAL << std::endl;
 	}
 }
 
-void Ptbft::respondMsgExprecommitPtbft(Justification justification_MsgExprecommit)
+void Hotsus::respondMsgExprecommitHotsus(Justification justification_MsgExprecommit)
 {
 	// Create [justification_MsgExcommit]
-	Justification justification_MsgExcommit = this->lockMsgExprecommitPtbft(justification_MsgExprecommit);
+	Justification justification_MsgExcommit = this->lockMsgExprecommitHotsus(justification_MsgExprecommit);
 
 	// Create [msgExcommit]
 	RoundData roundData_MsgExcommit = justification_MsgExcommit.getRoundData();
 	Signs signs_MsgExcommit = justification_MsgExcommit.getSigns();
-	MsgExcommitPtbft msgExcommit = MsgExcommitPtbft(roundData_MsgExcommit, signs_MsgExcommit);
+	MsgExcommitHotsus msgExcommit = MsgExcommitHotsus(roundData_MsgExcommit, signs_MsgExcommit);
 
 	// Send [msgExcommit] to leader
 	Peers recipients = this->keepFromPeers(this->getCurrentLeader());
-	this->sendMsgExcommitPtbft(msgExcommit, recipients);
+	this->sendMsgExcommitHotsus(msgExcommit, recipients);
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgExcommit to leader: " << msgExcommit.toPrint() << COLOUR_NORMAL << std::endl;
@@ -1885,7 +1885,7 @@ void Ptbft::respondMsgExprecommitPtbft(Justification justification_MsgExprecommi
 }
 
 // Main functions
-int Ptbft::initializeSGX()
+int Hotsus::initializeSGX()
 {
 	// Initializing enclave
 	if (initialize_enclave(&global_eid, "enclave.token", "enclave.signed.so") < 0)
@@ -1919,7 +1919,7 @@ int Ptbft::initializeSGX()
 	return 0;
 }
 
-void Ptbft::getStarted()
+void Hotsus::getStarted()
 {
 	if (DEBUG_BASIC)
 	{
@@ -1932,25 +1932,25 @@ void Ptbft::getStarted()
 	ReplicaID leader = this->getCurrentLeader();
 	Peers recipients = this->keepFromPeers(leader);
 
-	Justification justification_MsgNewview = this->initializeMsgNewviewPtbft();
+	Justification justification_MsgNewview = this->initializeMsgNewviewHotsus();
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "Initial justification: " << justification_MsgNewview.toPrint() << COLOUR_NORMAL << std::endl;
 	}
 	RoundData roundData_MsgNewview = justification_MsgNewview.getRoundData();
 	Signs signs_MsgNewview = justification_MsgNewview.getSigns();
-	MsgNewviewPtbft msgNewview = MsgNewviewPtbft(roundData_MsgNewview, signs_MsgNewview);
+	MsgNewviewHotsus msgNewview = MsgNewviewHotsus(roundData_MsgNewview, signs_MsgNewview);
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "Starting with: " << msgNewview.toPrint() << COLOUR_NORMAL << std::endl;
 	}
 	if (this->amCurrentLeader())
 	{
-		this->handleMsgNewviewPtbft(msgNewview);
+		this->handleMsgNewviewHotsus(msgNewview);
 	}
 	else
 	{
-		this->sendMsgNewviewPtbft(msgNewview, recipients);
+		this->sendMsgNewviewHotsus(msgNewview, recipients);
 	}
 	if (DEBUG_HELP)
 	{
@@ -1958,7 +1958,7 @@ void Ptbft::getStarted()
 	}
 }
 
-void Ptbft::getExtraStarted()
+void Hotsus::getExtraStarted()
 {
 	if (DEBUG_BASIC)
 	{
@@ -1969,25 +1969,25 @@ void Ptbft::getExtraStarted()
 	ReplicaID leader = this->getCurrentLeader();
 	Peers recipients = this->keepFromPeers(leader);
 
-	Justification justification_MsgExnewview = this->initializeMsgExnewviewPtbft();
+	Justification justification_MsgExnewview = this->initializeMsgExnewviewHotsus();
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "Initial justification: " << justification_MsgExnewview.toPrint() << COLOUR_NORMAL << std::endl;
 	}
 	RoundData roundData_MsgExnewview = justification_MsgExnewview.getRoundData();
 	Signs signs_MsgExnewview = justification_MsgExnewview.getSigns();
-	MsgExnewviewPtbft msgExnewview = MsgExnewviewPtbft(roundData_MsgExnewview, signs_MsgExnewview);
+	MsgExnewviewHotsus msgExnewview = MsgExnewviewHotsus(roundData_MsgExnewview, signs_MsgExnewview);
 	if (DEBUG_HELP)
 	{
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "Starting with: " << msgExnewview.toPrint() << COLOUR_NORMAL << std::endl;
 	}
 	if (this->amCurrentLeader())
 	{
-		this->handleMsgExnewviewPtbft(msgExnewview);
+		this->handleMsgExnewviewHotsus(msgExnewview);
 	}
 	else
 	{
-		this->sendMsgExnewviewPtbft(msgExnewview, recipients);
+		this->sendMsgExnewviewHotsus(msgExnewview, recipients);
 	}
 	if (DEBUG_HELP)
 	{
@@ -1995,10 +1995,10 @@ void Ptbft::getExtraStarted()
 	}
 }
 
-void Ptbft::startNewViewPtbft()
+void Hotsus::startNewViewHotsus()
 {
 	// Generate [justification_MsgNewview] until one for the next view
-	Justification justification_MsgNewview = this->initializeMsgNewviewPtbft();
+	Justification justification_MsgNewview = this->initializeMsgNewviewHotsus();
 	View proposeView_MsgNewview = justification_MsgNewview.getRoundData().getProposeView();
 	if (DEBUG_HELP)
 	{
@@ -2006,7 +2006,7 @@ void Ptbft::startNewViewPtbft()
 	}
 	while (proposeView_MsgNewview <= this->view)
 	{
-		justification_MsgNewview = this->initializeMsgNewviewPtbft();
+		justification_MsgNewview = this->initializeMsgNewviewHotsus();
 		proposeView_MsgNewview = justification_MsgNewview.getRoundData().getProposeView();
 		if (DEBUG_HELP)
 		{
@@ -2025,18 +2025,18 @@ void Ptbft::startNewViewPtbft()
 	Signs signs_MsgNewview = justification_MsgNewview.getSigns();
 	if (proposeView_MsgNewview == this->view && phase_MsgNewview == PHASE_NEWVIEW)
 	{
-		MsgNewviewPtbft msgNewview = MsgNewviewPtbft(roundData_MsgNewview, signs_MsgNewview);
+		MsgNewviewHotsus msgNewview = MsgNewviewHotsus(roundData_MsgNewview, signs_MsgNewview);
 		if (this->amCurrentLeader())
 		{
-			this->handleEarlierMessagesPtbft();
-			this->handleMsgNewviewPtbft(msgNewview);
+			this->handleEarlierMessagesHotsus();
+			this->handleMsgNewviewHotsus(msgNewview);
 		}
 		else
 		{
 			ReplicaID leader = this->getCurrentLeader();
 			Peers recipients = this->keepFromPeers(leader);
-			this->sendMsgNewviewPtbft(msgNewview, recipients);
-			this->handleEarlierMessagesPtbft();
+			this->sendMsgNewviewHotsus(msgNewview, recipients);
+			this->handleEarlierMessagesHotsus();
 		}
 	}
 	else
@@ -2048,7 +2048,7 @@ void Ptbft::startNewViewPtbft()
 	}
 }
 
-Block Ptbft::createNewBlockPtbft(Hash hash)
+Block Hotsus::createNewBlockHotsus(Hash hash)
 {
 	std::lock_guard<std::mutex> guard(mutexTransaction);
 	Transaction transaction[MAX_NUM_TRANSACTIONS];
@@ -2078,7 +2078,7 @@ Block Ptbft::createNewBlockPtbft(Hash hash)
 	return block;
 }
 
-void Ptbft::executeBlockPtbft(RoundData roundData_MsgPrecommit)
+void Hotsus::executeBlockHotsus(RoundData roundData_MsgPrecommit)
 {
 	auto endView = std::chrono::steady_clock::now();
 	double time = std::chrono::duration_cast<std::chrono::microseconds>(endView - startView).count();
@@ -2099,22 +2099,22 @@ void Ptbft::executeBlockPtbft(RoundData roundData_MsgPrecommit)
 	if (DEBUG_BASIC)
 	{
 		std::cout << COLOUR_RED << this->printReplicaId()
-				  << "PTBFT-EXECUTE(" << this->view << "/" << std::to_string(this->numViews - 1) << ":" << time << ") "
+				  << "HOTSUS-EXECUTE(" << this->view << "/" << std::to_string(this->numViews - 1) << ":" << time << ") "
 				  << statistics.toString() << COLOUR_NORMAL << std::endl;
 	}
 
 	this->replyHash(roundData_MsgPrecommit.getProposeHash());
 	if (this->timeToStop())
 	{
-		this->recordStatisticsPtbft();
+		this->recordStatisticsHotsus();
 	}
 	else
 	{
-		this->startNewViewPtbft();
+		this->startNewViewHotsus();
 	}
 }
 
-bool Ptbft::timeToStop()
+bool Hotsus::timeToStop()
 {
 	bool b = this->numViews > 0 && this->numViews <= this->view + 1;
 	if (DEBUG_HELP)
@@ -2142,7 +2142,7 @@ bool Ptbft::timeToStop()
 	return b;
 }
 
-void Ptbft::recordStatisticsPtbft()
+void Hotsus::recordStatisticsHotsus()
 {
 	if (DEBUG_HELP)
 	{
@@ -2203,7 +2203,7 @@ void Ptbft::recordStatisticsPtbft()
 }
 
 // Constuctor
-Ptbft::Ptbft(KeysFunctions keysFunctions, ReplicaID replicaId, unsigned int numGeneralReplicas, unsigned int numTrustedReplicas, unsigned int numReplicas, unsigned int numViews, unsigned int numFaults, double leaderChangeTime, Nodes nodes, Key privateKey, PeerNet::Config peerNetConfig, ClientNet::Config clientNetConfig) : peerNet(peerEventContext, peerNetConfig), clientNet(requestEventContext, clientNetConfig)
+Hotsus::Hotsus(KeysFunctions keysFunctions, ReplicaID replicaId, unsigned int numGeneralReplicas, unsigned int numTrustedReplicas, unsigned int numReplicas, unsigned int numViews, unsigned int numFaults, double leaderChangeTime, Nodes nodes, Key privateKey, PeerNet::Config peerNetConfig, ClientNet::Config clientNetConfig) : peerNet(peerEventContext, peerNetConfig), clientNet(requestEventContext, clientNetConfig)
 {
 	this->keysFunction = keysFunctions;
 	this->replicaId = replicaId;
@@ -2247,7 +2247,7 @@ Ptbft::Ptbft(KeysFunctions keysFunctions, ReplicaID replicaId, unsigned int numG
 	}
 	else
 	{
-		ptbftBasic = PtbftBasic(this->replicaId, this->privateKey, this->generalQuorumSize, this->trustedQuorumSize);
+		hotsusBasic = HotsusBasic(this->replicaId, this->privateKey, this->generalQuorumSize, this->trustedQuorumSize);
 	}
 
 	// Salticidae
@@ -2299,7 +2299,7 @@ Ptbft::Ptbft(KeysFunctions keysFunctions, ReplicaID replicaId, unsigned int numG
                                                 if (DEBUG_HELP)
 												{
 													std::cout << COLOUR_BLUE << this->printReplicaId() << "timer ran out" << COLOUR_NORMAL << std::endl;
-													this->startNewViewPtbft();
+													this->startNewViewHotsus();
 													this->timer.del();
 													this->timer.add(this->leaderChangeTime);
 												} });
@@ -2358,13 +2358,13 @@ Ptbft::Ptbft(KeysFunctions keysFunctions, ReplicaID replicaId, unsigned int numG
 		}
 	}
 
-	this->clientNet.reg_handler(salticidae::generic_bind(&Ptbft::receiveMsgStartPtbft, this, _1, _2));
-	this->clientNet.reg_handler(salticidae::generic_bind(&Ptbft::receiveMsgTransactionPtbft, this, _1, _2));
+	this->clientNet.reg_handler(salticidae::generic_bind(&Hotsus::receiveMsgStartHotsus, this, _1, _2));
+	this->clientNet.reg_handler(salticidae::generic_bind(&Hotsus::receiveMsgTransactionHotsus, this, _1, _2));
 
-	this->peerNet.reg_handler(salticidae::generic_bind(&Ptbft::receiveMsgNewviewPtbft, this, _1, _2));
-	this->peerNet.reg_handler(salticidae::generic_bind(&Ptbft::receiveMsgLdrpreparePtbft, this, _1, _2));
-	this->peerNet.reg_handler(salticidae::generic_bind(&Ptbft::receiveMsgPreparePtbft, this, _1, _2));
-	this->peerNet.reg_handler(salticidae::generic_bind(&Ptbft::receiveMsgPrecommitPtbft, this, _1, _2));
+	this->peerNet.reg_handler(salticidae::generic_bind(&Hotsus::receiveMsgNewviewHotsus, this, _1, _2));
+	this->peerNet.reg_handler(salticidae::generic_bind(&Hotsus::receiveMsgLdrprepareHotsus, this, _1, _2));
+	this->peerNet.reg_handler(salticidae::generic_bind(&Hotsus::receiveMsgPrepareHotsus, this, _1, _2));
+	this->peerNet.reg_handler(salticidae::generic_bind(&Hotsus::receiveMsgPrecommitHotsus, this, _1, _2));
 
 	// Statistics
 	auto timeNow = std::chrono::system_clock::now();

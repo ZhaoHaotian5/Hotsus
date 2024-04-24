@@ -44,12 +44,12 @@ Urts_Library_Name := sgx_urts_sim
 
 # Hotstuff Files
 Hotstuff_App_Cpp_Files := $(wildcard App/*.cpp)
-Hotstuff_App_Cpp_Files := $(filter-out App/Client.cpp App/Damysus.cpp App/Keys.cpp App/Ptbft.cpp App/PtbftBasic.cpp App/Server.cpp, $(Hotstuff_App_Cpp_Files))
+Hotstuff_App_Cpp_Files := $(filter-out App/Client.cpp App/Damysus.cpp App/Keys.cpp App/Hotsus.cpp App/HotsusBasic.cpp App/Server.cpp, $(Hotstuff_App_Cpp_Files))
 Hotstuff_App_Cpp_Objects := $(Hotstuff_App_Cpp_Files:.cpp=.o)
 
 # Damysus Files
 Damysus_App_Cpp_Files := $(wildcard App/*.cpp)
-Damysus_App_Cpp_Files := $(filter-out App/Client.cpp App/Hotstuff.cpp App/HotstuffBasic.cpp App/Keys.cpp App/Ptbft.cpp App/PtbftBasic.cpp  App/Server.cpp, $(Damysus_App_Cpp_Files))
+Damysus_App_Cpp_Files := $(filter-out App/Client.cpp App/Hotstuff.cpp App/HotstuffBasic.cpp App/Keys.cpp App/Hotsus.cpp App/HotsusBasic.cpp  App/Server.cpp, $(Damysus_App_Cpp_Files))
 Damysus_App_Cpp_Files :=  $(Damysus_App_Cpp_Files) App/sgx_utils/sgx_utils.cpp
 Damysus_App_Cpp_Objects := $(Damysus_App_Cpp_Files:.cpp=.o)
 
@@ -71,7 +71,7 @@ App_Link_Flags += -lsgx_uae_service_sim
 Trts_Library_Name := sgx_trts_sim
 Service_Library_Name := sgx_tservice_sim
 Crypto_Library_Name := sgx_tcrypto
-Enclave_Cpp_Files := Enclave/EnclaveBasic.cpp Enclave/EnclaveDamysus.cpp Enclave/EnclavePtbft.cpp
+Enclave_Cpp_Files := Enclave/EnclaveBasic.cpp Enclave/EnclaveDamysus.cpp Enclave/EnclaveHotsus.cpp
 Enclave_Include_Paths := -IEnclave -I$(SGX_SDK)/include -I$(SGX_SDK)/include/libcxx -I$(SGX_SDK)/include/tlibc -I$(SGX_SDK)/include/stlport -I$(SGXSSL_INCLUDE_PATH)
 Enclave_C_Flags := $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpie -fstack-protector $(Enclave_Include_Paths)
 Enclave_Cpp_Flags := $(Enclave_C_Flags) -std=c++11 -nostdinc++
