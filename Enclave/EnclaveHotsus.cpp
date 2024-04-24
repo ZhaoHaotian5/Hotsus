@@ -28,7 +28,7 @@ void increment_Hotsus_t()
 
 void feedback_Hotsus_t()
 {
-	phase_Hotsus_t == PHASE_EXNEWVIEW;
+	phase_Hotsus_t = PHASE_EXNEWVIEW;
 	if (switcher)
 	{
 		view_Hotsus_t--;

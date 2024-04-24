@@ -76,6 +76,22 @@ std::string phase2string(Phase phase)
 	{
 		return "PHASE_COMMIT";
 	}
+	else if (phase == PHASE_EXNEWVIEW)
+	{
+		return "PHASE_EXNEWVIEW";
+	}
+	else if (phase == PHASE_EXPREPARE)
+	{
+		return "PHASE_EXPREPARE";
+	}
+	else if (phase == PHASE_EXPRECOMMIT)
+	{
+		return "PHASE_EXPRECOMMIT";
+	}
+	else if (phase == PHASE_EXCOMMIT)
+	{
+		return "PHASE_EXCOMMIT";
+	}
 	else
 	{
 		return "";
