@@ -1,13 +1,9 @@
-# PT-BFT:
+# Hotsus
 
 ## Commands
 
-git clone https://github.com/ZhaoHaotian5/PT-BFT-HD
+git clone https://github.com/ZhaoHaotian5/Hotsus
 
-cd PT-BFT-HD
+cd Hotsus
 
 docker build -t ptbft .
-
-
-
-python3 experiments.py --RunHotstuff --NumExperiments 1 --NumViews 5

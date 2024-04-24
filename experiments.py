@@ -25,19 +25,19 @@ NetworkLatency = 0  # Network latency in ms
 NetworkVariation = 0  # Variation of the network latency
 SleepTime = 0  # Time of clients sleep between 2 sends (in microseconds)
 LeaderChangeTime = 5  # Timeout before changing leader (in seconds)
-PtbftFactor = 1  # Const factor of trusted replicas in Ptbft
+HotsusFactor = 1  # Const factor of trusted replicas in Hotsus
 
 # Parameters of making files
 NumCores = multiprocessing.cpu_count()  # Number of cores to use to make
 
 # Parameters of Docker
 Docker = "docker"
-DockerBase = "ptbft"  # Name of the docker container
+DockerBase = "hotsus"  # Name of the docker container
 DockerMemory = 0  # Memory used by docker containers (0 means no constraints)
 DockerCpu = 0  # Cpus used by containers (0 means no constraints)
 
 # Parameters of Aliyun
-LocalPath = "/root/PTBFT/"
+LocalPath = "/root/Hotsus/"
 Aliyun = "aliyun"
 InstanceType = "ecs.c7.large"
 InstanceInternetChargeType = "PayByTraffic"
@@ -48,7 +48,7 @@ InstanceCores = 2
 # Parameters of choosing protocols
 RunHotstuff = False  # True
 RunDamysus = False  # True
-RunPtbft = False  # True
+RunHotsus = False  # True
 
 # Configuration of running mode
 RunLocal = False
@@ -74,7 +74,7 @@ PointsFile = StatisticsFile + "/points-" + TimestampStr
 AbortedFile = StatisticsFile + "/aborted-" + TimestampStr
 PlotFile = StatisticsFile + "/plot-" + TimestampStr + ".png"
 ClientsFile = StatisticsFile + "/clients-" + TimestampStr
-MainFile = "PTBFT"
+MainFile = "Hotsus"
 
 # Names of execute files
 HotstuffServerFile = "HotstuffServer"
@@ -82,9 +82,9 @@ HotstuffClientFile = "HotstuffClient"
 DamysusServerFile = "DamysusServer"
 DamysusClientFile = "DamysusClient"
 DamysusKeysFile = "DamysusKeys"
-PtbftServerFile = "PtbftServer"
-PtbftClientFile = "PtbftClient"
-PtbftKeysFile = "PtbftKeys"
+HotsusServerFile = "HotsusServer"
+HotsusClientFile = "HotsusClient"
+HotsusKeysFile = "HotsusKeys"
 EnclaveSignedFile = "enclave.signed.so"
 
 # Aliyun ECS
@@ -122,7 +122,7 @@ RegionDictionary = {"cn-hongkong": "Hong Kong",
 class Protocol(Enum):
     HOTSTUFF = "BASIC_HOTSTUFF"
     DAMYSUS = "BASIC_DAMYSUS"
-    PTBFT = "BASIC_PTBFT"
+    HOTSUS = "BASIC_HOTSUS"
 
 
 def makeParameters(protocolName, numReplicas, numMaxSignatures, numTransactions, payloadSize):
@@ -263,8 +263,8 @@ def makeContainersFiles(protocolName, numGeneralReplicas, numTrustedReplicas, nu
             compileCmd = [Docker + " exec -t " + dockerInstance + " bash -c \"make -j " + str(NumCores) + " " + HotstuffServerFile + " " + HotstuffClientFile + "\""]
             subprocess.run(compileCmd, shell=True, check=True)
         else:
-            compileCmd = [Docker + " exec -t " + dockerInstance + " bash -c \"" + SgxSource + "; make -j " + str(NumCores) + " SGX_MODE=" + SgxMode + " " + PtbftServerFile +
-                          " " + PtbftClientFile + " " + PtbftKeysFile + " " + EnclaveSignedFile + "\""]
+            compileCmd = [Docker + " exec -t " + dockerInstance + " bash -c \"" + SgxSource + "; make -j " + str(NumCores) + " SGX_MODE=" + SgxMode + " " + HotsusServerFile +
+                          " " + HotsusClientFile + " " + HotsusKeysFile + " " + EnclaveSignedFile + "\""]
             subprocess.run(compileCmd, shell=True, check=True)
 
     for (isReplica, type, i) in trustedReplicas:
@@ -294,8 +294,8 @@ def makeContainersFiles(protocolName, numGeneralReplicas, numTrustedReplicas, nu
                           " " + DamysusClientFile + " " + DamysusKeysFile + " " + EnclaveSignedFile + "\""]
             subprocess.run(compileCmd, shell=True, check=True)
         else:
-            compileCmd = [Docker + " exec -t " + dockerInstance + " bash -c \"" + SgxSource + "; make -j " + str(NumCores) + " SGX_MODE=" + SgxMode + " " + PtbftServerFile +
-                          " " + PtbftClientFile + " " + PtbftKeysFile + " " + EnclaveSignedFile + "\""]
+            compileCmd = [Docker + " exec -t " + dockerInstance + " bash -c \"" + SgxSource + "; make -j " + str(NumCores) + " SGX_MODE=" + SgxMode + " " + HotsusServerFile +
+                          " " + HotsusClientFile + " " + HotsusKeysFile + " " + EnclaveSignedFile + "\""]
             subprocess.run(compileCmd, shell=True, check=True)
 
     for (isReplica, type, i) in clients:
@@ -328,8 +328,8 @@ def makeContainersFiles(protocolName, numGeneralReplicas, numTrustedReplicas, nu
                           " " + DamysusClientFile + " " + DamysusKeysFile + " " + EnclaveSignedFile + "\""]
             subprocess.run(compileCmd, shell=True, check=True)
         else:
-            compileCmd = [Docker + " exec -t " + dockerInstance + " bash -c \"" + SgxSource + "; make -j " + str(NumCores) + " SGX_MODE=" + SgxMode + " " + PtbftServerFile +
-                          " " + PtbftClientFile + " " + PtbftKeysFile + " " + EnclaveSignedFile + "\""]
+            compileCmd = [Docker + " exec -t " + dockerInstance + " bash -c \"" + SgxSource + "; make -j " + str(NumCores) + " SGX_MODE=" + SgxMode + " " + HotsusServerFile +
+                          " " + HotsusClientFile + " " + HotsusKeysFile + " " + EnclaveSignedFile + "\""]
             subprocess.run(compileCmd, shell=True, check=True)
 
 
@@ -376,14 +376,14 @@ def executeContainersProtocol(protocolName, numGeneralReplicas, numTrustedReplic
     elif protocolName == Protocol.DAMYSUS:
         serverPath = str("./" + DamysusServerFile)
     else:
-        serverPath = str("./" + PtbftServerFile)
+        serverPath = str("./" + HotsusServerFile)
 
     if protocolName == Protocol.HOTSTUFF:
         clientPath = str("./" + HotstuffClientFile)
     elif protocolName == Protocol.DAMYSUS:
         clientPath = str("./" + DamysusClientFile)
     else:
-        clientPath = str("./" + PtbftClientFile)
+        clientPath = str("./" + HotsusClientFile)
     newLeaderChangeTime = int(math.ceil(LeaderChangeTime + math.log(numFaults, 2)))
 
     # Start general servers
@@ -494,7 +494,7 @@ def executeContainersProtocol(protocolName, numGeneralReplicas, numTrustedReplic
     for (isReplica, type, i) in allNodes:
         dockerInstance = DockerBase + type + i
         killCmd = [Docker + " exec -t " + dockerInstance + " bash -c \"" + "killall -q " + HotstuffServerFile + " " + HotstuffClientFile + " " + DamysusServerFile +
-                   " " + DamysusClientFile + " " + PtbftServerFile + " " + PtbftClientFile + "; fuser -k " + allPorts + "\""]
+                   " " + DamysusClientFile + " " + HotsusServerFile + " " + HotsusClientFile + "; fuser -k " + allPorts + "\""]
         subprocess.run(killCmd, shell=True)
         copyCmd = [Docker + " cp " + dockerInstance + ":/app/" + StatisticsFile + "/." + " " + StatisticsFile + "/"]
         subprocess.run(copyCmd, shell=True, check=True)
@@ -581,7 +581,7 @@ def terminateContainers(numGeneralReplicas, numTrustedReplicas, numClients):
         subprocess.run(removeCmd, shell=True)
 
 
-def runLocalExperiment(protocolName, constFactor, numViews, numFaults, numClients, numClientTransactions, cutOffBound, numExperiments, sleepTime, ptbftFactor):
+def runLocalExperiment(protocolName, constFactor, numViews, numFaults, numClients, numClientTransactions, cutOffBound, numExperiments, sleepTime, hotsusFactor):
     # Initialize the parameters
     throughputViews = []
     latencyViews = []
@@ -600,7 +600,7 @@ def runLocalExperiment(protocolName, constFactor, numViews, numFaults, numClient
         numMaxSignatures = numAllReplicas - numFaults
     else:
         numAllReplicas = (constFactor * numFaults) + 1
-        numTrustedReplicas = int(ptbftFactor * numFaults)
+        numTrustedReplicas = int(hotsusFactor * numFaults)
         numGeneralReplicas = numAllReplicas - numTrustedReplicas
         numMaxSignatures = numAllReplicas - numFaults
         if numTrustedReplicas < 3:
@@ -656,15 +656,15 @@ def runLocalExperiments():
         if RunHotstuff:
             runLocalExperiment(protocolName=Protocol.HOTSTUFF, constFactor=3, numViews=NumViews, numFaults=numFaults, numClients=NumClients,
                                numClientTransactions=NumClientTransactions, cutOffBound=CutOffBound, numExperiments=NumExperiments, sleepTime=SleepTime,
-                               ptbftFactor=PtbftFactor)
+                               hotsusFactor=HotsusFactor)
         if RunDamysus:
             runLocalExperiment(protocolName=Protocol.DAMYSUS, constFactor=2, numViews=NumViews, numFaults=numFaults, numClients=NumClients,
                                numClientTransactions=NumClientTransactions, cutOffBound=CutOffBound, numExperiments=NumExperiments, sleepTime=SleepTime,
-                               ptbftFactor=PtbftFactor)
-        if RunPtbft:
-            runLocalExperiment(protocolName=Protocol.PTBFT, constFactor=3, numViews=NumViews, numFaults=numFaults, numClients=NumClients,
+                               hotsusFactor=HotsusFactor)
+        if RunHotsus:
+            runLocalExperiment(protocolName=Protocol.HOTSUS, constFactor=3, numViews=NumViews, numFaults=numFaults, numClients=NumClients,
                                numClientTransactions=NumClientTransactions, cutOffBound=CutOffBound, numExperiments=NumExperiments, sleepTime=SleepTime,
-                               ptbftFactor=PtbftFactor)
+                               hotsusFactor=HotsusFactor)
     print("Number of complete runs:", CompleteRuns)
     print("Number of aborted runs:", AbortedRuns)
     print("Aborted runs:", AbortedRunsList)
@@ -848,7 +848,7 @@ def installSalticidaeInstanceFiles(sshAddress):
     devNull = open(os.devnull, 'w')
 
     # Install Salticidae
-    installing = "cd /root/PTBFT; git clone https://github.com/Determinant/salticidae.git; cd salticidae; cmake . -DCMAKE_INSTALL_PREFIX=.; make; make install;"
+    installing = "cd /root/Hotsus; git clone https://github.com/Determinant/salticidae.git; cd salticidae; cmake . -DCMAKE_INSTALL_PREFIX=.; make; make install;"
     installingCmd = ["sshpass -p " + InstancePassword + " ssh " + sshAddress + " \"" + installing + "\""]
     subprocess.run(installingCmd, shell=True, check=True, stdout=devNull)
 
@@ -926,7 +926,7 @@ def makeInstancesFiles(protocolName, generalReplicasInstances, trustedReplicasIn
             subprocess.run(compileCmd, shell=True, check=True)
         else:
             compileCmd = ["sshpass -p " + InstancePassword + " ssh " + sshAddress + " \"cd " + MainFile + "; " + SgxSource + "; make -j " + str(InstanceCores) + " SGX_MODE=" + SgxMode +
-                          " " + PtbftServerFile + " " + PtbftClientFile + " " + PtbftKeysFile + " " + EnclaveSignedFile + "\""]
+                          " " + HotsusServerFile + " " + HotsusClientFile + " " + HotsusKeysFile + " " + EnclaveSignedFile + "\""]
             subprocess.run(compileCmd, shell=True, check=True)
 
     for (replicaId, instanceId, privateIpAddress, publicIpAddress, regionId) in trustedReplicasInstances:
@@ -942,7 +942,7 @@ def makeInstancesFiles(protocolName, generalReplicasInstances, trustedReplicasIn
             subprocess.run(compileCmd, shell=True, check=True)
         else:
             compileCmd = ["sshpass -p " + InstancePassword + " ssh " + sshAddress + " \"cd " + MainFile + "; " + SgxSource + "; make -j " + str(InstanceCores) + " SGX_MODE=" + SgxMode +
-                          " " + PtbftServerFile + " " + PtbftClientFile + " " + PtbftKeysFile + " " + EnclaveSignedFile + "\""]
+                          " " + HotsusServerFile + " " + HotsusClientFile + " " + HotsusKeysFile + " " + EnclaveSignedFile + "\""]
             subprocess.run(compileCmd, shell=True, check=True)
 
     for (replicaId, instanceId, privateIpAddress, publicIpAddress, regionId) in clientInstances:
@@ -962,7 +962,7 @@ def makeInstancesFiles(protocolName, generalReplicasInstances, trustedReplicasIn
             subprocess.run(compileCmd, shell=True, check=True)
         else:
             compileCmd = ["sshpass -p " + InstancePassword + " ssh " + sshAddress + " \"cd " + MainFile + "; " + SgxSource + "; make -j " + str(InstanceCores) + " SGX_MODE=" + SgxMode +
-                          " " + PtbftServerFile + " " + PtbftClientFile + " " + PtbftKeysFile + " " + EnclaveSignedFile + "\""]
+                          " " + HotsusServerFile + " " + HotsusClientFile + " " + HotsusKeysFile + " " + EnclaveSignedFile + "\""]
             subprocess.run(compileCmd, shell=True, check=True)
 
 
@@ -982,14 +982,14 @@ def executeInstancesProtocol(protocolName, generalReplicasInstances, trustedRepl
     elif protocolName == Protocol.DAMYSUS:
         serverPath = str("./" + DamysusServerFile)
     else:
-        serverPath = str("./" + PtbftServerFile)
+        serverPath = str("./" + HotsusServerFile)
 
     if protocolName == Protocol.HOTSTUFF:
         clientPath = str("./" + HotstuffClientFile)
     elif protocolName == Protocol.DAMYSUS:
         clientPath = str("./" + DamysusClientFile)
     else:
-        clientPath = str("./" + PtbftClientFile)
+        clientPath = str("./" + HotsusClientFile)
     newLeaderChangeTime = int(math.ceil(LeaderChangeTime + math.log(numFaults, 2)))
 
     # Start general servers
@@ -1103,7 +1103,7 @@ def executeInstancesProtocol(protocolName, generalReplicasInstances, trustedRepl
     for (clientId, instanceId, privateIpAddress, publicIpAddress, regionId) in allInstances:
         sshAddress = "root@" + publicIpAddress
         killCmd = ["sshpass -p " + InstancePassword + " ssh " + sshAddress + " \"cd " + MainFile + "; " + "killall -q " + HotstuffServerFile + " " + HotstuffClientFile + " " + DamysusServerFile +
-                   " " + DamysusClientFile + " " + PtbftServerFile + " " + PtbftClientFile + "\""]
+                   " " + DamysusClientFile + " " + HotsusServerFile + " " + HotsusClientFile + "\""]
         subprocess.run(killCmd, shell=True)
 
 
@@ -1131,7 +1131,7 @@ def terminateInstances():
             subprocess.run(terminationCmd, shell=True)
 
 
-def runInstanceExperiment(protocolName, constFactor, numViews, numFaults, numClients, numClientTransactions, cutOffBound, numExperiments, sleepTime, ptbftFactor):
+def runInstanceExperiment(protocolName, constFactor, numViews, numFaults, numClients, numClientTransactions, cutOffBound, numExperiments, sleepTime, hotsusFactor):
     # Initialize the parameters
     throughputViews = []
     latencyViews = []
@@ -1150,7 +1150,7 @@ def runInstanceExperiment(protocolName, constFactor, numViews, numFaults, numCli
         numMaxSignatures = numAllReplicas - numFaults
     else:
         numAllReplicas = (constFactor * numFaults) + 1
-        numTrustedReplicas = int(ptbftFactor * numFaults)
+        numTrustedReplicas = int(hotsusFactor * numFaults)
         numGeneralReplicas = numAllReplicas - numTrustedReplicas
         numMaxSignatures = numAllReplicas - numFaults
         if numTrustedReplicas < 3:
@@ -1234,15 +1234,15 @@ def runInstanceExperiments():
         if RunHotstuff:
             runInstanceExperiment(protocolName=Protocol.HOTSTUFF, constFactor=3, numViews=NumViews, numFaults=numFaults, numClients=NumClients,
                                   numClientTransactions=NumClientTransactions, cutOffBound=CutOffBound, numExperiments=NumExperiments, sleepTime=SleepTime,
-                                  ptbftFactor=PtbftFactor)
+                                  hotsusFactor=HotsusFactor)
         if RunDamysus:
             runInstanceExperiment(protocolName=Protocol.DAMYSUS, constFactor=2, numViews=NumViews, numFaults=numFaults, numClients=NumClients,
                                   numClientTransactions=NumClientTransactions, cutOffBound=CutOffBound, numExperiments=NumExperiments, sleepTime=SleepTime,
-                                  ptbftFactor=PtbftFactor)
-        if RunPtbft:
-            runInstanceExperiment(protocolName=Protocol.PTBFT, constFactor=3, numViews=NumViews, numFaults=numFaults, numClients=NumClients,
+                                  hotsusFactor=HotsusFactor)
+        if RunHotsus:
+            runInstanceExperiment(protocolName=Protocol.HOTSUS, constFactor=3, numViews=NumViews, numFaults=numFaults, numClients=NumClients,
                                   numClientTransactions=NumClientTransactions, cutOffBound=CutOffBound, numExperiments=NumExperiments, sleepTime=SleepTime,
-                                  ptbftFactor=PtbftFactor)
+                                  hotsusFactor=HotsusFactor)
 
     print("Number of complete runs:", CompleteRuns)
     print("Number of aborted runs:", AbortedRuns)
@@ -1268,8 +1268,8 @@ parser.add_argument("--DockerCpu", type=float, default=0, help="Cpus used by doc
 # Configuration of experiments
 parser.add_argument("--RunHotstuff", action="store_true", help="Run Hotstuff protocol")
 parser.add_argument("--RunDamysus", action="store_true", help="Run Damysus protocol")
-parser.add_argument("--RunPtbft", action="store_true", help="Run Ptbft protocol")
-parser.add_argument("--PtbftFactor", type=float, default=0, help="Const factor of trusted replicas in Ptbft")
+parser.add_argument("--RunHotsus", action="store_true", help="Run Hotsus protocol")
+parser.add_argument("--HotsusFactor", type=float, default=0, help="Const factor of trusted replicas in Hotsus")
 
 # Configuration of running mode
 parser.add_argument("--RunLocal", action="store_true", help="Run experiments in local")
@@ -1321,12 +1321,12 @@ if args.RunHotstuff:
 if args.RunDamysus:
     RunDamysus = True
     print("SUCCESSFULLY PARSED ARGUMENT - Test Damysus protocol")
-if args.RunPtbft:
-    RunPtbft = True
-    print("SUCCESSFULLY PARSED ARGUMENT - Test Ptbft protocol")
-if args.PtbftFactor > 0:
-    PtbftFactor = args.PtbftFactor
-    print("SUCCESSFULLY PARSED ARGUMENT - The const factor of trusted replicas in Ptbft is:", PtbftFactor)
+if args.RunHotsus:
+    RunHotsus = True
+    print("SUCCESSFULLY PARSED ARGUMENT - Test Hotsus protocol")
+if args.HotsusFactor > 0:
+    HotsusFactor = args.HotsusFactor
+    print("SUCCESSFULLY PARSED ARGUMENT - The const factor of trusted replicas in Hotsus is:", HotsusFactor)
 
 # Configuration of running mode
 if args.RunLocal:

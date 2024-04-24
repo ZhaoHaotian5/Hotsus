@@ -53,11 +53,11 @@ Damysus_App_Cpp_Files := $(filter-out App/Client.cpp App/Hotstuff.cpp App/Hotstu
 Damysus_App_Cpp_Files :=  $(Damysus_App_Cpp_Files) App/sgx_utils/sgx_utils.cpp
 Damysus_App_Cpp_Objects := $(Damysus_App_Cpp_Files:.cpp=.o)
 
-# Ptbft Files
-Ptbft_App_Cpp_Files := $(wildcard App/*.cpp)
-Ptbft_App_Cpp_Files := $(filter-out App/Client.cpp App/Damysus.cpp App/Hotstuff.cpp App/HotstuffBasic.cpp App/Keys.cpp App/Server.cpp, $(Ptbft_App_Cpp_Files))
-Ptbft_App_Cpp_Files :=  $(Ptbft_App_Cpp_Files) App/sgx_utils/sgx_utils.cpp
-Ptbft_App_Cpp_Objects := $(Ptbft_App_Cpp_Files:.cpp=.o)
+# Hotsus Files
+Hotsus_App_Cpp_Files := $(wildcard App/*.cpp)
+Hotsus_App_Cpp_Files := $(filter-out App/Client.cpp App/Damysus.cpp App/Hotstuff.cpp App/HotstuffBasic.cpp App/Keys.cpp App/Server.cpp, $(Hotsus_App_Cpp_Files))
+Hotsus_App_Cpp_Files :=  $(Hotsus_App_Cpp_Files) App/sgx_utils/sgx_utils.cpp
+Hotsus_App_Cpp_Objects := $(Hotsus_App_Cpp_Files:.cpp=.o)
 
 # App Files
 App_Include_Paths := -IApp -I$(SGX_SDK)/include $(Salticidae_Include_Paths)
@@ -127,16 +127,16 @@ DamysusKeys: App/Keys.cpp App/KeysFunctions.o
 	@$(CXX) $^ -o $@ $(App_Link_Flags) $(App_Include_Paths)
 	@echo "LINK <=  $@"
 
-# Ptbft Objects
-PtbftServer: App/Server.cpp App/Enclave_u.o $(Ptbft_App_Cpp_Objects)
+# Hotsus Objects
+HotsusServer: App/Server.cpp App/Enclave_u.o $(Hotsus_App_Cpp_Objects)
 	@$(CXX) $^ -o $@ $(App_Link_Flags) $(App_Include_Paths)
 	@echo "LINK =>  $@"
 
-PtbftClient: App/Client.cpp App/KeysFunctions.o App/Node.o App/Nodes.o App/Sign.o App/Signs.o App/Statistics.o App/Transaction.o
+HotsusClient: App/Client.cpp App/KeysFunctions.o App/Node.o App/Nodes.o App/Sign.o App/Signs.o App/Statistics.o App/Transaction.o
 	@$(CXX) $^ -o $@ $(App_Link_Flags) $(App_Include_Paths)
 	@echo "LINK <=  $@"
 
-PtbftKeys: App/Keys.cpp App/KeysFunctions.o
+HotsusKeys: App/Keys.cpp App/KeysFunctions.o
 	@$(CXX) $^ -o $@ $(App_Link_Flags) $(App_Include_Paths)
 	@echo "LINK <=  $@"
 
