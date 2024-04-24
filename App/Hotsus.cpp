@@ -1982,10 +1982,21 @@ int Hotsus::initializeSGX()
 
 void Hotsus::getStarted()
 {
-	if (DEBUG_BASIC)
+	if (this->protocol == PROTOCOL_HOTSTUFF)
 	{
-		std::cout << COLOUR_RED << this->printReplicaId() << "Starting" << COLOUR_NORMAL << std::endl;
+		if (DEBUG_BASIC)
+		{
+			std::cout << COLOUR_RED << this->printReplicaId() << "Starting in Hotstuff" < < < < COLOUR_NORMAL << std::endl;
+		}
 	}
+	else if (this->protocol == PROTOCOL_DAMYSUS)
+	{
+		if (DEBUG_BASIC)
+		{
+			std::cout << COLOUR_RED << this->printReplicaId() << "Starting in Damysus" < < < < COLOUR_NORMAL << std::endl;
+		}
+	}
+
 	startTime = std::chrono::steady_clock::now();
 	startView = std::chrono::steady_clock::now();
 
