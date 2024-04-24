@@ -14,14 +14,15 @@ class HotsusBasic
 private:
 	Hash prepareHash;				// Hash of the last prepared block
 	View prepareView;				// View of [prepareHash]
-	Hash preprepareHash;			// Copy of [prepareHash]
-	View preprepareView;			// Copy of [prepareView]
+	Hash exprepareHash;				// Hash of the last prepared block
+	View exprepareView;				// View of [exprepareHash]
 	View view;						// Current view
 	Phase phase;					// Current phase
 	ReplicaID replicaId;			// Unique identifier
 	Key privateKey;					// Private key
 	unsigned int generalQuorumSize; // General quorum size
 	unsigned int trustedQuorumSize; // Trusted quorum size
+	bool switcher;
 
 	void increment();
 	void feedback();
@@ -44,6 +45,7 @@ public:
 	void skipRound();
 	Justification initializeMsgExnewview();
 	Justification respondExproposal(Nodes nodes, Hash proposeHash, Justification justification_MsgExnewview);
+	Signs initializeMsgExldrprepare(Proposal<Justification> proposal_MsgExldrprepare);
 	Justification saveMsgExprepare(Nodes nodes, Justification justification_MsgExprepare);
 	Justification lockMsgExprecommit(Nodes nodes, Justification justification_MsgExprecommit);
 };

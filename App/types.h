@@ -39,12 +39,15 @@ typedef uint8_t HEADER;
 #define PHASE_EXPRECOMMIT 0x6
 #define PHASE_EXCOMMIT 0x7
 
+#define PROTOCOL_HOTSTUFF 0x0
+#define PROTOCOL_DAMYSUS 0x1
+
 typedef uint8_t Phase;
+typedef uint8_t Protocol;
 typedef unsigned int ReplicaID;		// process ids
 typedef unsigned int ClientID;		// client ids
 typedef unsigned int TransactionID; // transaction ids
 typedef unsigned int PortID;
 typedef unsigned int View;
-typedef unsigned int Value;
 
 #endif

@@ -248,8 +248,14 @@ std::string Hotsus::recipients2string(Peers recipients)
 // Setting functions
 unsigned int Hotsus::getLeaderOf(View view)
 {
-	unsigned int leader = this->view % this->numTrustedReplicas + this->numGeneralReplicas;
-	return leader;
+	if (this->protocol == PROTOCOL_HOTSTUFF)
+	{
+		unsigned int leader = this->view % (this->numTrustedReplicas + this->numGeneralReplicas);
+		return leader;
+	}
+	else
+	{
+	}
 }
 
 unsigned int Hotsus::getCurrentLeader()
@@ -297,8 +303,22 @@ bool Hotsus::amGeneralReplicaIds()
 	std::vector<ReplicaID> generalNodeIds = this->getGeneralReplicaIds();
 	for (std::vector<ReplicaID>::iterator itReplica = generalNodeIds.begin(); itReplica != generalNodeIds.end(); itReplica++)
 	{
-		ReplicaID replicaId = *itReplica;
-		if (this->replicaId == replicaId)
+		ReplicaID generalReplicaId = *itReplica;
+		if (this->replicaId == generalReplicaId)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Hotsus::isGeneralReplicaIds(ReplicaID replicaId)
+{
+	std::vector<ReplicaID> generalNodeIds = this->getGeneralReplicaIds();
+	for (std::vector<ReplicaID>::iterator itReplica = generalNodeIds.begin(); itReplica != generalNodeIds.end(); itReplica++)
+	{
+		ReplicaID generalReplicaId = *itReplica;
+		if (replicaId == generalReplicaId)
 		{
 			return true;
 		}
@@ -600,27 +620,43 @@ Justification Hotsus::initializeMsgExnewviewHotsus()
 
 Justification Hotsus::respondMsgExnewviewProposalHotsus(Hash proposeHash, Justification justification_MsgExnewview)
 {
-	Hash_t proposeHash_t;
-	setHash(proposeHash, &proposeHash_t);
-	Justification_t justification_MsgExnewview_t;
-	setJustification(justification_MsgExnewview, &justification_MsgExnewview_t);
-	Justification_t justification_MsgExprepare_t;
-	sgx_status_t extra_t;
-	sgx_status_t status_t;
-	status_t = TEE_respondExproposalHotsus(global_eid, &extra_t, &proposeHash_t, &justification_MsgExnewview_t, &justification_MsgExprepare_t);
-	Justification justification_MsgExprepare = getJustification(&justification_MsgExprepare_t);
+	Justification justification_MsgExprepare = Justification();
+	if (!this->amGeneralReplicaIds())
+	{
+		Hash_t proposeHash_t;
+		setHash(proposeHash, &proposeHash_t);
+		Justification_t justification_MsgExnewview_t;
+		setJustification(justification_MsgExnewview, &justification_MsgExnewview_t);
+		Justification_t justification_MsgExprepare_t;
+		sgx_status_t extra_t;
+		sgx_status_t status_t;
+		status_t = TEE_respondExproposalHotsus(global_eid, &extra_t, &proposeHash_t, &justification_MsgExnewview_t, &justification_MsgExprepare_t);
+		justification_MsgExprepare = getJustification(&justification_MsgExprepare_t);
+	}
+	else
+	{
+		justification_MsgExprepare = hotsusBasic.respondExproposal(this->nodes, proposeHash, justification_MsgExnewview);
+	}
 	return justification_MsgExprepare;
 }
 
 Signs Hotsus::initializeMsgExldrprepareHotsus(Proposal<Justification> proposal_MsgExldrprepare)
 {
-	Exproposal_t proposal_MsgExldrprepare_t;
-	setExproposal(proposal_MsgExldrprepare, &proposal_MsgExldrprepare_t);
-	Signs_t signs_MsgExldrprepare_t;
-	sgx_status_t extra_t;
-	sgx_status_t status_t;
-	status_t = TEE_initializeMsgExldrprepareHotsus(global_eid, &extra_t, &proposal_MsgExldrprepare_t, &signs_MsgExldrprepare_t);
-	Signs signs_MsgExldrprepare = getSigns(&signs_MsgExldrprepare_t);
+	Signs signs_MsgExldrprepare = Signs();
+	if (!this->amGeneralReplicaIds())
+	{
+		Exproposal_t proposal_MsgExldrprepare_t;
+		setExproposal(proposal_MsgExldrprepare, &proposal_MsgExldrprepare_t);
+		Signs_t signs_MsgExldrprepare_t;
+		sgx_status_t extra_t;
+		sgx_status_t status_t;
+		status_t = TEE_initializeMsgExldrprepareHotsus(global_eid, &extra_t, &proposal_MsgExldrprepare_t, &signs_MsgExldrprepare_t);
+		signs_MsgExldrprepare = getSigns(&signs_MsgExldrprepare_t);
+	}
+	else
+	{
+		signs_MsgExldrprepare = hotsusBasic.initializeMsgExldrprepare(proposal_MsgExldrprepare);
+	}
 	return signs_MsgExldrprepare;
 }
 
@@ -1436,7 +1472,7 @@ void Hotsus::handleMsgExcommitHotsus(MsgExcommitHotsus msgExcommit)
 			{
 				if (signs_MsgExcommit.getSize() == this->generalQuorumSize && this->verifyJustificationHotsus(justification_MsgExcommit))
 				{
-					this->executeBlockHotsus(roundData_MsgExcommit);
+					this->executeExtraBlockHotsus(roundData_MsgExcommit);
 				}
 			}
 		}
@@ -1617,6 +1653,31 @@ void Hotsus::initiateMsgPrecommitHotsus(RoundData roundData_MsgPrecommit)
 
 void Hotsus::initiateMsgExnewviewHotsus()
 {
+	// Get the trusted replicas
+	if (this->protocol == PROTOCOL_HOTSTUFF && !this->amGeneralReplicaIds())
+	{
+		std::vector<ReplicaID> senders = this->log.getTrustedMsgExnewviewHotsus(this->view);
+		std::vector<ReplicaID> trustedSenders;
+		for (std::vector<int>::iterator itSenders = senders.begin(); itSenders != senders.end(); itSenders++)
+		{
+			ReplicaID sender = *itSenders;
+			if (!this->isGeneralReplicaIds(sender))
+			{
+				trustedSenders.push_back(sender);
+			}
+		}
+		if (trustedSenders.size() > this->lowrustedSize)
+		{
+			trustedGroup = trustedSenders;
+			std::cout << COLOUR_BLUE << this->printReplicaId() << "Trusted group: ";
+			for (int trustedSendersNum = 0; trustedSendersNum < trustedSenders.size(); trustedSendersNum++)
+			{
+				std::cout << trustedSenders[trustedSendersNum] << " ";
+			}
+			std::cout << COLOUR_NORMAL << std::endl;
+		}
+	}
+
 	// Create [block] extends the highest prepared block
 	Justification justification_MsgExnewview = this->log.findHighestMsgExnewviewHotsus(this->view);
 	RoundData roundData_MsgExnewview = justification_MsgExnewview.getRoundData();
@@ -1761,7 +1822,7 @@ void Hotsus::initiateMsgExcommitHotsus(RoundData roundData_MsgExcommit)
 		}
 
 		// Execute the block
-		this->executeBlockHotsus(roundData_MsgExcommit);
+		this->executeExtraBlockHotsus(roundData_MsgExcommit);
 	}
 }
 
@@ -1928,33 +1989,33 @@ void Hotsus::getStarted()
 	startTime = std::chrono::steady_clock::now();
 	startView = std::chrono::steady_clock::now();
 
-	// Send [msgNewview] to the leader of the current view
+	// Send [msgExnewview] to the leader of the current view
 	ReplicaID leader = this->getCurrentLeader();
 	Peers recipients = this->keepFromPeers(leader);
 
-	Justification justification_MsgNewview = this->initializeMsgNewviewHotsus();
+	Justification justification_MsgExnewview = this->initializeMsgExnewviewHotsus();
 	if (DEBUG_HELP)
 	{
-		std::cout << COLOUR_BLUE << this->printReplicaId() << "Initial justification: " << justification_MsgNewview.toPrint() << COLOUR_NORMAL << std::endl;
+		std::cout << COLOUR_BLUE << this->printReplicaId() << "Initial justification: " << justification_MsgExnewview.toPrint() << COLOUR_NORMAL << std::endl;
 	}
-	RoundData roundData_MsgNewview = justification_MsgNewview.getRoundData();
-	Signs signs_MsgNewview = justification_MsgNewview.getSigns();
-	MsgNewviewHotsus msgNewview = MsgNewviewHotsus(roundData_MsgNewview, signs_MsgNewview);
+	RoundData roundData_MsgExnewview = justification_MsgExnewview.getRoundData();
+	Signs signs_MsgExnewview = justification_MsgExnewview.getSigns();
+	MsgExnewviewHotsus msgExnewview = MsgExnewviewHotsus(roundData_MsgExnewview, signs_MsgExnewview);
 	if (DEBUG_HELP)
 	{
-		std::cout << COLOUR_BLUE << this->printReplicaId() << "Starting with: " << msgNewview.toPrint() << COLOUR_NORMAL << std::endl;
+		std::cout << COLOUR_BLUE << this->printReplicaId() << "Starting with: " << msgExnewview.toPrint() << COLOUR_NORMAL << std::endl;
 	}
 	if (this->amCurrentLeader())
 	{
-		this->handleMsgNewviewHotsus(msgNewview);
+		this->handleMsgExnewviewHotsus(msgExnewview);
 	}
 	else
 	{
-		this->sendMsgNewviewHotsus(msgNewview, recipients);
+		this->sendMsgExnewviewHotsus(msgExnewview, recipients);
 	}
 	if (DEBUG_HELP)
 	{
-		std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgNewview to leader[" << leader << "]" << COLOUR_NORMAL << std::endl;
+		std::cout << COLOUR_BLUE << this->printReplicaId() << "Sent MsgExnewview to leader[" << leader << "]" << COLOUR_NORMAL << std::endl;
 	}
 }
 
@@ -2099,11 +2160,47 @@ void Hotsus::executeBlockHotsus(RoundData roundData_MsgPrecommit)
 	if (DEBUG_BASIC)
 	{
 		std::cout << COLOUR_RED << this->printReplicaId()
-				  << "HOTSUS-EXECUTE(" << this->view << "/" << std::to_string(this->numViews - 1) << ":" << time << ") "
+				  << "HOTSUS-DAMYSUS-EXECUTE(" << this->view << "/" << std::to_string(this->numViews - 1) << ":" << time << ") "
 				  << statistics.toString() << COLOUR_NORMAL << std::endl;
 	}
 
 	this->replyHash(roundData_MsgPrecommit.getProposeHash());
+	if (this->timeToStop())
+	{
+		this->recordStatisticsHotsus();
+	}
+	else
+	{
+		this->startNewViewHotsus();
+	}
+}
+
+void Hotsus::executeExtraBlockHotsus(RoundData roundData_MsgExcommit)
+{
+	auto endView = std::chrono::steady_clock::now();
+	double time = std::chrono::duration_cast<std::chrono::microseconds>(endView - startView).count();
+	startView = endView;
+	statistics.increaseExecuteViews();
+	statistics.addViewTime(time);
+
+	if (this->transactions.empty())
+	{
+		this->viewsWithoutNewTrans++;
+	}
+	else
+	{
+		this->viewsWithoutNewTrans = 0;
+	}
+
+	// Execute
+	if (DEBUG_BASIC)
+	{
+		std::cout << COLOUR_RED << this->printReplicaId()
+				  << "HOTSUS-HOTSTUFF-EXECUTE(" << this->view << "/" << std::to_string(this->numViews - 1) << ":" << time << ") "
+				  << statistics.toString() << COLOUR_NORMAL << std::endl;
+	}
+
+	this->replyHash(roundData_MsgExcommit.getProposeHash());
 	if (this->timeToStop())
 	{
 		this->recordStatisticsHotsus();
@@ -2217,7 +2314,10 @@ Hotsus::Hotsus(KeysFunctions keysFunctions, ReplicaID replicaId, unsigned int nu
 	this->privateKey = privateKey;
 	this->generalQuorumSize = this->numReplicas - this->numFaults;
 	this->trustedQuorumSize = floor(this->numTrustedReplicas / 2) + 1;
+	this->lowrustedSize = 3;
+	this->trustedGroup = std::vector<ReplicaID> trustedGroup;
 	this->view = 0;
+	this->protocol = PROTOCOL_HOTSTUFF;
 
 	if (DEBUG_HELP)
 	{

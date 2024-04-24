@@ -24,7 +24,10 @@ void HotsusBasic::increment()
 void HotsusBasic::feedback()
 {
 	this->phase = PHASE_EXNEWVIEW;
-	this->view--;
+	if (this->switcher)
+	{
+		this->view--;
+	}
 }
 
 void HotsusBasic::incrementExtra()
@@ -82,26 +85,28 @@ HotsusBasic::HotsusBasic()
 {
 	this->prepareHash = Hash(true); // The genesis block
 	this->prepareView = 0;
-	this->preprepareHash = Hash(true); // The genesis block
-	this->preprepareView = 0;
+	this->exprepareHash = Hash(true); // The genesis block
+	this->exprepareView = 0;
 	this->view = 0;
 	this->phase = PHASE_NEWVIEW;
 	this->generalQuorumSize = 0;
 	this->trustedQuorumSize = 0;
+	this->switcher = false;
 }
 
 HotsusBasic::HotsusBasic(ReplicaID replicaId, Key privateKey, unsigned int generalQuorumSize, unsigned int trustedQuorumSize)
 {
 	this->prepareHash = Hash(true); // The genesis block
 	this->prepareView = 0;
-	this->preprepareHash = Hash(true); // The genesis block
-	this->preprepareView = 0;
+	this->exprepareHash = Hash(true); // The genesis block
+	this->exprepareView = 0;
 	this->view = 0;
 	this->phase = PHASE_NEWVIEW;
 	this->replicaId = replicaId;
 	this->privateKey = privateKey;
 	this->generalQuorumSize = generalQuorumSize;
 	this->trustedQuorumSize = trustedQuorumSize;
+	this->switcher = false;
 }
 
 bool HotsusBasic::verifyJustification(Nodes nodes, Justification justification)
@@ -140,8 +145,8 @@ Justification HotsusBasic::respondProposal(Nodes nodes, Hash proposeHash, Accumu
 		RoundData roundData_MsgPrepare = justification_MsgPrepare.getRoundData();
 		Hash proposeHash_MsgPrepare = roundData_MsgPrepare.getProposeHash();
 		View proposeView_MsgPrepare = roundData_MsgPrepare.getProposeView();
-		this->preprepareHash = this->prepareHash;
-		this->preprepareView = this->prepareView;
+		this->exprepareHash = this->prepareHash;
+		this->exprepareView = this->prepareView;
 		this->prepareHash = proposeHash_MsgPrepare;
 		this->prepareView = proposeView_MsgPrepare;
 		return justification_MsgPrepare;
@@ -165,7 +170,7 @@ void HotsusBasic::skipRound()
 Justification HotsusBasic::initializeMsgExnewview()
 {
 	this->feedback();
-	Justification justification_MsgExnewview = this->updateExtraRoundData(Hash(false), this->preprepareHash, this->preprepareView);
+	Justification justification_MsgExnewview = this->updateExtraRoundData(Hash(false), this->exprepareHash, this->exprepareView);
 	return justification_MsgExnewview;
 }
 
@@ -189,6 +194,13 @@ Justification HotsusBasic::respondExproposal(Nodes nodes, Hash proposeHash, Just
 		}
 		return Justification();
 	}
+}
+
+Signs HotstuffBasic::initializeMsgExldrprepare(Proposal<Justification> proposal_MsgExldrprepare)
+{
+	Sign sign_MsgExldrprepare = this->signText(proposal_MsgExldrprepare.toString());
+	Signs signs_MsgExldrprepare = Signs(sign_MsgExldrprepare);
+	return signs_MsgExldrprepare;
 }
 
 Justification HotsusBasic::saveMsgExprepare(Nodes nodes, Justification justification_MsgExprepare)

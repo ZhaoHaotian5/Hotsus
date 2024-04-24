@@ -11,7 +11,7 @@
 class Hash
 {
 private:
-	bool set; // True if [Hash] is not dummy  
+	bool set; // True if [Hash] is not dummy
 	unsigned char hash[SHA256_DIGEST_LENGTH];
 
 public:

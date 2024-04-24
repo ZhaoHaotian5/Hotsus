@@ -112,7 +112,7 @@ void KeysFunctions::generateEc256Keys(int id)
 	{
 		std::cout << COLOUR_CYAN << "Error writing private key data in PEM format" << COLOUR_NORMAL << std::endl;
 	}
-		
+
 	// BIO_pending function return number of byte read to bio buffer during previous step
 	int private_len = BIO_pending(outbio);
 	char *private_key = new char[private_len + 1];
@@ -124,7 +124,7 @@ void KeysFunctions::generateEc256Keys(int id)
 	{
 		std::cout << COLOUR_CYAN << "Error writing public key data in PEM format" << COLOUR_NORMAL << std::endl;
 	}
-		
+
 	// BIO_pending function return number of byte read to bio buffer during previous step
 	int public_len = BIO_pending(outbio);
 	char *public_key = new char[public_len + 1];

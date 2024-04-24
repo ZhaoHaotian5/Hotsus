@@ -66,7 +66,10 @@ private:
 	Key privateKey;
 	unsigned int generalQuorumSize;
 	unsigned int trustedQuorumSize;
+	unsigned int lowTrustedSize;
+	std::vector<ReplicaID> trustedGroup;
 	View view;
+	Protocol protocol;
 
 	// Message handlers
 	salticidae::EventContext peerEventContext;	  // Peer event context
@@ -104,6 +107,7 @@ private:
 	bool amCurrentLeader();
 	std::vector<ReplicaID> getGeneralReplicaIds();
 	bool amGeneralReplicaIds();
+	bool isGeneralReplicaIds(ReplicaID replicaId);
 	Peers removeFromPeers(ReplicaID replicaId);
 	Peers removeFromPeers(std::vector<ReplicaID> generalNodeIds);
 	Peers keepFromPeers(ReplicaID replicaId);
@@ -160,32 +164,32 @@ private:
 
 	// Handle messages
 	void handleMsgTransaction(MsgTransaction msgTransaction);
-	void handleEarlierMessagesHotsus();									   // For replicas to process messages they have already received for in new view
-	void handleMsgNewviewHotsus(MsgNewviewHotsus msgNewview);				   // Once the leader has received [msgNewview], it creates [msgLdrprepare] out of the highest prepared block
-	void handleMsgLdrprepareHotsus(MsgLdrprepareHotsus msgLdrprepare);	   // Once the replicas have received [msgLdrprepare], it creates [msgPrepare] out of the proposal
-	void handleMsgPrepareHotsus(MsgPrepareHotsus msgPrepare);				   // For both the leader and replicas process [msgPrepare]
-	void handleMsgPrecommitHotsus(MsgPrecommitHotsus msgPrecommit);		   // For both the leader and replicas process [msgPrecommit]
-	void handleMsgExnewviewHotsus(MsgExnewviewHotsus msgExnewview);		   // Once the leader has received [msgExnewview], it creates [msgExldrprepare] out of the highest prepared block
+	void handleEarlierMessagesHotsus();										 // For replicas to process messages they have already received for in new view
+	void handleMsgNewviewHotsus(MsgNewviewHotsus msgNewview);				 // Once the leader has received [msgNewview], it creates [msgLdrprepare] out of the highest prepared block
+	void handleMsgLdrprepareHotsus(MsgLdrprepareHotsus msgLdrprepare);		 // Once the replicas have received [msgLdrprepare], it creates [msgPrepare] out of the proposal
+	void handleMsgPrepareHotsus(MsgPrepareHotsus msgPrepare);				 // For both the leader and replicas process [msgPrepare]
+	void handleMsgPrecommitHotsus(MsgPrecommitHotsus msgPrecommit);			 // For both the leader and replicas process [msgPrecommit]
+	void handleMsgExnewviewHotsus(MsgExnewviewHotsus msgExnewview);			 // Once the leader has received [msgExnewview], it creates [msgExldrprepare] out of the highest prepared block
 	void handleMsgExldrprepareHotsus(MsgExldrprepareHotsus msgExldrprepare); // Once the replicas have received [msgExldrprepare], it creates [msgExprepare] out of the proposal
-	void handleMsgExprepareHotsus(MsgExprepareHotsus msgExprepare);		   // For both the leader and replicas process [msgExprepare]
-	void handleMsgExprecommitHotsus(MsgExprecommitHotsus msgExprecommit);	   // For both the leader and replicas process [msgExprecommit]
-	void handleMsgExcommitHotsus(MsgExcommitHotsus msgExcommit);			   // For both the leader and replicas process [msgExcommit]
+	void handleMsgExprepareHotsus(MsgExprepareHotsus msgExprepare);			 // For both the leader and replicas process [msgExprepare]
+	void handleMsgExprecommitHotsus(MsgExprecommitHotsus msgExprecommit);	 // For both the leader and replicas process [msgExprecommit]
+	void handleMsgExcommitHotsus(MsgExcommitHotsus msgExcommit);			 // For both the leader and replicas process [msgExcommit]
 
 	// Initiate messages
-	void initiateMsgNewviewHotsus();										  // Leader send [msgLdrprepare] to others and hold its own [msgPrepare]
-	void initiateMsgPrepareHotsus(RoundData roundData_MsgPrepare);		  // Leader send [msgPrepare] to others and hold its own [msgPrecommit]
-	void initiateMsgPrecommitHotsus(RoundData roundData_MsgPrecommit);	  // Leader send [msgPrecommit] to others and execute the block
-	void initiateMsgExnewviewHotsus();									  // Leader send [msgExldrprepare] to others and hold its own [msgExprepare]
-	void initiateMsgExprepareHotsus(RoundData roundData_MsgExprepare);	  // Leader send [msgExprepare] to others and hold its own [msgExprecommit]
+	void initiateMsgNewviewHotsus();									   // Leader send [msgLdrprepare] to others and hold its own [msgPrepare]
+	void initiateMsgPrepareHotsus(RoundData roundData_MsgPrepare);		   // Leader send [msgPrepare] to others and hold its own [msgPrecommit]
+	void initiateMsgPrecommitHotsus(RoundData roundData_MsgPrecommit);	   // Leader send [msgPrecommit] to others and execute the block
+	void initiateMsgExnewviewHotsus();									   // Leader send [msgExldrprepare] to others and hold its own [msgExprepare]
+	void initiateMsgExprepareHotsus(RoundData roundData_MsgExprepare);	   // Leader send [msgExprepare] to others and hold its own [msgExprecommit]
 	void initiateMsgExprecommitHotsus(RoundData roundData_MsgExprecommit); // Leader send [msgExprecommit] to others and hold its own [msgExcommit]
-	void initiateMsgExcommitHotsus(RoundData roundData_MsgExcommit);		  // Leader send [msgExcommit] to others and execute the block
+	void initiateMsgExcommitHotsus(RoundData roundData_MsgExcommit);	   // Leader send [msgExcommit] to others and execute the block
 
 	// Respond messages
-	void respondMsgLdrprepareHotsus(Accumulator accumulator_MsgLdrprepare, Block block);		 // Replicas respond to [msgLdrprepare] and send [msgPrepare] to the leader
-	void respondMsgPrepareHotsus(Justification justification_MsgPrepare);					 // Replicas respond to [msgPrepare] and send [msgPrecommit] to the leader
+	void respondMsgLdrprepareHotsus(Accumulator accumulator_MsgLdrprepare, Block block);	  // Replicas respond to [msgLdrprepare] and send [msgPrepare] to the leader
+	void respondMsgPrepareHotsus(Justification justification_MsgPrepare);					  // Replicas respond to [msgPrepare] and send [msgPrecommit] to the leader
 	void respondMsgExldrprepareHotsus(Justification justification_MsgExnewview, Block block); // Replicas respond to [msgExldrprepare] and send [msgExprepare] to the leader
-	void respondMsgExprepareHotsus(Justification justification_MsgExprepare);				 // Replicas respond to [msgExprepare] and send [msgExprecommit] to the leader
-	void respondMsgExprecommitHotsus(Justification justification_MsgExprecommit);			 // Replicas respond to [msgExprecommit] and send [msgExcommit] to the leader
+	void respondMsgExprepareHotsus(Justification justification_MsgExprepare);				  // Replicas respond to [msgExprepare] and send [msgExprecommit] to the leader
+	void respondMsgExprecommitHotsus(Justification justification_MsgExprecommit);			  // Replicas respond to [msgExprecommit] and send [msgExcommit] to the leader
 
 	// Main functions
 	int initializeSGX();
@@ -194,6 +198,7 @@ private:
 	void startNewViewHotsus();
 	Block createNewBlockHotsus(Hash hash);
 	void executeBlockHotsus(RoundData roundData_MsgPrecommit);
+	void executeExtraBlockHotsus(RoundData roundData_MsgExcommit);
 	bool timeToStop();
 	void recordStatisticsHotsus();
 

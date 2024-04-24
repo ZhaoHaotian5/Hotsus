@@ -102,6 +102,9 @@ public:
 	Signs getMsgExprecommitHotsus(View view, unsigned int n);
 	Signs getMsgExcommitHotsus(View view, unsigned int n);
 
+    // Get the trusted sender of the messages
+	std::vector<ReplicaID> getTrustedMsgExnewviewHotsus(View view);
+
 	// Find the justification of the highest message
 	Justification findHighestMsgExnewviewHotsus(View view);
 

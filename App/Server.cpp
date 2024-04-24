@@ -142,7 +142,7 @@ int main(int argc, char const *argv[])
 	long unsigned int sizeMessage = std::max({sizeof(MsgNewviewHotsus), sizeof(MsgLdrprepareHotsus), sizeof(MsgPrepareHotsus), sizeof(MsgPrecommitHotsus), sizeof(MsgExnewviewHotsus), sizeof(MsgExldrprepareHotsus), sizeof(MsgExprepareHotsus), sizeof(MsgExprecommitHotsus), sizeof(MsgExcommitHotsus)});
 #endif
 	long unsigned int size = std::max({sizeBasic, sizeMessage});
-	
+
 	if (DEBUG_SERVER)
 	{
 		std::cout << COLOUR_ORANGE << printReplicaId() << "Max msg size = " << size << COLOUR_NORMAL << std::endl;

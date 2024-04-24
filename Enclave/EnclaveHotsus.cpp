@@ -3,10 +3,11 @@
 
 Hash_t prepareHash_Hotsus_t = initiateHash_t();	  // Hash of the last prepared block
 View prepareView_Hotsus_t = 0;					  // View of [prepareHash_Hotsus_t]
-Hash_t preprepareHash_Hotsus_t = initiateHash_t(); // Copy of [prepareHash_Hotsus_t]
-View preprepareView_Hotsus_t = 0;				  // Copy of [prepareView_Hotsus_t]
+Hash_t exprepareHash_Hotsus_t = initiateHash_t(); // Hash of the last prepared block
+View exprepareView_Hotsus_t = 0;				  // Copy of [exprepareView_Hotsus_t]
 View view_Hotsus_t = 0;							  // Current view
 Phase phase_Hotsus_t = PHASE_NEWVIEW;			  // Current phase
+bool switcher = false;
 
 void increment_Hotsus_t()
 {
@@ -28,7 +29,10 @@ void increment_Hotsus_t()
 void feedback_Hotsus_t()
 {
 	phase_Hotsus_t == PHASE_EXNEWVIEW;
-	view_Hotsus_t--;
+	if (switcher)
+	{
+		view_Hotsus_t--;
+	}
 }
 
 void incrementExtra_Hotsus_t()
@@ -214,8 +218,8 @@ sgx_status_t TEE_saveMsgPrepareHotsus(Justification_t *justification_MsgPrepare_
 	Phase phase_MsgPrepare_t = roundData_MsgPrepare_t.phase;
 	if (verifyJustification_t(justification_MsgPrepare_t) && justification_MsgPrepare_t->signs.size == getTrustedQuorumSize_t() && view_Hotsus_t == proposeView_MsgPrepare_t && phase_MsgPrepare_t == PHASE_PREPARE)
 	{
-		preprepareHash_Hotsus_t = prepareHash_Hotsus_t;
-		preprepareView_Hotsus_t = prepareView_Hotsus_t;
+		exprepareHash_Hotsus_t = prepareHash_Hotsus_t;
+		exprepareView_Hotsus_t = prepareView_Hotsus_t;
 		prepareHash_Hotsus_t = proposeHash_MsgPrepare_t;
 		prepareView_Hotsus_t = proposeView_MsgPrepare_t;
 		*justification_msgExprecommit_t = updateRoundData_Hotsus_t(proposeHash_MsgPrepare_t, initiateHash_t(), 0);
@@ -238,7 +242,7 @@ sgx_status_t TEE_initializeMsgExnewviewHotsus(Justification_t *justification_Msg
 
 	feedback_Hotsus_t();
 	Hash_t hash_t = initiateDummyHash_t();
-	*justification_MsgExnewview_t = updateExtraRoundData_Hotsus_t(hash_t, preprepareHash_Hotsus_t, preprepareView_Hotsus_t);
+	*justification_MsgExnewview_t = updateExtraRoundData_Hotsus_t(hash_t, exprepareHash_Hotsus_t, exprepareView_Hotsus_t);
 
 	return status_t;
 }

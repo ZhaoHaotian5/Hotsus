@@ -1424,6 +1424,25 @@ Signs Log::getMsgExcommitHotsus(View view, unsigned int n)
 	return signs;
 }
 
+std::vector<ReplicaID> Log::getTrustedMsgExnewviewHotsus(View view)
+{
+	std::vector<ReplicaID> senders;
+	std::map<View, std::set<MsgExnewviewHotsus>>::iterator itView = this->exnewviewsHotsus.find(view);
+	if (itView != this->exnewviewsHotsus.end())
+	{
+		std::set<MsgExnewviewHotsus> msgExnewviews = itView->second;
+		for (std::set<MsgExnewviewHotsus>::iterator itMsg = msgExnewviews.begin(); itMsg != msgExnewviews.end(); itMsg++)
+		{
+			MsgExnewviewHotsus msgExnewview = *itMsg;
+			Signs signs_MsgExnewview = msgExnewview.signs;
+			Sign sign_MsgExnewview = signs_MsgExnewview.signs[0];
+			ReplicaID sender = sign_MsgExnewview.getSigner();
+			senders.push_back(sender);
+		}
+	}
+	return senders;
+}
+
 Justification Log::findHighestMsgExnewviewHotsus(View view)
 {
 	std::map<View, std::set<MsgExnewviewHotsus>>::iterator itView = this->exnewviewsHotsus.find(view);
