@@ -1658,7 +1658,7 @@ void Hotsus::initiateMsgExnewviewHotsus()
 	{
 		std::vector<ReplicaID> senders = this->log.getTrustedMsgExnewviewHotsus(this->view);
 		std::vector<ReplicaID> trustedSenders;
-		for (std::vector<int>::iterator itSenders = senders.begin(); itSenders != senders.end(); itSenders++)
+		for (std::vector<ReplicaID>::iterator itSenders = senders.begin(); itSenders != senders.end(); itSenders++)
 		{
 			ReplicaID sender = *itSenders;
 			if (!this->isGeneralReplicaIds(sender))
@@ -1666,7 +1666,7 @@ void Hotsus::initiateMsgExnewviewHotsus()
 				trustedSenders.push_back(sender);
 			}
 		}
-		if (trustedSenders.size() > this->lowrustedSize)
+		if (trustedSenders.size() > this->lowTrustedSize)
 		{
 			trustedGroup = trustedSenders;
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Trusted group: ";
@@ -1986,14 +1986,14 @@ void Hotsus::getStarted()
 	{
 		if (DEBUG_BASIC)
 		{
-			std::cout << COLOUR_RED << this->printReplicaId() << "Starting in Hotstuff" < < < < COLOUR_NORMAL << std::endl;
+			std::cout << COLOUR_RED << this->printReplicaId() << "Starting in Hotstuff" << COLOUR_NORMAL << std::endl;
 		}
 	}
 	else if (this->protocol == PROTOCOL_DAMYSUS)
 	{
 		if (DEBUG_BASIC)
 		{
-			std::cout << COLOUR_RED << this->printReplicaId() << "Starting in Damysus" < < < < COLOUR_NORMAL << std::endl;
+			std::cout << COLOUR_RED << this->printReplicaId() << "Starting in Damysus" << COLOUR_NORMAL << std::endl;
 		}
 	}
 
@@ -2313,6 +2313,8 @@ void Hotsus::recordStatisticsHotsus()
 // Constuctor
 Hotsus::Hotsus(KeysFunctions keysFunctions, ReplicaID replicaId, unsigned int numGeneralReplicas, unsigned int numTrustedReplicas, unsigned int numReplicas, unsigned int numViews, unsigned int numFaults, double leaderChangeTime, Nodes nodes, Key privateKey, PeerNet::Config peerNetConfig, ClientNet::Config clientNetConfig) : peerNet(peerEventContext, peerNetConfig), clientNet(requestEventContext, clientNetConfig)
 {
+	std::vector<ReplicaID> trustedGroup;
+
 	this->keysFunction = keysFunctions;
 	this->replicaId = replicaId;
 	this->numGeneralReplicas = numGeneralReplicas;
@@ -2325,8 +2327,8 @@ Hotsus::Hotsus(KeysFunctions keysFunctions, ReplicaID replicaId, unsigned int nu
 	this->privateKey = privateKey;
 	this->generalQuorumSize = this->numReplicas - this->numFaults;
 	this->trustedQuorumSize = floor(this->numTrustedReplicas / 2) + 1;
-	this->lowrustedSize = 3;
-	this->trustedGroup = std::vector<ReplicaID> trustedGroup;
+	this->lowTrustedSize = 3;
+	this->trustedGroup = trustedGroup;
 	this->view = 0;
 	this->protocol = PROTOCOL_HOTSTUFF;
 

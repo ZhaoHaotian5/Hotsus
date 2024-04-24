@@ -1435,8 +1435,7 @@ std::vector<ReplicaID> Log::getTrustedMsgExnewviewHotsus(View view)
 		{
 			MsgExnewviewHotsus msgExnewview = *itMsg;
 			Signs signs_MsgExnewview = msgExnewview.signs;
-			Sign sign_MsgExnewview = signs_MsgExnewview.signs[0];
-			ReplicaID sender = sign_MsgExnewview.getSigner();
+			ReplicaID sender = signs_MsgExnewview.getSigners()[0];
 			senders.push_back(sender);
 		}
 	}

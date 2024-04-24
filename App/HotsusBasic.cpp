@@ -196,7 +196,7 @@ Justification HotsusBasic::respondExproposal(Nodes nodes, Hash proposeHash, Just
 	}
 }
 
-Signs HotstuffBasic::initializeMsgExldrprepare(Proposal<Justification> proposal_MsgExldrprepare)
+Signs HotsusBasic::initializeMsgExldrprepare(Proposal<Justification> proposal_MsgExldrprepare)
 {
 	Sign sign_MsgExldrprepare = this->signText(proposal_MsgExldrprepare.toString());
 	Signs signs_MsgExldrprepare = Signs(sign_MsgExldrprepare);
