@@ -721,7 +721,7 @@ struct MsgExldrprepareHotsus
 	Group group;
 	Signs signs;
 
-	MsgExldrprepareHotsus(const Proposal<Justification> &proposal, const Group &group, const Signs &signs) : proposal(proposal), group(group) signs(signs) { serialized << proposal << group << signs; }
+	MsgExldrprepareHotsus(const Proposal<Justification> &proposal, const Group &group, const Signs &signs) : proposal(proposal), group(group), signs(signs) { serialized << proposal << group << signs; }
 	MsgExldrprepareHotsus(salticidae::DataStream &&data) { data >> proposal >> group >> signs; }
 
 	void serialize(salticidae::DataStream &data) const

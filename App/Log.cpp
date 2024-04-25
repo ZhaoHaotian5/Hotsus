@@ -1550,8 +1550,9 @@ MsgExldrprepareHotsus Log::firstMsgExldrprepareHotsus(View view)
 		}
 	}
 	Proposal<Justification> proposal;
+	Group group;
 	Signs signs;
-	MsgExldrprepareHotsus msgExldrprepare = MsgExldrprepareHotsus(proposal, signs);
+	MsgExldrprepareHotsus msgExldrprepare = MsgExldrprepareHotsus(proposal, group, signs);
 	return msgExldrprepare;
 }
 

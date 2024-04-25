@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include "salticidae/stream.h"
 #include "config.h"
 #include "types.h"
 

@@ -395,7 +395,7 @@ void Hotsus::setTimer()
 	this->timerView = this->view;
 }
 
-bool Hotsus::changeSwitcher()
+void Hotsus::changeSwitcher()
 {
 	if (!this->amGeneralReplicaIds())
 	{
@@ -1442,7 +1442,7 @@ void Hotsus::handleMsgExldrprepareHotsus(MsgExldrprepareHotsus msgExldrprepare)
 	{
 		if (proposeView_MsgExnewview == this->view)
 		{
-			this->trustedGroup = group_MsgExldrprepare;
+			this->trustedGroup = group_MsgExldrprepare.getGroup();
 			this->protocol = PROTOCOL_DAMYSUS;
 			this->changeAuthenticator();
 			this->respondMsgExldrprepareHotsus(justification_MsgExnewview, block);

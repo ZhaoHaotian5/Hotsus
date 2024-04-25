@@ -30,6 +30,7 @@
 #include "sgx_urts.h"
 #include "sgx_utils/sgx_utils.h"
 #include "Enclave_u.h"
+#include "Group.h"
 #include "Nodes.h"
 #include "KeysFunctions.h"
 #include "Log.h"
