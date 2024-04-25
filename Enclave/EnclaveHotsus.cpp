@@ -6,7 +6,7 @@ View prepareView_Hotsus_t = 0;					  // View of [prepareHash_Hotsus_t]
 Hash_t exprepareHash_Hotsus_t = initiateHash_t(); // Hash of the last prepared block
 View exprepareView_Hotsus_t = 0;				  // Copy of [exprepareView_Hotsus_t]
 View view_Hotsus_t = 0;							  // Current view
-Phase phase_Hotsus_t = PHASE_NEWVIEW;			  // Current phase
+Phase phase_Hotsus_t = PHASE_EXNEWVIEW;			  // Current phase
 bool switcher = false;
 bool authenticator = false;
 
