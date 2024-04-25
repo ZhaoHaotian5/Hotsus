@@ -474,7 +474,7 @@ void Hotstuff::handleEarlierMessagesHotstuff()
 			if (signs_MsgCommit.getSize() == this->generalQuorumSize)
 			{
 				Justification justification_MsgCommit = this->log.firstMsgCommitHotstuff(this->view);
-				executeBlockHotstuff(justification_MsgCommit.getRoundData());
+				this->executeBlockHotstuff(justification_MsgCommit.getRoundData());
 			}
 		}
 		else

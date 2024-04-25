@@ -165,6 +165,7 @@ private:
 	// Handle messages
 	void handleMsgTransaction(MsgTransaction msgTransaction);
 	void handleEarlierMessagesHotsus();										 // For replicas to process messages they have already received for in new view
+	void handleExtraEarlierMessagesHotsus();								 // For replicas to process messages they have already received for in new view
 	void handleMsgNewviewHotsus(MsgNewviewHotsus msgNewview);				 // Once the leader has received [msgNewview], it creates [msgLdrprepare] out of the highest prepared block
 	void handleMsgLdrprepareHotsus(MsgLdrprepareHotsus msgLdrprepare);		 // Once the replicas have received [msgLdrprepare], it creates [msgPrepare] out of the proposal
 	void handleMsgPrepareHotsus(MsgPrepareHotsus msgPrepare);				 // For both the leader and replicas process [msgPrepare]

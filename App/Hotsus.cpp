@@ -998,8 +998,8 @@ void Hotsus::handleEarlierMessagesHotsus()
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Leader handling earlier messages" << COLOUR_NORMAL << std::endl;
 		}
-		std::set<MsgNewviewHotsus> msgNewviews = this->log.getMsgNewviewHotsus(this->view, this->generalQuorumSize);
-		if (msgNewviews.size() == this->generalQuorumSize)
+		std::set<MsgNewviewHotsus> msgNewviews = this->log.getMsgNewviewHotsus(this->view, this->trustedQuorumSize);
+		if (msgNewviews.size() == this->trustedQuorumSize)
 		{
 			this->initiateMsgNewviewHotsus();
 		}
@@ -1064,6 +1064,89 @@ void Hotsus::handleEarlierMessagesHotsus()
 					Accumulator accumulator_MsgLdrprepare = proposal.getCertification();
 					Block block = proposal.getBlock();
 					this->respondMsgLdrprepareHotsus(accumulator_MsgLdrprepare, block);
+				}
+			}
+		}
+	}
+}
+
+void Hotsus::handleExtraEarlierMessagesHotsus()
+{
+	// Check if there are enough messages to start the next view
+	if (this->amCurrentLeader())
+	{
+		if (DEBUG_HELP)
+		{
+			std::cout << COLOUR_BLUE << this->printReplicaId() << "Leader handling extra earlier messages" << COLOUR_NORMAL << std::endl;
+		}
+		std::set<MsgExnewviewHotsus> msgExnewviews = this->log.getMsgExnewviewHotsus(this->view, this->generalQuorumSize);
+		if (msgNewviews.size() == this->generalQuorumSize)
+		{
+			this->initiateMsgExnewviewHotsus();
+		}
+	}
+	else
+	{
+		if (DEBUG_HELP)
+		{
+			std::cout << COLOUR_BLUE << this->printReplicaId() << "Replica handling extra earlier messages" << COLOUR_NORMAL << std::endl;
+		}
+		// Check if the view has already been locked
+		Signs signs_MsgExprecommit = this->log.getMsgExprecommitHotsus(this->view, this->generalQuorumSize);
+		if (signs_MsgExprecommit.getSize() == this->generalQuorumSize)
+		{
+			if (DEBUG_HELP)
+			{
+				std::cout << COLOUR_BLUE << this->printReplicaId() << "Catching up using MsgExprecommit certificate" << COLOUR_NORMAL << std::endl;
+			}
+			Justification justification_MsgExprecommit = this->log.firstMsgExprecommitHotsus(this->view);
+
+			// Skip the prepare phase and pre-commit phase
+			this->initializeMsgExnewviewHotsus();
+			this->initializeMsgExnewviewHotsus();
+
+			// Store [justification_MsgExprecommit]
+			this->respondMsgExprecommitHotsus(justification_MsgExprecommit);
+
+			Signs signs_MsgExcommit = this->log.getMsgExcommitHotsus(this->view, this->generalQuorumSize);
+			if (signs_MsgExcommit.getSize() == this->generalQuorumSize)
+			{
+				Justification justification_MsgExcommit = this->log.firstMsgExcommitHotsus(this->view);
+				this->executeExtraBlockHotsus(justification_MsgExcommit.getRoundData());
+			}
+		}
+		else
+		{
+			Signs signs_MsgExprepare = this->log.getMsgExprepareHotsus(this->view, this->generalQuorumSize);
+			if (signs_MsgExprepare.getSize() == this->generalQuorumSize)
+			{
+				if (DEBUG_HELP)
+				{
+					std::cout << COLOUR_BLUE << this->printReplicaId() << "Catching up using MsgExprepare certificate" << COLOUR_NORMAL << std::endl;
+				}
+				Justification justification_MsgExprepare = this->log.firstMsgExprepareHotsus(this->view);
+
+				// Skip the prepare phase
+				this->initializeMsgExnewviewHotsus();
+
+				// Store [justification_MsgExprepare]
+				this->respondMsgExprepareHotsus(justification_MsgExprepare);
+			}
+			else
+			{
+				MsgExldrprepareHotsus msgExldrprepare = this->log.firstMsgExldrprepareHotsus(this->view);
+
+				// Check if the proposal has been stored
+				if (msgExldrprepare.signs.getSize() == 1)
+				{
+					if (DEBUG_HELP)
+					{
+						std::cout << COLOUR_BLUE << this->printReplicaId() << "Catching up using MsgExldrprepare proposal" << COLOUR_NORMAL << std::endl;
+					}
+					Proposal<Justification> proposal = msgExldrprepare.proposal;
+					Justification justification_MsgExldrprepare = proposal.getCertification();
+					Block block = proposal.getBlock();
+					this->respondMsgExldrprepareHotsus(justification_MsgExldrprepare, block);
 				}
 			}
 		}
@@ -2107,7 +2190,7 @@ void Hotsus::startNewViewHotsus()
 		View proposeView_MsgExnewview = justification_MsgExnewview.getRoundData().getProposeView();
 		if (DEBUG_HELP)
 		{
-			std::cout << COLOUR_BLUE << this->printReplicaId() << "Generating justification: " << justification_MsgExnewview.toPrint() << COLOUR_NORMAL << std::endl;
+			std::cout << COLOUR_BLUE << this->printReplicaId() << "Generating Hotstuff justification: " << justification_MsgExnewview.toPrint() << COLOUR_NORMAL << std::endl;
 		}
 		while (proposeView_MsgExnewview <= this->view)
 		{
@@ -2115,7 +2198,7 @@ void Hotsus::startNewViewHotsus()
 			proposeView_MsgExnewview = justification_MsgExnewview.getRoundData().getProposeView();
 			if (DEBUG_HELP)
 			{
-				std::cout << COLOUR_BLUE << this->printReplicaId() << "Generating justification: " << justification_MsgExnewview.toPrint() << COLOUR_NORMAL << std::endl;
+				std::cout << COLOUR_BLUE << this->printReplicaId() << "Generating Hotstuff justification: " << justification_MsgExnewview.toPrint() << COLOUR_NORMAL << std::endl;
 			}
 		}
 
@@ -2133,7 +2216,7 @@ void Hotsus::startNewViewHotsus()
 			MsgExnewviewHotsus msgExnewview = MsgExnewviewHotsus(roundData_MsgExnewview, signs_MsgExnewview);
 			if (this->amCurrentLeader())
 			{
-				this->handleEarlierMessagesHotsus();
+				this->handleExtraEarlierMessagesHotsus();
 				this->handleMsgExnewviewHotsus(msgExnewview);
 			}
 			else
@@ -2141,7 +2224,7 @@ void Hotsus::startNewViewHotsus()
 				ReplicaID leader = this->getCurrentLeader();
 				Peers recipients = this->keepFromPeers(leader);
 				this->sendMsgExnewviewHotsus(msgExnewview, recipients);
-				this->handleEarlierMessagesHotsus();
+				this->handleExtraEarlierMessagesHotsus();
 			}
 		}
 		else
@@ -2158,7 +2241,7 @@ void Hotsus::startNewViewHotsus()
 		View proposeView_MsgNewview = justification_MsgNewview.getRoundData().getProposeView();
 		if (DEBUG_HELP)
 		{
-			std::cout << COLOUR_BLUE << this->printReplicaId() << "Generating justification: " << justification_MsgNewview.toPrint() << COLOUR_NORMAL << std::endl;
+			std::cout << COLOUR_BLUE << this->printReplicaId() << "Generating Damysus justification: " << justification_MsgNewview.toPrint() << COLOUR_NORMAL << std::endl;
 		}
 		while (proposeView_MsgNewview <= this->view)
 		{
@@ -2166,7 +2249,7 @@ void Hotsus::startNewViewHotsus()
 			proposeView_MsgNewview = justification_MsgNewview.getRoundData().getProposeView();
 			if (DEBUG_HELP)
 			{
-				std::cout << COLOUR_BLUE << this->printReplicaId() << "Generating justification: " << justification_MsgNewview.toPrint() << COLOUR_NORMAL << std::endl;
+				std::cout << COLOUR_BLUE << this->printReplicaId() << "Generating Damysus justification: " << justification_MsgNewview.toPrint() << COLOUR_NORMAL << std::endl;
 			}
 		}
 
