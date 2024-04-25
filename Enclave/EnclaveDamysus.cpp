@@ -111,17 +111,6 @@ sgx_status_t TEE_initializeAccumulatorDamysus(Justifications_t *justifications_M
 	return status_t;
 }
 
-sgx_status_t TEE_initializeMsgLdrprepareDamysus(Proposal_t *proposal_MsgLdrprepare_t, Signs_t *signs_MsgLdrprepare_t)
-{
-	sgx_status_t status_t = SGX_SUCCESS;
-
-	Sign_t sign_MsgLdrprepare_t = signData_t(proposal2string_t(*proposal_MsgLdrprepare_t));
-	signs_MsgLdrprepare_t->size = 1;
-	signs_MsgLdrprepare_t->signs[0] = sign_MsgLdrprepare_t;
-
-	return status_t;
-}
-
 sgx_status_t TEE_respondProposalDamysus(Hash_t *proposeHash_t, Accumulator_t *accumulator_MsgLdrprepare_t, Justification_t *justification_MsgPrepare_t)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
@@ -138,6 +127,17 @@ sgx_status_t TEE_respondProposalDamysus(Hash_t *proposeHash_t, Accumulator_t *ac
 			TEE_Print((printReplicaId_t() + " fail to respond accumulator").c_str());
 		}
 	}
+
+	return status_t;
+}
+
+sgx_status_t TEE_initializeMsgLdrprepareDamysus(Proposal_t *proposal_MsgLdrprepare_t, Signs_t *signs_MsgLdrprepare_t)
+{
+	sgx_status_t status_t = SGX_SUCCESS;
+
+	Sign_t sign_MsgLdrprepare_t = signData_t(proposal2string_t(*proposal_MsgLdrprepare_t));
+	signs_MsgLdrprepare_t->size = 1;
+	signs_MsgLdrprepare_t->signs[0] = sign_MsgLdrprepare_t;
 
 	return status_t;
 }

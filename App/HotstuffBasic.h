@@ -35,8 +35,8 @@ public:
 	bool verifyProposal(Nodes nodes, Proposal<Justification> proposal, Signs signs);
 
 	Justification initializeMsgNewview();
-	Signs initializeMsgLdrprepare(Proposal<Justification> proposal_MsgLdrprepare);
 	Justification respondProposal(Nodes nodes, Hash proposeHash, Justification justification_MsgNewview);
+	Signs initializeMsgLdrprepare(Proposal<Justification> proposal_MsgLdrprepare);
 	Justification saveMsgPrepare(Nodes nodes, Justification justification_MsgPrepare);
 	Justification lockMsgPrecommit(Nodes nodes, Justification justification_MsgPrecommit);
 };

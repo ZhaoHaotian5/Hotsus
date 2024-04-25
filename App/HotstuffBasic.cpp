@@ -84,13 +84,6 @@ Justification HotstuffBasic::initializeMsgNewview()
 	return justification_MsgNewview;
 }
 
-Signs HotstuffBasic::initializeMsgLdrprepare(Proposal<Justification> proposal_MsgLdrprepare)
-{
-	Sign sign_MsgLdrprepare = this->signText(proposal_MsgLdrprepare.toString());
-	Signs signs_MsgLdrprepare = Signs(sign_MsgLdrprepare);
-	return signs_MsgLdrprepare;
-}
-
 Justification HotstuffBasic::respondProposal(Nodes nodes, Hash proposeHash, Justification justification_MsgNewview)
 {
 	RoundData roundData_MsgNewview = justification_MsgNewview.getRoundData();
@@ -111,6 +104,13 @@ Justification HotstuffBasic::respondProposal(Nodes nodes, Hash proposeHash, Just
 		}
 		return Justification();
 	}
+}
+
+Signs HotstuffBasic::initializeMsgLdrprepare(Proposal<Justification> proposal_MsgLdrprepare)
+{
+	Sign sign_MsgLdrprepare = this->signText(proposal_MsgLdrprepare.toString());
+	Signs signs_MsgLdrprepare = Signs(sign_MsgLdrprepare);
+	return signs_MsgLdrprepare;
 }
 
 Justification HotstuffBasic::saveMsgPrepare(Nodes nodes, Justification justification_MsgPrepare)
