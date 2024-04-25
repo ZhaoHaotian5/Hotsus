@@ -236,6 +236,8 @@ Justification HotsusBasic::lockMsgExprecommit(Nodes nodes, Justification justifi
 	{
 		this->prepareHash = proposeHash_MsgExprecommit;
 		this->prepareView = proposeView_MsgExprecommit;
+		this->exprepareHash = proposeHash_MsgExprecommit;
+		this->exprepareView = proposeView_MsgExprecommit;
 		Justification justification_MsgExcommit = this->updateExtraRoundData(proposeHash_MsgExprecommit, Hash(), View());
 		return justification_MsgExcommit;
 	}

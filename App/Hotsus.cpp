@@ -1079,8 +1079,8 @@ void Hotsus::handleExtraEarlierMessagesHotsus()
 		{
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Leader handling extra earlier messages" << COLOUR_NORMAL << std::endl;
 		}
-		std::set<MsgExnewviewHotsus> msgExnewviews = this->log.getMsgExnewviewHotsus(this->view, this->generalQuorumSize);
-		if (msgNewviews.size() == this->generalQuorumSize)
+		Signs signs_MsgExnewview = this->log.getMsgExnewviewHotsus(this->view, this->generalQuorumSize);
+		if (signs_MsgExnewview.getSize() == this->generalQuorumSize)
 		{
 			this->initiateMsgExnewviewHotsus();
 		}

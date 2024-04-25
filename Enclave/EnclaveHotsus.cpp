@@ -322,6 +322,8 @@ sgx_status_t TEE_lockMsgExprecommitHotsus(Justification_t *justification_MsgExpr
 	{
 		prepareHash_Hotsus_t = proposeHash_MsgExprecommit_t;
 		prepareView_Hotsus_t = proposeView_MsgExprecommit_t;
+		exprepareHash_Hotsus_t = proposeHash_MsgExprecommit_t;
+		exprepareView_Hotsus_t = proposeView_MsgExprecommit_t;
 		*justification_MsgExcommit_t = updateExtraRoundData_Hotsus_t(proposeHash_MsgExprecommit_t, initiateHash_t(), 0);
 	}
 	else
