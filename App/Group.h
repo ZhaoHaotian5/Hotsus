@@ -25,6 +25,7 @@ public:
 	Group();
 	Group(std::vector<ReplicaID> group);
 
+	unsigned int getSize();
 	std::vector<ReplicaID> getGroup();
 
 	std::string toPrint();

@@ -1442,9 +1442,12 @@ void Hotsus::handleMsgExldrprepareHotsus(MsgExldrprepareHotsus msgExldrprepare)
 	{
 		if (proposeView_MsgExnewview == this->view)
 		{
-			this->trustedGroup = group_MsgExldrprepare.getGroup();
-			this->protocol = PROTOCOL_DAMYSUS;
-			this->changeAuthenticator();
+			if (group_MsgExldrprepare.getSize() > 0)
+			{
+				this->trustedGroup = group_MsgExldrprepare.getGroup();
+				this->protocol = PROTOCOL_DAMYSUS;
+				this->changeAuthenticator();
+			}
 			this->respondMsgExldrprepareHotsus(justification_MsgExnewview, block);
 		}
 		else

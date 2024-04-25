@@ -31,6 +31,11 @@ Group::Group(std::vector<ReplicaID> group)
 	this->group = group;
 }
 
+unsigned int Group::getSize()
+{
+	return this->size;
+}
+
 std::vector<ReplicaID> Group::getGroup()
 {
 	return this->group;
