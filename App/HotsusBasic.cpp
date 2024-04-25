@@ -88,7 +88,7 @@ HotsusBasic::HotsusBasic()
 	this->exprepareHash = Hash(true); // The genesis block
 	this->exprepareView = 0;
 	this->view = 0;
-	this->phase = PHASE_NEWVIEW;
+	this->phase = PHASE_EXNEWVIEW;
 	this->generalQuorumSize = 0;
 	this->trustedQuorumSize = 0;
 	this->switcher = false;
@@ -101,7 +101,7 @@ HotsusBasic::HotsusBasic(ReplicaID replicaId, Key privateKey, unsigned int gener
 	this->exprepareHash = Hash(true); // The genesis block
 	this->exprepareView = 0;
 	this->view = 0;
-	this->phase = PHASE_NEWVIEW;
+	this->phase = PHASE_EXNEWVIEW;
 	this->replicaId = replicaId;
 	this->privateKey = privateKey;
 	this->generalQuorumSize = generalQuorumSize;
