@@ -8,6 +8,7 @@
 #include "salticidae/msg.h"
 #include "salticidae/stream.h"
 #include "Accumulator.h"
+#include "Group.h"
 #include "Proposal.h"
 #include "RoundData.h"
 #include "Sign.h"
@@ -717,19 +718,20 @@ struct MsgExldrprepareHotsus
 	static const uint8_t opcode = HEADER_EXLDRPREPARE_HOTSUS;
 	salticidae::DataStream serialized;
 	Proposal<Justification> proposal;
+	Group group;
 	Signs signs;
 
-	MsgExldrprepareHotsus(const Proposal<Justification> &proposal, const Signs &signs) : proposal(proposal), signs(signs) { serialized << proposal << signs; }
-	MsgExldrprepareHotsus(salticidae::DataStream &&data) { data >> proposal >> signs; }
+	MsgExldrprepareHotsus(const Proposal<Justification> &proposal, const Group &group, const Signs &signs) : proposal(proposal), group(group) signs(signs) { serialized << proposal << group << signs; }
+	MsgExldrprepareHotsus(salticidae::DataStream &&data) { data >> proposal >> group >> signs; }
 
 	void serialize(salticidae::DataStream &data) const
 	{
-		data << proposal << signs;
+		data << proposal << group << signs;
 	}
 
 	unsigned int sizeMsg()
 	{
-		return (sizeof(Proposal<Justification>) + sizeof(Signs));
+		return (sizeof(Proposal<Justification>) + sizeof(Group) + sizeof(Signs));
 	}
 
 	std::string toPrint()
@@ -737,6 +739,8 @@ struct MsgExldrprepareHotsus
 		std::string text = "";
 		text += "HOTSUS_MSGEXLDRPREPARE[";
 		text += proposal.toPrint();
+		text += ",";
+		text += group.toPrint();
 		text += ",";
 		text += signs.toPrint();
 		text += "]";

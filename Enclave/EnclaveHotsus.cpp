@@ -120,6 +120,38 @@ sgx_status_t TEE_verifyProposalHotsus(Proposal_t *proposal_t, Signs_t *signs_t, 
 	return status_t;
 }
 
+sgx_status_t TEE_changeSwitcher()
+{
+	sgx_status_t status_t = SGX_SUCCESS;
+
+	if (switcher == false)
+	{
+		switcher = true;
+	}
+	else
+	{
+		switcher = false;
+	}
+
+	return status_t;
+}
+
+sgx_status_t TEE_changeAuthenticator()
+{
+	sgx_status_t status_t = SGX_SUCCESS;
+
+	if (authenticator == false)
+	{
+		authenticator = true;
+	}
+	else
+	{
+		authenticator = false;
+	}
+
+	return status_t;
+}
+
 sgx_status_t TEE_verifyExproposalHotsus(Exproposal_t *exproposal_t, Signs_t *signs_t, bool *b)
 {
 	sgx_status_t status_t = SGX_SUCCESS;

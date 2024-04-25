@@ -395,6 +395,34 @@ void Hotsus::setTimer()
 	this->timerView = this->view;
 }
 
+bool Hotsus::changeSwitcher()
+{
+	if (!this->amGeneralReplicaIds())
+	{
+		sgx_status_t extra_t;
+		sgx_status_t status_t;
+		status_t = TEE_changeSwitcher(global_eid, &extra_t);
+	}
+	else
+	{
+		hotsusBasic.changeSwitcher();
+	}
+}
+
+void Hotsus::changeAuthenticator()
+{
+	if (!this->amGeneralReplicaIds())
+	{
+		sgx_status_t extra_t;
+		sgx_status_t status_t;
+		status_t = TEE_changeAuthenticator(global_eid, &extra_t);
+	}
+	else
+	{
+		hotsusBasic.changeAuthenticator();
+	}
+}
+
 // Reply to clients
 void Hotsus::replyTransactions(Transaction *transactions)
 {
@@ -1401,6 +1429,7 @@ void Hotsus::handleMsgExldrprepareHotsus(MsgExldrprepareHotsus msgExldrprepare)
 		std::cout << COLOUR_BLUE << this->printReplicaId() << "Handling MsgExldrprepare: " << msgExldrprepare.toPrint() << COLOUR_NORMAL << std::endl;
 	}
 	Proposal<Justification> proposal_MsgExldrprepare = msgExldrprepare.proposal;
+	Group group_MsgExldrprepare = msgExldrprepare.group;
 	Signs signs_MsgExldrprepare = msgExldrprepare.signs;
 	Justification justification_MsgExnewview = proposal_MsgExldrprepare.getCertification();
 	RoundData roundData_MsgExnewview = justification_MsgExnewview.getRoundData();
@@ -1413,6 +1442,9 @@ void Hotsus::handleMsgExldrprepareHotsus(MsgExldrprepareHotsus msgExldrprepare)
 	{
 		if (proposeView_MsgExnewview == this->view)
 		{
+			this->trustedGroup = group_MsgExldrprepare;
+			this->protocol = PROTOCOL_DAMYSUS;
+			this->changeAuthenticator();
 			this->respondMsgExldrprepareHotsus(justification_MsgExnewview, block);
 		}
 		else
@@ -1737,6 +1769,7 @@ void Hotsus::initiateMsgPrecommitHotsus(RoundData roundData_MsgPrecommit)
 void Hotsus::initiateMsgExnewviewHotsus()
 {
 	// Get the trusted replicas
+	Group group_MsgExldrprepare = Group();
 	if (this->protocol == PROTOCOL_HOTSTUFF && !this->amGeneralReplicaIds())
 	{
 		std::vector<ReplicaID> senders = this->log.getTrustedMsgExnewviewHotsus(this->view, this->generalQuorumSize);
@@ -1752,6 +1785,7 @@ void Hotsus::initiateMsgExnewviewHotsus()
 		if (trustedSenders.size() > this->lowTrustedSize)
 		{
 			this->trustedGroup = trustedSenders;
+			group_MsgExldrprepare = Group(trustedSenders);
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Trusted group: ";
 			for (int trustedSendersNum = 0; trustedSendersNum < trustedSenders.size(); trustedSendersNum++)
 			{
@@ -1784,7 +1818,7 @@ void Hotsus::initiateMsgExnewviewHotsus()
 		// Create [msgExldrprepare] out of [block]
 		Proposal<Justification> proposal_MsgExldrprepare = Proposal<Justification>(justification_MsgExnewview, block);
 		Signs signs_MsgExldrprepare = this->initializeMsgExldrprepareHotsus(proposal_MsgExldrprepare);
-		MsgExldrprepareHotsus msgExldrprepare = MsgExldrprepareHotsus(proposal_MsgExldrprepare, signs_MsgExldrprepare);
+		MsgExldrprepareHotsus msgExldrprepare = MsgExldrprepareHotsus(proposal_MsgExldrprepare, group_MsgExldrprepare, signs_MsgExldrprepare);
 
 		// Send [msgExldrprepare] to replicas
 		Peers recipients = this->removeFromPeers(this->replicaId);

@@ -134,6 +134,30 @@ bool HotsusBasic::verifyExproposal(Nodes nodes, Proposal<Justification> expropos
 	return b;
 }
 
+void HotsusBasic::changeSwitcher()
+{
+	if (this->switcher == false)
+	{
+		this->switcher = true;
+	}
+	else
+	{
+		this->switcher = false;
+	}
+}
+
+void HotsusBasic::changeAuthenticator()
+{
+	if (this->authenticator == false)
+	{
+		this->authenticator = true;
+	}
+	else
+	{
+		this->authenticator = false;
+	}
+}
+
 Justification HotsusBasic::initializeMsgNewview()
 {
 	Justification justification_MsgNewview = this->updateRoundData(Hash(false), this->prepareHash, this->prepareView);

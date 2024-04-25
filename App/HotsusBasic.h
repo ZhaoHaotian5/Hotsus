@@ -40,6 +40,9 @@ public:
 	bool verifyProposal(Nodes nodes, Proposal<Accumulator> proposal, Signs signs);
 	bool verifyExproposal(Nodes nodes, Proposal<Justification> exproposal, Signs signs);
 
+	void changeSwitcher();
+	void changeAuthenticator();
+
 	Justification initializeMsgNewview();
 	Justification respondProposal(Nodes nodes, Hash proposeHash, Accumulator accumulator_MsgLdrprepare);
 	void skipRound();

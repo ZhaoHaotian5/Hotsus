@@ -113,6 +113,8 @@ private:
 	Peers keepFromPeers(ReplicaID replicaId);
 	std::vector<salticidae::PeerId> getPeerIds(Peers recipients);
 	void setTimer();
+	void changeSwitcher();
+	void changeAuthenticator();
 
 	// Reply to clients
 	void replyTransactions(Transaction *transactions);
