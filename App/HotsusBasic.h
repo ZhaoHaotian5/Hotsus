@@ -23,9 +23,9 @@ private:
 	unsigned int generalQuorumSize; // General quorum size
 	unsigned int trustedQuorumSize; // Trusted quorum size
 	bool switcher;
+	bool authenticator;
 
 	void increment();
-	void feedback();
 	void incrementExtra();
 	Sign signText(std::string text);
 	Justification updateRoundData(Hash hash1, Hash hash2, View view);

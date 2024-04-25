@@ -16,17 +16,15 @@ void HotsusBasic::increment()
 	}
 	else if (this->phase == PHASE_COMMIT)
 	{
-		this->phase = PHASE_NEWVIEW;
-		this->view++;
-	}
-}
-
-void HotsusBasic::feedback()
-{
-	this->phase = PHASE_EXNEWVIEW;
-	if (this->switcher)
-	{
-		this->view--;
+		if (this->switcher)
+		{
+			this->phase = PHASE_EXNEWVIEW;
+		}
+		else
+		{
+			this->phase = PHASE_NEWVIEW;
+			this->view++;
+		}
 	}
 }
 
@@ -46,7 +44,14 @@ void HotsusBasic::incrementExtra()
 	}
 	else if (this->phase == PHASE_EXCOMMIT)
 	{
-		this->phase = PHASE_NEWVIEW;
+		if (this->authenticator)
+		{
+			this->phase = PHASE_NEWVIEW;
+		}
+		else
+		{
+			this->phase = PHASE_EXNEWVIEW;
+		}
 		this->view++;
 	}
 }
@@ -92,6 +97,7 @@ HotsusBasic::HotsusBasic()
 	this->generalQuorumSize = 0;
 	this->trustedQuorumSize = 0;
 	this->switcher = false;
+	this->authenticator = false;
 }
 
 HotsusBasic::HotsusBasic(ReplicaID replicaId, Key privateKey, unsigned int generalQuorumSize, unsigned int trustedQuorumSize)
@@ -107,6 +113,7 @@ HotsusBasic::HotsusBasic(ReplicaID replicaId, Key privateKey, unsigned int gener
 	this->generalQuorumSize = generalQuorumSize;
 	this->trustedQuorumSize = trustedQuorumSize;
 	this->switcher = false;
+	this->authenticator = false;
 }
 
 bool HotsusBasic::verifyJustification(Nodes nodes, Justification justification)
@@ -169,7 +176,6 @@ void HotsusBasic::skipRound()
 
 Justification HotsusBasic::initializeMsgExnewview()
 {
-	this->feedback();
 	Justification justification_MsgExnewview = this->updateExtraRoundData(Hash(false), this->exprepareHash, this->exprepareView);
 	return justification_MsgExnewview;
 }

@@ -8,6 +8,7 @@ View exprepareView_Hotsus_t = 0;				  // Copy of [exprepareView_Hotsus_t]
 View view_Hotsus_t = 0;							  // Current view
 Phase phase_Hotsus_t = PHASE_NEWVIEW;			  // Current phase
 bool switcher = false;
+bool authenticator = false;
 
 void increment_Hotsus_t()
 {
@@ -21,17 +22,15 @@ void increment_Hotsus_t()
 	}
 	else if (phase_Hotsus_t == PHASE_PRECOMMIT)
 	{
-		phase_Hotsus_t = PHASE_NEWVIEW;
-		view_Hotsus_t++;
-	}
-}
-
-void feedback_Hotsus_t()
-{
-	phase_Hotsus_t = PHASE_EXNEWVIEW;
-	if (switcher)
-	{
-		view_Hotsus_t--;
+		if (switcher)
+		{
+			phase_Hotsus_t = PHASE_EXNEWVIEW;
+		}
+		else
+		{
+			phase_Hotsus_t = PHASE_NEWVIEW;
+			view_Hotsus_t++;
+		}
 	}
 }
 
@@ -51,7 +50,14 @@ void incrementExtra_Hotsus_t()
 	}
 	else if (phase_Hotsus_t == PHASE_EXCOMMIT)
 	{
-		phase_Hotsus_t = PHASE_NEWVIEW;
+		if (authenticator)
+		{
+			phase_Hotsus_t = PHASE_NEWVIEW;
+		}
+		else
+		{
+			phase_Hotsus_t = PHASE_EXNEWVIEW;
+		}
 		view_Hotsus_t++;
 	}
 }
@@ -240,7 +246,6 @@ sgx_status_t TEE_initializeMsgExnewviewHotsus(Justification_t *justification_Msg
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 
-	feedback_Hotsus_t();
 	Hash_t hash_t = initiateDummyHash_t();
 	*justification_MsgExnewview_t = updateExtraRoundData_Hotsus_t(hash_t, exprepareHash_Hotsus_t, exprepareView_Hotsus_t);
 
