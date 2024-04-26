@@ -3,7 +3,7 @@
 void Group::serialize(salticidae::DataStream &data) const
 {
 	data << this->size;
-	for (int i = 0; i < this->group.size(); i++)
+	for (int i = 0; i < this->size; i++)
 	{
 		data << this->group[i];
 	}
@@ -12,7 +12,7 @@ void Group::serialize(salticidae::DataStream &data) const
 void Group::unserialize(salticidae::DataStream &data)
 {
 	data >> this->size;
-	for (int i = 0; i < this->group.size(); i++)
+	for (int i = 0; i < this->size; i++)
 	{
 		data >> this->group[i];
 	}
@@ -21,14 +21,19 @@ void Group::unserialize(salticidae::DataStream &data)
 Group::Group()
 {
 	this->size = 0;
-	std::vector<ReplicaID> group;
-	this->group = group;
+	for (int i = 0; i < MAX_NUM_GROUPMEMBERS; i++)
+	{
+		this->group[i] = 0;
+	}
 }
 
 Group::Group(std::vector<ReplicaID> group)
 {
 	this->size = group.size();
-	this->group = group;
+	for (int i = 0; i < this->size; i++)
+	{
+		this->group[i] = group[i];
+	}
 }
 
 unsigned int Group::getSize()
@@ -36,7 +41,7 @@ unsigned int Group::getSize()
 	return this->size;
 }
 
-std::vector<ReplicaID> Group::getGroup()
+unsigned int *Group::getGroup()
 {
 	return this->group;
 }

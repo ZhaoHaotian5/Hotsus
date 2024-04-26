@@ -26,6 +26,7 @@ NetworkVariation = 0  # Variation of the network latency
 SleepTime = 0  # Time of clients sleep between 2 sends (in microseconds)
 LeaderChangeTime = 5  # Timeout before changing leader (in seconds)
 HotsusFactor = 1  # Const factor of trusted replicas in Hotsus
+GroupMembers = 100
 
 # Parameters of making files
 NumCores = multiprocessing.cpu_count()  # Number of cores to use to make
@@ -133,6 +134,7 @@ def makeParameters(protocolName, numReplicas, numMaxSignatures, numTransactions,
     f.write("#define MAX_NUM_NODES " + str(numReplicas) + "\n")
     f.write("#define MAX_NUM_SIGNATURES " + str(numMaxSignatures) + "\n")
     f.write("#define MAX_NUM_TRANSACTIONS " + str(numTransactions) + "\n")
+    f.write("#define MAX_NUM_GROUPMEMBERS " + str(GroupMembers) + "\n")
     f.write("#define PAYLOAD_SIZE " + str(payloadSize) + "\n")
     f.write("\n")
     f.write("#endif\n")
