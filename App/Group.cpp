@@ -49,7 +49,7 @@ std::string Group::toPrint()
 		textGroup += std::to_string(this->group[i]);
 		if (i != this->size - 1)
 		{
-			textGroup += " ";
+			textGroup += ",";
 		}
 	}
 	std::string text = "";

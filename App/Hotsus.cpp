@@ -248,14 +248,16 @@ std::string Hotsus::recipients2string(Peers recipients)
 // Setting functions
 unsigned int Hotsus::getLeaderOf(View view)
 {
+	unsigned int leader;
 	if (this->protocol == PROTOCOL_HOTSTUFF)
 	{
-		unsigned int leader = this->view % (this->numTrustedReplicas + this->numGeneralReplicas);
-		return leader;
+		leader = this->view % (this->numTrustedReplicas + this->numGeneralReplicas);
 	}
-	else
+	else if (this->protocol == PROTOCOL_DAMYSUS)
 	{
+		leader = this->trustedGroup[this->view % this->trustedGroup.size()];
 	}
+	return leader;
 }
 
 unsigned int Hotsus::getCurrentLeader()
@@ -1445,7 +1447,6 @@ void Hotsus::handleMsgExldrprepareHotsus(MsgExldrprepareHotsus msgExldrprepare)
 			if (group_MsgExldrprepare.getSize() > 0)
 			{
 				this->trustedGroup = group_MsgExldrprepare.getGroup();
-				this->protocol = PROTOCOL_DAMYSUS;
 				this->changeAuthenticator();
 			}
 			this->respondMsgExldrprepareHotsus(justification_MsgExnewview, block);
@@ -2214,12 +2215,6 @@ void Hotsus::getExtraStarted()
 
 void Hotsus::startNewViewHotsus()
 {
-	// Check if switch the protocol
-	if (this->trustedGroup.size() > this->lowTrustedSize)
-	{
-		this->protocol = PROTOCOL_DAMYSUS;
-	}
-
 	// Generate [justification_MsgNewview] or [justification_MsgExnewview] until one for the next view
 	if (this->protocol == PROTOCOL_HOTSTUFF)
 	{
@@ -2417,6 +2412,13 @@ void Hotsus::executeExtraBlockHotsus(RoundData roundData_MsgExcommit)
 	}
 
 	this->replyHash(roundData_MsgExcommit.getProposeHash());
+	
+	// Check if switch the protocol
+	if (this->trustedGroup.size() > this->lowTrustedSize)
+	{
+		this->protocol = PROTOCOL_DAMYSUS;
+	}
+
 	if (this->timeToStop())
 	{
 		this->recordStatisticsHotsus();
