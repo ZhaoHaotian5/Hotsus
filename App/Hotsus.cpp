@@ -255,7 +255,7 @@ unsigned int Hotsus::getLeaderOf(View view)
 	}
 	else if (this->protocol == PROTOCOL_DAMYSUS)
 	{
-		leader = this->trustedGroup[this->view % this->trustedGroup.size()];
+		leader = this->trustedGroup.getGroup()[this->view % this->trustedGroup.getSize()];
 	}
 	return leader;
 }
@@ -1446,7 +1446,7 @@ void Hotsus::handleMsgExldrprepareHotsus(MsgExldrprepareHotsus msgExldrprepare)
 		{
 			if (group_MsgExldrprepare.getSize() > 0)
 			{
-				this->trustedGroup = group_MsgExldrprepare.getGroup();
+				this->trustedGroup = group_MsgExldrprepare;
 				this->changeAuthenticator();
 			}
 			this->respondMsgExldrprepareHotsus(justification_MsgExnewview, block);
@@ -1788,8 +1788,8 @@ void Hotsus::initiateMsgExnewviewHotsus()
 		}
 		if (trustedSenders.size() > this->lowTrustedSize)
 		{
-			this->trustedGroup = trustedSenders;
-			group_MsgExldrprepare = Group(trustedSenders);
+			this->trustedGroup = Group(trustedSenders);
+			group_MsgExldrprepare = this->trustedGroup;
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Trusted group: ";
 			for (int trustedSendersNum = 0; trustedSendersNum < trustedSenders.size(); trustedSendersNum++)
 			{
@@ -2018,7 +2018,7 @@ void Hotsus::respondMsgExldrprepareHotsus(Justification justification_MsgExnewvi
 		}
 		if (trustedSenders.size() > this->lowTrustedSize)
 		{
-			this->trustedGroup = trustedSenders;
+			this->trustedGroup = Group(trustedSenders);
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Trusted group: ";
 			for (int trustedSendersNum = 0; trustedSendersNum < trustedSenders.size(); trustedSendersNum++)
 			{
@@ -2414,7 +2414,7 @@ void Hotsus::executeExtraBlockHotsus(RoundData roundData_MsgExcommit)
 	this->replyHash(roundData_MsgExcommit.getProposeHash());
 	
 	// Check if switch the protocol
-	if (this->trustedGroup.size() > this->lowTrustedSize)
+	if (this->trustedGroup.getSize() > this->lowTrustedSize)
 	{
 		this->protocol = PROTOCOL_DAMYSUS;
 	}
@@ -2520,8 +2520,6 @@ void Hotsus::recordStatisticsHotsus()
 // Constuctor
 Hotsus::Hotsus(KeysFunctions keysFunctions, ReplicaID replicaId, unsigned int numGeneralReplicas, unsigned int numTrustedReplicas, unsigned int numReplicas, unsigned int numViews, unsigned int numFaults, double leaderChangeTime, Nodes nodes, Key privateKey, PeerNet::Config peerNetConfig, ClientNet::Config clientNetConfig) : peerNet(peerEventContext, peerNetConfig), clientNet(requestEventContext, clientNetConfig)
 {
-	std::vector<ReplicaID> trustedGroup;
-
 	this->keysFunction = keysFunctions;
 	this->replicaId = replicaId;
 	this->numGeneralReplicas = numGeneralReplicas;
@@ -2535,7 +2533,7 @@ Hotsus::Hotsus(KeysFunctions keysFunctions, ReplicaID replicaId, unsigned int nu
 	this->generalQuorumSize = this->numReplicas - this->numFaults;
 	this->trustedQuorumSize = floor(this->numTrustedReplicas / 2) + 1;
 	this->lowTrustedSize = 3;
-	this->trustedGroup = trustedGroup;
+	this->trustedGroup = Group();
 	this->view = 0;
 	this->protocol = PROTOCOL_HOTSTUFF;
 

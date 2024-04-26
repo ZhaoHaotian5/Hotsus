@@ -68,7 +68,7 @@ private:
 	unsigned int generalQuorumSize;
 	unsigned int trustedQuorumSize;
 	unsigned int lowTrustedSize;
-	std::vector<ReplicaID> trustedGroup;
+	Group trustedGroup;
 	View view;
 	Protocol protocol;
 
