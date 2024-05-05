@@ -1819,6 +1819,7 @@ void Hotsus::initiateMsgExnewviewHotsus()
 		if (trustedSenders.size() > this->lowTrustedSize)
 		{
 			this->trustedGroup = Group(trustedSenders);
+			this->changeAuthenticator();
 			group_MsgExldrprepare = this->trustedGroup;
 			std::cout << COLOUR_BLUE << this->printReplicaId() << "Trusted group: ";
 			for (int trustedSendersNum = 0; trustedSendersNum < trustedSenders.size(); trustedSendersNum++)
@@ -2297,7 +2298,7 @@ void Hotsus::startNewViewHotsus()
 			}
 		}
 	}
-	else if (this->protocol == PROTOCOL_DAMYSUS && )
+	else if (this->protocol == PROTOCOL_DAMYSUS)
 	{
 		Justification justification_MsgNewview = this->initializeMsgNewviewHotsus();
 		View proposeView_MsgNewview = justification_MsgNewview.getRoundData().getProposeView();
@@ -2336,7 +2337,10 @@ void Hotsus::startNewViewHotsus()
 			{
 				ReplicaID leader = this->getCurrentLeader();
 				Peers recipients = this->keepFromPeers(leader);
-				this->sendMsgNewviewHotsus(msgNewview, recipients);
+				if (this->amTrustedReplicaIds())
+				{
+					this->sendMsgNewviewHotsus(msgNewview, recipients);
+				}
 				this->handleEarlierMessagesHotsus();
 			}
 		}
@@ -2442,7 +2446,7 @@ void Hotsus::executeExtraBlockHotsus(RoundData roundData_MsgExcommit)
 	}
 
 	this->replyHash(roundData_MsgExcommit.getProposeHash());
-	
+
 	// Check if switch the protocol
 	if (this->trustedGroup.getSize() > this->lowTrustedSize)
 	{
