@@ -110,9 +110,12 @@ private:
 	bool amGeneralReplicaIds();
 	bool isGeneralReplicaIds(ReplicaID replicaId);
 	bool amTrustedReplicaIds();
+	bool isTrustedReplicaIds(ReplicaID replicaId);
 	Peers removeFromPeers(ReplicaID replicaId);
-	Peers removeFromPeers(std::vector<ReplicaID> generalNodeIds);
+	Peers removeFromPeers(std::vector<ReplicaID> generalReplicaIds);
+	Peers removeFromTrustedPeers(ReplicaID replicaId);
 	Peers keepFromPeers(ReplicaID replicaId);
+	Peers keepFromTrustedPeers(ReplicaID replicaId);
 	std::vector<salticidae::PeerId> getPeerIds(Peers recipients);
 	void setTimer();
 	void changeSwitcher();

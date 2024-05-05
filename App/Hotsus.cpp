@@ -292,18 +292,18 @@ bool Hotsus::amCurrentLeader()
 
 std::vector<ReplicaID> Hotsus::getGeneralReplicaIds()
 {
-	std::vector<ReplicaID> generalNodeIds;
+	std::vector<ReplicaID> generalReplicaIds;
 	for (unsigned int i = 0; i < this->numGeneralReplicas; i++)
 	{
-		generalNodeIds.push_back(i);
+		generalReplicaIds.push_back(i);
 	}
-	return generalNodeIds;
+	return generalReplicaIds;
 }
 
 bool Hotsus::amGeneralReplicaIds()
 {
-	std::vector<ReplicaID> generalNodeIds = this->getGeneralReplicaIds();
-	for (std::vector<ReplicaID>::iterator itReplica = generalNodeIds.begin(); itReplica != generalNodeIds.end(); itReplica++)
+	std::vector<ReplicaID> generalReplicaIds = this->getGeneralReplicaIds();
+	for (std::vector<ReplicaID>::iterator itReplica = generalReplicaIds.begin(); itReplica != generalReplicaIds.end(); itReplica++)
 	{
 		ReplicaID generalReplicaId = *itReplica;
 		if (this->replicaId == generalReplicaId)
@@ -316,8 +316,8 @@ bool Hotsus::amGeneralReplicaIds()
 
 bool Hotsus::isGeneralReplicaIds(ReplicaID replicaId)
 {
-	std::vector<ReplicaID> generalNodeIds = this->getGeneralReplicaIds();
-	for (std::vector<ReplicaID>::iterator itReplica = generalNodeIds.begin(); itReplica != generalNodeIds.end(); itReplica++)
+	std::vector<ReplicaID> generalReplicaIds = this->getGeneralReplicaIds();
+	for (std::vector<ReplicaID>::iterator itReplica = generalReplicaIds.begin(); itReplica != generalReplicaIds.end(); itReplica++)
 	{
 		ReplicaID generalReplicaId = *itReplica;
 		if (replicaId == generalReplicaId)
@@ -330,11 +330,25 @@ bool Hotsus::isGeneralReplicaIds(ReplicaID replicaId)
 
 bool Hotsus::amTrustedReplicaIds()
 {
-	Group trustedGroup = this->trustedGroup;
-	for (int i = 0; i < trustedGroup.getSize(); i++)
+	Group trustedReplicaIds = this->trustedGroup;
+	for (int i = 0; i < trustedReplicaIds.getSize(); i++)
 	{
-		ReplicaID TrustedReplicaId = (trustedGroup.getGroup())[i];
-		if (this->replicaId == TrustedReplicaId)
+		ReplicaID trustedReplicaId = (trustedReplicaIds.getGroup())[i];
+		if (this->replicaId == trustedReplicaId)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Hotsus::isTrustedReplicaIds(ReplicaID replicaId)
+{
+	Group trustedReplicaIds = this->trustedGroup;
+	for (int i = 0; i < trustedReplicaIds.getSize(); i++)
+	{
+		ReplicaID trustedReplicaId = (trustedReplicaIds.getGroup())[i];
+		if (replicaId == trustedReplicaId)
 		{
 			return true;
 		}
@@ -356,14 +370,14 @@ Peers Hotsus::removeFromPeers(ReplicaID replicaId)
 	return peers;
 }
 
-Peers Hotsus::removeFromPeers(std::vector<ReplicaID> generalNodeIds)
+Peers Hotsus::removeFromPeers(std::vector<ReplicaID> generalReplicaIds)
 {
 	Peers peers;
 	for (Peers::iterator itPeers = this->peers.begin(); itPeers != this->peers.end(); itPeers++)
 	{
 		Peer peer = *itPeers;
 		bool tag = true;
-		for (std::vector<ReplicaID>::iterator itReplica = generalNodeIds.begin(); itReplica != generalNodeIds.end(); itReplica++)
+		for (std::vector<ReplicaID>::iterator itReplica = generalReplicaIds.begin(); itReplica != generalReplicaIds.end(); itReplica++)
 		{
 			ReplicaID replicaId = *itReplica;
 			if (std::get<0>(peer) == replicaId)
@@ -379,6 +393,20 @@ Peers Hotsus::removeFromPeers(std::vector<ReplicaID> generalNodeIds)
 	return peers;
 }
 
+Peers Hotsus::removeFromTrustedPeers(ReplicaID replicaId)
+{
+	Peers peers;
+	for (Peers::iterator itPeers = this->peers.begin(); itPeers != this->peers.end(); itPeers++)
+	{
+		Peer peer = *itPeers;
+		if (std::get<0>(peer) != replicaId && this->isTrustedReplicaIds(std::get<0>(peer)))
+		{
+			peers.push_back(peer);
+		}
+	}
+	return peers;
+}
+
 Peers Hotsus::keepFromPeers(ReplicaID replicaId)
 {
 	Peers peers;
@@ -386,6 +414,20 @@ Peers Hotsus::keepFromPeers(ReplicaID replicaId)
 	{
 		Peer peer = *itPeers;
 		if (std::get<0>(peer) == replicaId)
+		{
+			peers.push_back(peer);
+		}
+	}
+	return peers;
+}
+
+Peers Hotsus::keepFromTrustedPeers(ReplicaID replicaId)
+{
+	Peers peers;
+	for (Peers::iterator itPeers = this->peers.begin(); itPeers != this->peers.end(); itPeers++)
+	{
+		Peer peer = *itPeers;
+		if (std::get<0>(peer) == replicaId && this->isTrustedReplicaIds(std::get<0>(peer)))
 		{
 			peers.push_back(peer);
 		}
@@ -1230,7 +1272,7 @@ void Hotsus::handleMsgNewviewHotsus(MsgNewviewHotsus msgNewview)
 	{
 		if (proposeView_MsgNewview == this->view)
 		{
-			if (this->log.storeMsgNewviewHotsus(msgNewview) == this->generalQuorumSize)
+			if (this->log.storeMsgNewviewHotsus(msgNewview) == this->trustedQuorumSize)
 			{
 				this->initiateMsgNewviewHotsus();
 			}
@@ -1379,6 +1421,7 @@ void Hotsus::handleMsgPrecommitHotsus(MsgPrecommitHotsus msgPrecommit)
 				}
 				else
 				{
+					this->changeSwitcher();
 					this->getExtraStarted();
 				}
 			}
@@ -1684,7 +1727,7 @@ void Hotsus::initiateMsgNewviewHotsus()
 				MsgLdrprepareHotsus msgLdrprepare = MsgLdrprepareHotsus(proposal_MsgLdrprepare, signs_MsgLdrprepare);
 
 				// Send [msgLdrprepare] to replicas
-				Peers recipients = this->removeFromPeers(this->replicaId);
+				Peers recipients = this->removeFromTrustedPeers(this->replicaId);
 				this->sendMsgLdrprepareHotsus(msgLdrprepare, recipients);
 				if (DEBUG_HELP)
 				{
@@ -1733,7 +1776,7 @@ void Hotsus::initiateMsgPrepareHotsus(RoundData roundData_MsgPrepare)
 		MsgPrepareHotsus msgPrepare = MsgPrepareHotsus(roundData_MsgPrepare, signs_MsgPrepare);
 
 		// Send [msgPrepare] to replicas
-		Peers recipients = this->removeFromPeers(this->getGeneralReplicaIds());
+		Peers recipients = this->removeFromTrustedPeers(this->replicaId);
 		this->sendMsgPrepareHotsus(msgPrepare, recipients);
 		if (DEBUG_HELP)
 		{
@@ -2003,7 +2046,7 @@ void Hotsus::respondMsgLdrprepareHotsus(Accumulator accumulator_MsgLdrprepare, B
 		// Send [msgPrepare] to leader
 		if (!this->amGeneralReplicaIds())
 		{
-			Peers recipients = this->keepFromPeers(this->getCurrentLeader());
+			Peers recipients = this->keepFromTrustedPeers(this->getCurrentLeader());
 			this->sendMsgPrepareHotsus(msgPrepare, recipients);
 			if (DEBUG_HELP)
 			{
@@ -2024,7 +2067,7 @@ void Hotsus::respondMsgPrepareHotsus(Justification justification_MsgPrepare)
 	MsgPrecommitHotsus msgPrecommit = MsgPrecommitHotsus(roundData_MsgPrecommit, signs_MsgPrecommit);
 
 	// Send [msgPrecommit] to leader
-	Peers recipients = this->keepFromPeers(this->getCurrentLeader());
+	Peers recipients = this->keepFromTrustedPeers(this->getCurrentLeader());
 	this->sendMsgPrecommitHotsus(msgPrecommit, recipients);
 	if (DEBUG_HELP)
 	{
