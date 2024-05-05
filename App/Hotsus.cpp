@@ -328,6 +328,20 @@ bool Hotsus::isGeneralReplicaIds(ReplicaID replicaId)
 	return false;
 }
 
+bool Hotsus::amTrustedReplicaIds()
+{
+	Group trustedGroup = this->trustedGroup;
+	for (int i = 0; i < trustedGroup.getSize(); i++)
+	{
+		ReplicaID TrustedReplicaId = (trustedGroup.getGroup())[i];
+		if (this->replicaId == TrustedReplicaId)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 Peers Hotsus::removeFromPeers(ReplicaID replicaId)
 {
 	Peers peers;
@@ -2283,7 +2297,7 @@ void Hotsus::startNewViewHotsus()
 			}
 		}
 	}
-	else if (this->protocol == PROTOCOL_DAMYSUS)
+	else if (this->protocol == PROTOCOL_DAMYSUS && )
 	{
 		Justification justification_MsgNewview = this->initializeMsgNewviewHotsus();
 		View proposeView_MsgNewview = justification_MsgNewview.getRoundData().getProposeView();

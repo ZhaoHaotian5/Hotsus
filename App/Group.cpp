@@ -41,7 +41,7 @@ unsigned int Group::getSize()
 	return this->size;
 }
 
-unsigned int *Group::getGroup()
+ReplicaID *Group::getGroup()
 {
 	return this->group;
 }

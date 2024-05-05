@@ -109,6 +109,7 @@ private:
 	std::vector<ReplicaID> getGeneralReplicaIds();
 	bool amGeneralReplicaIds();
 	bool isGeneralReplicaIds(ReplicaID replicaId);
+	bool amTrustedReplicaIds();
 	Peers removeFromPeers(ReplicaID replicaId);
 	Peers removeFromPeers(std::vector<ReplicaID> generalNodeIds);
 	Peers keepFromPeers(ReplicaID replicaId);

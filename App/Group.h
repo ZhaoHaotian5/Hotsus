@@ -16,7 +16,7 @@ class Group
 {
 private:
 	unsigned int size;
-	unsigned int group[MAX_NUM_GROUPMEMBERS];
+	ReplicaID group[MAX_NUM_GROUPMEMBERS];
 
 public:
 	void serialize(salticidae::DataStream &data) const;
@@ -26,7 +26,7 @@ public:
 	Group(std::vector<ReplicaID> group);
 
 	unsigned int getSize();
-	unsigned int *getGroup();
+	ReplicaID *getGroup();
 
 	std::string toPrint();
 	std::string toString();
