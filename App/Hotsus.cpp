@@ -1712,8 +1712,8 @@ void Hotsus::handleMsgExcommitHotsus(MsgExcommitHotsus msgExcommit)
 // Initiate messages
 void Hotsus::initiateMsgNewviewHotsus()
 {
-	std::set<MsgNewviewHotsus> msgNewviews = this->log.getMsgNewviewHotsus(this->view, this->generalQuorumSize);
-	if (msgNewviews.size() == this->generalQuorumSize)
+	std::set<MsgNewviewHotsus> msgNewviews = this->log.getMsgNewviewHotsus(this->view, this->trustedQuorumSize);
+	if (msgNewviews.size() == this->trustedQuorumSize)
 	{
 		if (DEBUG_HELP)
 		{
@@ -2510,7 +2510,7 @@ void Hotsus::executeExtraBlockHotsus(RoundData roundData_MsgExcommit)
 	if (this->trustedGroup.getSize() > this->lowTrustedSize)
 	{
 		this->protocol = PROTOCOL_DAMYSUS;
-		this->trustedQuorumSize = floor(this->trustedGroup.getSize() / 2) - 1;
+		this->trustedQuorumSize = floor(this->trustedGroup.getSize() / 2) + 1;
 		this->setTrustedQuorumSize();
 	}
 
