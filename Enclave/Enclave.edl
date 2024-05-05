@@ -10,7 +10,7 @@ enclave
     trusted
 	{
         public sgx_status_t initializeVariables_t([in] ReplicaID *me, [in] Pids_t *others, [in] unsigned int *GeneralQuorumSize, [in] unsigned int *TrustedQuorumSize);
-        public sgx_status_t setTrustedQuorumSize([in] unsigned int *TrustedQuorumSize);
+        public sgx_status_t setTrustedQuorumSize_t([in] unsigned int *TrustedQuorumSize);
 		
         public sgx_status_t TEE_verifyProposalDamysus([in] Proposal_t *proposal_t, [in] Signs_t *signs_t, [out] bool *b);
         public sgx_status_t TEE_verifyJustificationDamysus([in] Justification_t *justification_t, [out] bool *b);

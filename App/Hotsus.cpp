@@ -483,17 +483,17 @@ void Hotsus::changeAuthenticator()
 	}
 }
 
-void Hotsus::setTrustedQuorumSize(unsigned int trustedQuorumSize)
+void Hotsus::setTrustedQuorumSize()
 {
 	if (!this->amGeneralReplicaIds())
 	{
 		sgx_status_t extra_t;
 		sgx_status_t status_t;
-		status_t = setTrustedQuorumSize(global_eid, &extra_t, &trustedQuorumSize);
+		status_t = setTrustedQuorumSize_t(global_eid, &extra_t, &(this->trustedQuorumSize));
 	}
 	else
 	{
-		hotsusBasic.setTrustedQuorumSize(trustedQuorumSize);
+		hotsusBasic.setTrustedQuorumSize(this->trustedQuorumSize);
 	}
 }
 
@@ -2511,7 +2511,7 @@ void Hotsus::executeExtraBlockHotsus(RoundData roundData_MsgExcommit)
 	{
 		this->protocol = PROTOCOL_DAMYSUS;
 		this->trustedQuorumSize = floor(this->trustedGroup.getSize() / 2) - 1;
-		this->setTrustedQuorumSize(this->trustedQuorumSize);
+		this->setTrustedQuorumSize();
 	}
 
 	if (this->timeToStop())

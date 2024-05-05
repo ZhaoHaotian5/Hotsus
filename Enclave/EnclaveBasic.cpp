@@ -72,7 +72,7 @@ sgx_status_t initializeVariables_t(ReplicaID *me, Pids_t *others, unsigned int *
 	return status_t;
 }
 
-sgx_status_t setTrustedQuorumSize(unsigned int *TrustedQuorumSize)
+sgx_status_t setTrustedQuorumSize_t(unsigned int *TrustedQuorumSize)
 {
 	sgx_status_t status_t = SGX_SUCCESS;
 	trustedQuorumSize = *TrustedQuorumSize;
