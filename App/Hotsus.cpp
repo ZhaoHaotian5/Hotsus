@@ -1033,6 +1033,10 @@ void Hotsus::handleEarlierMessagesHotsus()
 		{
 			this->initiateMsgNewviewHotsus();
 		}
+		if (DEBUG_HELP)
+		{
+			std::cout << COLOUR_BLUE << this->printReplicaId() << "Leader handled earlier messages" << COLOUR_NORMAL << std::endl;
+		}
 	}
 	else
 	{
@@ -1097,6 +1101,10 @@ void Hotsus::handleEarlierMessagesHotsus()
 				}
 			}
 		}
+		if (DEBUG_HELP)
+		{
+			std::cout << COLOUR_BLUE << this->printReplicaId() << "Replica handled earlier messages" << COLOUR_NORMAL << std::endl;
+		}
 	}
 }
 
@@ -1113,6 +1121,10 @@ void Hotsus::handleExtraEarlierMessagesHotsus()
 		if (signs_MsgExnewview.getSize() == this->generalQuorumSize)
 		{
 			this->initiateMsgExnewviewHotsus();
+		}
+		if (DEBUG_HELP)
+		{
+			std::cout << COLOUR_BLUE << this->printReplicaId() << "Leader handled extra earlier messages" << COLOUR_NORMAL << std::endl;
 		}
 	}
 	else
@@ -1179,6 +1191,10 @@ void Hotsus::handleExtraEarlierMessagesHotsus()
 					this->respondMsgExldrprepareHotsus(justification_MsgExldrprepare, block);
 				}
 			}
+		}
+		if (DEBUG_HELP)
+		{
+			std::cout << COLOUR_BLUE << this->printReplicaId() << "Replica handled extra earlier messages" << COLOUR_NORMAL << std::endl;
 		}
 	}
 }
