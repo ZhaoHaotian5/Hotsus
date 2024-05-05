@@ -14,6 +14,7 @@ unsigned int getGeneralQuorumSize_t();
 unsigned int getTrustedQuorumSize_t();
 std::string printReplicaId_t();
 sgx_status_t initializeVariables_t(ReplicaID *me, Pids_t *others, unsigned int *GeneralQuorumSize, unsigned int *TrustedQuorumSize);
+sgx_status_t setTrustedQuorumSize(unsigned int *TrustedQuorumSize);
 
 std::string hash2string_t(Hash_t hash_t);
 std::string roundData2string_t(RoundData_t roundData_t);

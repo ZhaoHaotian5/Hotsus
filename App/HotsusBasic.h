@@ -42,6 +42,7 @@ public:
 
 	void changeSwitcher();
 	void changeAuthenticator();
+	void setTrustedQuorumSize(unsigned int trustedQuorumSize);
 
 	Justification initializeMsgNewview();
 	Justification respondProposal(Nodes nodes, Hash proposeHash, Accumulator accumulator_MsgLdrprepare);

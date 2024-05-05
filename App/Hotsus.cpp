@@ -331,14 +331,10 @@ bool Hotsus::isGeneralReplicaIds(ReplicaID replicaId)
 bool Hotsus::amTrustedReplicaIds()
 {
 	Group trustedReplicaIds = this->trustedGroup;
-	ReplicaID trustedReplicGroup[MAX_NUM_GROUPMEMBERS] = trustedReplicaIds.getGroup();
+	ReplicaID *trustedReplicGroup = trustedReplicaIds.getGroup();
 	for (int i = 0; i < trustedReplicaIds.getSize(); i++)
 	{
 		ReplicaID trustedReplicaId = trustedReplicGroup[i];
-		if (DEBUG_HELP)
-		{
-			std::cout << COLOUR_BLUE << this->printReplicaId() << "Verifing: " << std::to_string(trustedReplicaId) << COLOUR_NORMAL << std::endl;
-		}
 		if (this->replicaId == trustedReplicaId)
 		{
 			return true;
@@ -350,7 +346,7 @@ bool Hotsus::amTrustedReplicaIds()
 bool Hotsus::isTrustedReplicaIds(ReplicaID replicaId)
 {
 	Group trustedReplicaIds = this->trustedGroup;
-	ReplicaID trustedReplicGroup[MAX_NUM_GROUPMEMBERS] = trustedReplicaIds.getGroup();
+	ReplicaID *trustedReplicGroup = trustedReplicaIds.getGroup();
 	for (int i = 0; i < trustedReplicaIds.getSize(); i++)
 	{
 		ReplicaID trustedReplicaId = trustedReplicGroup[i];
@@ -484,6 +480,20 @@ void Hotsus::changeAuthenticator()
 	else
 	{
 		hotsusBasic.changeAuthenticator();
+	}
+}
+
+void Hotsus::setTrustedQuorumSize(unsigned int trustedQuorumSize)
+{
+	if (!this->amGeneralReplicaIds())
+	{
+		sgx_status_t extra_t;
+		sgx_status_t status_t;
+		status_t = setTrustedQuorumSize(global_eid, &extra_t, &trustedQuorumSize);
+	}
+	else
+	{
+		hotsusBasic.setTrustedQuorumSize(trustedQuorumSize);
 	}
 }
 
@@ -2500,6 +2510,8 @@ void Hotsus::executeExtraBlockHotsus(RoundData roundData_MsgExcommit)
 	if (this->trustedGroup.getSize() > this->lowTrustedSize)
 	{
 		this->protocol = PROTOCOL_DAMYSUS;
+		this->trustedQuorumSize = floor(this->trustedGroup.getSize() / 2) - 1;
+		this->setTrustedQuorumSize(this->trustedQuorumSize);
 	}
 
 	if (this->timeToStop())

@@ -120,6 +120,7 @@ private:
 	void setTimer();
 	void changeSwitcher();
 	void changeAuthenticator();
+	void setTrustedQuorumSize(unsigned int trustedQuorumSize);
 
 	// Reply to clients
 	void replyTransactions(Transaction *transactions);

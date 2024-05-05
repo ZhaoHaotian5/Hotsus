@@ -72,6 +72,15 @@ sgx_status_t initializeVariables_t(ReplicaID *me, Pids_t *others, unsigned int *
 	return status_t;
 }
 
+sgx_status_t setTrustedQuorumSize(unsigned int *TrustedQuorumSize)
+{
+	sgx_status_t status_t = SGX_SUCCESS;
+	trustedQuorumSize = *TrustedQuorumSize;
+	TEE_Print((printReplicaId_t() + "ENCLAVE: Set up the trusted quorum size " + std::to_string(trustedQuorumSize)).c_str());
+
+	return status_t;
+}
+
 std::string transaction2string_t(Transaction_t transaction_t)
 {
 	std::string text = "";

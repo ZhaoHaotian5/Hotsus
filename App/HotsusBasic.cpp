@@ -158,6 +158,11 @@ void HotsusBasic::changeAuthenticator()
 	}
 }
 
+void HotsusBasic::setTrustedQuorumSize(unsigned int trustedQuorumSize)
+{
+	this->trustedQuorumSize = trustedQuorumSize;
+}
+
 Justification HotsusBasic::initializeMsgNewview()
 {
 	Justification justification_MsgNewview = this->updateRoundData(Hash(false), this->prepareHash, this->prepareView);
