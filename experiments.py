@@ -638,7 +638,10 @@ def runLocalExperiment(protocolName, constFactor, numViews, numFaults, numClient
         throughputView = 0.0
         latencyView = 0.0
         handle = 0.0
-
+    
+    print("All throughput:", throughputViews)
+    print("All latency:", latencyViews)
+    print("All handle:", handles)
     print("Average throughput:", throughputView)
     print("Average latency:", latencyView)
     print("Average handle:", handle)
