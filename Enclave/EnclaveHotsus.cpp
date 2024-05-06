@@ -230,7 +230,7 @@ sgx_status_t TEE_respondProposalHotsus(Hash_t *proposeHash_t, Accumulator_t *acc
 	Hash_t prepareHash_MsgLdrprepare_t = accumulator_MsgLdrprepare_t->prepareHash;
 	View prepareView_MsgLdrprepare = accumulator_MsgLdrprepare_t->prepareView;
 	unsigned int size_MsgLdrprepare = accumulator_MsgLdrprepare_t->size;
-	if (view_Hotsus_t == proposeView_MsgLdrprepare && size_MsgLdrprepare == MAX_NUM_SIGNATURES)
+	if (view_Hotsus_t == proposeView_MsgLdrprepare && size_MsgLdrprepare == trustedQuorumSize)
 	{
 		*justification_MsgPrepare_t = updateRoundData_Hotsus_t(*proposeHash_t, prepareHash_MsgLdrprepare_t, prepareView_MsgLdrprepare);
 	}
