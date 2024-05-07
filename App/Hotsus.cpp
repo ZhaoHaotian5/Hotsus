@@ -799,7 +799,7 @@ Justification Hotsus::saveMsgExprepareHotsus(Justification justification_MsgExpr
 	}
 	else
 	{
-		Justification justification_MsgExprecommit = hotsusBasic.saveMsgExprepare(this->nodes, justification_MsgExprepare);
+		justification_MsgExprecommit = hotsusBasic.saveMsgExprepare(this->nodes, justification_MsgExprepare);
 	}
 	return justification_MsgExprecommit;
 }
