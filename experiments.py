@@ -712,7 +712,7 @@ def startInstances(numGeneralReplicas, numTrustedReplicas, numClients):
         option6 = "--InternetChargeType " + InstanceInternetChargeType
         option7 = "--VSwitchId " + vswitchId
         option8 = "--SystemDisk.Category " + InstanceSystemDiskCategory
-        option9 = "--InternetMaxBandwidthOut " + str(5)
+        option9 = "--InternetMaxBandwidthOut " + str(50)
         option10 = "--Password " + InstancePassword
 
         instanceCmd = [Aliyun + " ecs RunInstances " + option1 + " " + option2 + " " + option3 + " " + option4 + " " + option5 + " " + option6 + " " + option7 + " " + option8 +
@@ -1152,7 +1152,7 @@ def runInstanceExperiment(protocolName, constFactor, numViews, numFaults, numCli
         numTrustedReplicas = int(hotsusFactor * numFaults)
         numGeneralReplicas = numAllReplicas - numTrustedReplicas
         numMaxSignatures = numAllReplicas - numFaults
-        if numTrustedReplicas < 3:
+        if numTrustedReplicas < 5:
             print("----The number of trusted replicas is too small")
             exit(0)
 
