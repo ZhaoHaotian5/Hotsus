@@ -251,7 +251,7 @@ unsigned int Hotsus::getLeaderOf(View view)
 	unsigned int leader;
 	if (this->protocol == PROTOCOL_HOTSTUFF)
 	{
-		leader = (this->view + this->numGeneralReplicas - this->numFaults) % (this->numTrustedReplicas + this->numGeneralReplicas);
+		leader = (this->view + this->numGeneralReplicas - this->numFaults - 1) % (this->numTrustedReplicas + this->numGeneralReplicas);
 	}
 	else if (this->protocol == PROTOCOL_DAMYSUS)
 	{
