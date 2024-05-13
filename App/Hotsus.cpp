@@ -1364,7 +1364,14 @@ void Hotsus::handleMsgLdrprepareHotsus(MsgLdrprepareHotsus msgLdrprepare)
 	{
 		if (proposeView_MsgLdrprepare == this->view)
 		{
-			this->respondMsgLdrprepareHotsus(accumulator_MsgLdrprepare, block);
+			if (!this->amGeneralReplicaIds())
+			{
+				this->respondMsgLdrprepareHotsus(accumulator_MsgLdrprepare, block);
+			}
+			else
+			{
+				this->blocks[this->view] = block;
+			}
 		}
 		else
 		{
@@ -2091,7 +2098,7 @@ void Hotsus::respondMsgLdrprepareHotsus(Accumulator accumulator_MsgLdrprepare, B
 		// Send [msgPrepare] to leader
 		if (!this->amGeneralReplicaIds())
 		{
-			Peers recipients = this->keepFromTrustedPeers(this->getCurrentLeader());
+			Peers recipients = this->keepFromPeers(this->getCurrentLeader());
 			this->sendMsgPrepareHotsus(msgPrepare, recipients);
 			if (DEBUG_HELP)
 			{
