@@ -1779,7 +1779,7 @@ void Hotsus::initiateMsgNewviewHotsus()
 				MsgLdrprepareHotsus msgLdrprepare = MsgLdrprepareHotsus(proposal_MsgLdrprepare, signs_MsgLdrprepare);
 
 				// Send [msgLdrprepare] to replicas
-				Peers recipients = this->removeFromTrustedPeers(this->replicaId);
+				Peers recipients = this->removeFromPeers(this->replicaId);
 				this->sendMsgLdrprepareHotsus(msgLdrprepare, recipients);
 				if (DEBUG_HELP)
 				{
@@ -2098,7 +2098,7 @@ void Hotsus::respondMsgLdrprepareHotsus(Accumulator accumulator_MsgLdrprepare, B
 		// Send [msgPrepare] to leader
 		if (!this->amGeneralReplicaIds())
 		{
-			Peers recipients = this->keepFromPeers(this->getCurrentLeader());
+			Peers recipients = this->keepFromTrustedPeers(this->getCurrentLeader());
 			this->sendMsgPrepareHotsus(msgPrepare, recipients);
 			if (DEBUG_HELP)
 			{
