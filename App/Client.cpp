@@ -193,7 +193,7 @@ ReplicaID getFirstLeader()
 #elif defined(BASIC_DAMYSUS)
 	ReplicaID firstLeader = 0;
 #elif defined(BASIC_HOTSUS)
-	ReplicaID firstLeader = 0;
+	ReplicaID firstLeader = numGeneralReplicas - numFaults - 1;
 #endif
 	return firstLeader;
 }
