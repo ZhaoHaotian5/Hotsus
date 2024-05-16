@@ -1129,6 +1129,19 @@ void Hotsus::handleEarlierMessagesHotsus()
 			this->initializeMsgNewviewHotsus();
 			this->initializeMsgNewviewHotsus();
 
+			// Fill the block
+			if (DEBUG_HELP)
+			{
+				std::cout << COLOUR_BLUE << this->printReplicaId() << "Fill the block with MsgLdrprepare" << COLOUR_NORMAL << std::endl;
+			}
+			MsgLdrprepareHotsus msgLdrprepare = this->log.firstMsgLdrprepareHotsus(this->view);
+			if (msgLdrprepare.signs.getSize() == 1)
+			{
+				Proposal<Accumulator> proposal = msgLdrprepare.proposal;
+				Block block = proposal.getBlock();
+				this->blocks[this->view] = block;
+			}
+
 			// Execute the block
 			Justification justification_MsgPrecommit = this->log.firstMsgPrecommitHotsus(this->view);
 			RoundData roundData_MsgPrecommit = justification_MsgPrecommit.getRoundData();
@@ -1152,6 +1165,19 @@ void Hotsus::handleEarlierMessagesHotsus()
 				// Skip the prepare phase
 				this->initializeMsgNewviewHotsus();
 
+				// Fill the block
+				if (DEBUG_HELP)
+				{
+					std::cout << COLOUR_BLUE << this->printReplicaId() << "Fill the block with MsgLdrprepare" << COLOUR_NORMAL << std::endl;
+				}
+				MsgLdrprepareHotsus msgLdrprepare = this->log.firstMsgLdrprepareHotsus(this->view);
+				if (msgLdrprepare.signs.getSize() == 1)
+				{
+					Proposal<Accumulator> proposal = msgLdrprepare.proposal;
+					Block block = proposal.getBlock();
+					this->blocks[this->view] = block;
+				}
+
 				// Store [justification_MsgPrepare]
 				this->respondMsgPrepareHotsus(justification_MsgPrepare);
 			}
@@ -1169,7 +1195,18 @@ void Hotsus::handleEarlierMessagesHotsus()
 					Proposal<Accumulator> proposal = msgLdrprepare.proposal;
 					Accumulator accumulator_MsgLdrprepare = proposal.getCertification();
 					Block block = proposal.getBlock();
-					this->respondMsgLdrprepareHotsus(accumulator_MsgLdrprepare, block);
+					if (!this->amGeneralReplicaIds())
+					{
+						this->respondMsgLdrprepareHotsus(accumulator_MsgLdrprepare, block);
+					}
+					else
+					{
+						if (DEBUG_HELP)
+						{
+							std::cout << COLOUR_BLUE << this->printReplicaId() << "Fill the block with MsgLdrprepare" << COLOUR_NORMAL << std::endl;
+						}
+						this->blocks[this->view] = block;
+					}
 				}
 			}
 		}
@@ -1219,6 +1256,26 @@ void Hotsus::handleExtraEarlierMessagesHotsus()
 			this->initializeMsgExnewviewHotsus();
 			this->initializeMsgExnewviewHotsus();
 
+			// Fill the block and check the trusted group
+			MsgExldrprepareHotsus msgExldrprepare = this->log.firstMsgExldrprepareHotsus(this->view);
+			if (msgExldrprepare.signs.getSize() == 1 && msgExldrprepare.group.getSize() > 0)
+			{
+				Proposal<Justification> proposal = msgExldrprepare.proposal;
+				Block block = proposal.getBlock();
+				this->blocks[this->view] = block;
+				if (DEBUG_HELP)
+				{
+					std::cout << COLOUR_BLUE << this->printReplicaId() << "Fill the block with MsgExldrprepare" << COLOUR_NORMAL << std::endl;
+				}
+
+				this->trustedGroup = msgExldrprepare.group;
+				this->changeAuthenticator();
+				if (DEBUG_HELP)
+				{
+					std::cout << COLOUR_BLUE << this->printReplicaId() << "Update the trusted group" << COLOUR_NORMAL << std::endl;
+				}
+			}
+
 			// Store [justification_MsgExprecommit]
 			this->respondMsgExprecommitHotsus(justification_MsgExprecommit);
 
@@ -1227,18 +1284,6 @@ void Hotsus::handleExtraEarlierMessagesHotsus()
 			{
 				Justification justification_MsgExcommit = this->log.firstMsgExcommitHotsus(this->view);
 				this->executeExtraBlockHotsus(justification_MsgExcommit.getRoundData());
-			}
-
-			// Check the trusted group
-			MsgExldrprepareHotsus msgExldrprepare = this->log.firstMsgExldrprepareHotsus(this->view);
-			if (msgExldrprepare.signs.getSize() == 1 && msgExldrprepare.group.getSize() > 0)
-			{
-				if (DEBUG_HELP)
-				{
-					std::cout << COLOUR_BLUE << this->printReplicaId() << "Update the trusted group" << COLOUR_NORMAL << std::endl;
-				}
-				this->trustedGroup = msgExldrprepare.group;
-				this->changeAuthenticator();
 			}
 		}
 		else
@@ -1258,16 +1303,24 @@ void Hotsus::handleExtraEarlierMessagesHotsus()
 				// Store [justification_MsgExprepare]
 				this->respondMsgExprepareHotsus(justification_MsgExprepare);
 
-				// Check the trusted group
+				// Fill the block and check the trusted group
 				MsgExldrprepareHotsus msgExldrprepare = this->log.firstMsgExldrprepareHotsus(this->view);
 				if (msgExldrprepare.signs.getSize() == 1 && msgExldrprepare.group.getSize() > 0)
 				{
+					Proposal<Justification> proposal = msgExldrprepare.proposal;
+					Block block = proposal.getBlock();
+					this->blocks[this->view] = block;
+					if (DEBUG_HELP)
+					{
+						std::cout << COLOUR_BLUE << this->printReplicaId() << "Fill the block with MsgExldrprepare" << COLOUR_NORMAL << std::endl;
+					}
+
+					this->trustedGroup = msgExldrprepare.group;
+					this->changeAuthenticator();
 					if (DEBUG_HELP)
 					{
 						std::cout << COLOUR_BLUE << this->printReplicaId() << "Update the trusted group" << COLOUR_NORMAL << std::endl;
 					}
-					this->trustedGroup = msgExldrprepare.group;
-					this->changeAuthenticator();
 				}
 			}
 			else

@@ -225,7 +225,7 @@ Justification HotsusBasic::respondExproposal(Nodes nodes, Hash proposeHash, Just
 	{
 		if (DEBUG_MODULES)
 		{
-			std::cout << COLOUR_CYAN << this->replicaId << " fail to respond proposal" << COLOUR_NORMAL << std::endl;
+			std::cout << COLOUR_CYAN << this->replicaId << " fail to respond Exproposal" << COLOUR_NORMAL << std::endl;
 		}
 		return Justification();
 	}
