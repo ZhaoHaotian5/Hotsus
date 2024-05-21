@@ -712,7 +712,7 @@ def startInstances(numGeneralReplicas, numTrustedReplicas, numClients):
         option6 = "--InternetChargeType " + InstanceInternetChargeType
         option7 = "--VSwitchId " + vswitchId
         option8 = "--SystemDisk.Category " + InstanceSystemDiskCategory
-        option9 = "--InternetMaxBandwidthOut " + str(50)
+        option9 = "--InternetMaxBandwidthOut " + str(20)
         option10 = "--Password " + InstancePassword
 
         instanceCmd = [Aliyun + " ecs RunInstances " + option1 + " " + option2 + " " + option3 + " " + option4 + " " + option5 + " " + option6 + " " + option7 + " " + option8 +
