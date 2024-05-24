@@ -24,7 +24,7 @@ CutOffBound = 100  # Stop experiment after some time
 NetworkLatency = 0  # Network latency in ms
 NetworkVariation = 0  # Variation of the network latency
 SleepTime = 0  # Time of clients sleep between 2 sends (in microseconds)
-LeaderChangeTime = 5  # Timeout before changing leader (in seconds)
+LeaderChangeTime = 30  # Timeout before changing leader (in seconds)
 HotsusFactor = 1  # Const factor of trusted replicas in Hotsus
 GroupMembers = 100
 
@@ -1194,6 +1194,10 @@ def runInstanceExperiment(protocolName, constFactor, numViews, numFaults, numCli
             subprocess.run(removeCmd, shell=True, check=True)
 
         (throughputView, latencyView, handle) = computeStatistics(protocolName=protocolName, numFaults=numFaults, experimentIndex=i, numExperiments=numExperiments)
+        
+        print("This throughput:", throughputView)
+        print("This latency:", latencyView)
+        print("This handle:", handle)
 
         if throughputView > 0 and latencyView > 0 and handle > 0:
             throughputViews.append(throughputView)
