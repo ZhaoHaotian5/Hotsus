@@ -40,7 +40,7 @@ DockerCpu = 0  # Cpus used by containers (0 means no constraints)
 # Parameters of Aliyun
 LocalPath = "/root/Hotsus/"
 Aliyun = "aliyun"
-InstanceType = "ecs.c7.large"
+InstanceType = "ecs.e-c1m2.large"
 InstanceInternetChargeType = "PayByBandwidth"
 InstanceSystemDiskCategory = "cloud_essd"
 InstancePassword = "ilove1533WAIBIBABU"
@@ -88,24 +88,24 @@ EnclaveSignedFile = "enclave.signed.so"
 
 # Aliyun ECS
 RegionId1 = "cn-hongkong"
-ImageId1 = "ubuntu_20_04_x64_20G_alibase_20231221.vhd"
+ImageId1 = "ubuntu_20_04_x64_20G_alibase_20250113.vhd"
 SecurityGroupId1 = "sg-j6c7wqjkv4l5ce4ej5sy"
-VSwitchId1 = "vsw-j6c64v1wrotwc9u22fuxp"
+VSwitchId1 = "vsw-j6cod840au18vxxxsile1"
 
 RegionId2 = "ap-southeast-1"
-ImageId2 = "ubuntu_20_04_x64_20G_alibase_20231221.vhd"
+ImageId2 = "ubuntu_20_04_x64_20G_alibase_20250113.vhd"
 SecurityGroupId2 = "sg-t4nddoks5tm9afcg7ciw"
-VSwitchId2 = "vsw-t4nwtafs74l2lii7v3zee"
+VSwitchId2 = "vsw-t4nkla71ohji3e3geq1s1"
 
 RegionId3 = "ap-southeast-5"
-ImageId3 = "ubuntu_20_04_x64_20G_alibase_20231221.vhd"
+ImageId3 = "ubuntu_20_04_x64_20G_alibase_20250113.vhd"
 SecurityGroupId3 = "sg-k1a2907rjludhj3z87pf"
-VSwitchId3 = "vsw-k1a4u1hrmgncvukv8emr8"
+VSwitchId3 = "vsw-k1ar7q0fbn5vqmcv3byoz"
 
 RegionId4 = "ap-northeast-2"
-ImageId4 = "ubuntu_20_04_x64_20G_alibase_20231221.vhd"
+ImageId4 = "ubuntu_20_04_x64_20G_alibase_20250113.vhd"
 SecurityGroupId4 = "sg-mj73m2mxtn44qg0kwvu7"
-VSwitchId4 = "vsw-mj7n2mv1umfbjyacppft5"
+VSwitchId4 = "vsw-mj7til587ziwj25fiecxl"
 
 RegionIds = [RegionId1, RegionId2, RegionId3, RegionId4]
 RegionInformations = [(RegionId1, ImageId1, SecurityGroupId1, VSwitchId1),
